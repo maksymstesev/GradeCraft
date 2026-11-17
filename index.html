@@ -371,7 +371,7 @@
         <div class="flex items-center gap-2.5">
           <button id="btnHeaderProfileNav" type="button" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-semibold bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-700 border border-indigo-200 transition cursor-pointer">
             <div class="w-5 h-5 rounded-full bg-indigo-600 text-white flex items-center justify-center text-[10px] font-bold">MS</div>
-            <span class="hidden sm:inline" id="headerUserNameDisplay">Maksym Stesev</span>
+            <span class="hidden sm:inline" id="headerUserNameDisplay">First Last</span>
             <i class="fa-solid fa-gear text-[10px] ml-0.5"></i>
           </button>
         </div>
@@ -506,8 +506,8 @@
         configExpanded: true,
         customGradeDefinitions: cloneCustomGradeDefinitions(defaultDefs),
         userProfile: {
-          name: 'Maksym Stesev',
-          email: 'maksym.stesev@berkeley.edu',
+          name: 'First Last',
+          email: 'first_last@berkeley.edu',
           authProvider: 'mock_session',
           isLoggedIn: false
         },
@@ -591,7 +591,7 @@
           parsed.customGradeDefinitions = cloneCustomGradeDefinitions(UCB_DEFAULT_GRADE_DEFINITIONS);
         }
         if (!parsed.userProfile) {
-          parsed.userProfile = { name: 'Maksym Stesev', email: 'maksym.stesev@berkeley.edu', authProvider: 'mock_session', isLoggedIn: false };
+          parsed.userProfile = { name: 'First Last', email: 'first_last@berkeley.edu', authProvider: 'mock_session', isLoggedIn: false };
         }
         return parsed;
       } catch (err) {
@@ -1754,7 +1754,7 @@
       const mainContainer = document.getElementById('mainWorkspaceContainer');
       if (!mainContainer) return;
 
-      const profile = appState.userProfile || { name: 'Maksym Stesev', email: 'maksym.stesev@berkeley.edu', isLoggedIn: false };
+      const profile = appState.userProfile || { name: 'First Last', email: 'first_last@berkeley.edu', isLoggedIn: false };
       const customDefs = appState.customGradeDefinitions || cloneCustomGradeDefinitions(UCB_DEFAULT_GRADE_DEFINITIONS);
 
       mainContainer.innerHTML = `
