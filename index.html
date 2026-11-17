@@ -30,9 +30,6 @@
   </script>
 
   <style>
-    /* =========================================================================
-       THEME DESIGN TOKENS: Black (OLED - Default), Midnight, and Light
-       ========================================================================= */
     :root,
     html[data-theme="black"] {
       color-scheme: dark;
@@ -128,50 +125,16 @@
       transition: background-color 0.2s ease, color 0.2s ease;
     }
 
-    .app-header {
-      background-color: var(--bg-header);
-      border-color: var(--border-primary);
-    }
-
-    .surface-card {
-      background-color: var(--bg-surface);
-      border-color: var(--border-primary);
-      box-shadow: var(--card-shadow);
-    }
-
-    .surface-alt {
-      background-color: var(--bg-surface-alt);
-      border-color: var(--border-primary);
-    }
-
-    .surface-pill {
-      background-color: var(--bg-pill);
-      border-color: var(--border-primary);
-    }
-
-    .border-theme {
-      border-color: var(--border-primary);
-    }
-
-    .border-theme-subtle {
-      border-color: var(--border-subtle);
-    }
-
-    .text-theme-primary {
-      color: var(--text-primary);
-    }
-
-    .text-theme-secondary {
-      color: var(--text-secondary);
-    }
-
-    .text-theme-muted {
-      color: var(--text-muted);
-    }
-
-    .text-theme-faint {
-      color: var(--text-faint);
-    }
+    .app-header { background-color: var(--bg-header); border-color: var(--border-primary); }
+    .surface-card { background-color: var(--bg-surface); border-color: var(--border-primary); box-shadow: var(--card-shadow); }
+    .surface-alt { background-color: var(--bg-surface-alt); border-color: var(--border-primary); }
+    .surface-pill { background-color: var(--bg-pill); border-color: var(--border-primary); }
+    .border-theme { border-color: var(--border-primary); }
+    .border-theme-subtle { border-color: var(--border-subtle); }
+    .text-theme-primary { color: var(--text-primary); }
+    .text-theme-secondary { color: var(--text-secondary); }
+    .text-theme-muted { color: var(--text-muted); }
+    .text-theme-faint { color: var(--text-faint); }
 
     .accent-pill {
       background-color: var(--accent-soft-bg);
@@ -179,25 +142,18 @@
       border-color: var(--accent-soft-border);
     }
 
-    .theme-input,
-    .theme-select {
+    .theme-input, .theme-select {
       background-color: var(--bg-input);
       border: 1px solid var(--border-input);
       color: var(--text-primary);
       transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
     }
-
-    .theme-input:focus,
-    .theme-select:focus {
+    .theme-input:focus, .theme-select:focus {
       outline: none;
       border-color: var(--accent-primary);
       box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.24);
     }
-
-    .theme-input::placeholder {
-      color: var(--text-faint);
-      opacity: 0.85;
-    }
+    .theme-input::placeholder { color: var(--text-faint); opacity: 0.85; }
 
     .theme-inline-input {
       background-color: transparent;
@@ -205,11 +161,7 @@
       color: var(--text-primary);
       transition: border-color 0.15s ease, background-color 0.15s ease;
     }
-
-    .theme-inline-input:hover {
-      border-color: var(--border-input);
-    }
-
+    .theme-inline-input:hover { border-color: var(--border-input); }
     .theme-inline-input:focus {
       outline: none;
       background-color: var(--bg-input);
@@ -217,9 +169,7 @@
       box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.22);
     }
 
-    .theme-row-hover:hover {
-      background-color: var(--bg-surface-hover);
-    }
+    .theme-row-hover:hover { background-color: var(--bg-surface-hover); }
 
     .theme-btn-secondary {
       background-color: var(--bg-pill);
@@ -227,30 +177,26 @@
       color: var(--text-secondary);
       transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
     }
-
     .theme-btn-secondary:hover {
       background-color: var(--bg-surface-hover);
       color: var(--text-primary);
     }
 
-    ::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
+    .drag-over-top {
+      box-shadow: inset 0 2px 0 0 #6366f1;
+      background-color: rgba(99, 102, 241, 0.12) !important;
     }
-    ::-webkit-scrollbar-track {
-      background: var(--scroll-track);
-    }
-    ::-webkit-scrollbar-thumb {
-      background: var(--scroll-thumb);
-      border-radius: 9999px;
-    }
-    ::-webkit-scrollbar-thumb:hover {
-      background: var(--scroll-thumb-hover);
+    .drag-over-bottom {
+      box-shadow: inset 0 -2px 0 0 #6366f1;
+      background-color: rgba(99, 102, 241, 0.12) !important;
     }
 
-    .row-highlight-anim {
-      animation: pulseHighlight 1.15s ease-out;
-    }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: var(--scroll-track); }
+    ::-webkit-scrollbar-thumb { background: var(--scroll-thumb); border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--scroll-thumb-hover); }
+
+    .row-highlight-anim { animation: pulseHighlight 1.15s ease-out; }
     @keyframes pulseHighlight {
       0% { background-color: rgba(99, 102, 241, 0.25); }
       100% { background-color: transparent; }
@@ -259,17 +205,14 @@
 </head>
 <body class="min-h-screen flex flex-col selection:bg-indigo-500/30 selection:text-indigo-200">
 
-  <!-- =========================================================================
-       TOP HEADER BAR
-       ========================================================================= -->
+  <!-- TOP HEADER BAR -->
   <header class="sticky top-0 z-30 app-header backdrop-blur-md border-b">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex flex-wrap items-center justify-between py-3 gap-3">
-        <!-- Top-Left Graduation Cap Reload Button (#btnBrandReload) -->
+        <!-- Top-Left Graduation Cap Reload Button -->
         <button
           id="btnBrandReload"
           type="button"
-          onclick="window.reloadGradeCraft && window.reloadGradeCraft()"
           title="Reload GradeCraft"
           aria-label="Reload GradeCraft"
           class="group flex items-center gap-3 text-left cursor-pointer rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-400 transition-transform duration-150 hover:scale-[1.02] active:scale-95"
@@ -293,8 +236,6 @@
           <button
             id="navBtnGradebook"
             type="button"
-            onclick="window.switchAppView && window.switchAppView('gradebook')"
-            data-nav-view="gradebook"
             class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold bg-indigo-600 text-white shadow-sm shadow-indigo-500/25 transition cursor-pointer"
           >
             <i class="fa-solid fa-table-columns"></i>
@@ -303,8 +244,6 @@
           <button
             id="navBtnProfile"
             type="button"
-            onclick="window.switchAppView && window.switchAppView('profile')"
-            data-nav-view="profile"
             class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold text-theme-muted hover:text-theme-primary transition cursor-pointer"
           >
             <span id="headerAvatarInitials" class="w-5 h-5 rounded-full bg-indigo-600 text-white flex items-center justify-center text-[10px] font-bold">SN</span>
@@ -315,16 +254,12 @@
     </div>
   </header>
 
-  <!-- =========================================================================
-       MAIN WORKSPACE CONTAINER (STATIC CONTAINERS PREVENT BLANK SCREEN)
-       ========================================================================= -->
+  <!-- MAIN WORKSPACE -->
   <main id="mainWorkspace" class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
 
-    <!-- =======================================================================
-         VIEW 1: GRADEBOOK VIEW (#viewGradebook - Visible by Default)
-         ======================================================================= -->
+    <!-- VIEW 1: GRADEBOOK VIEW -->
     <div id="viewGradebook" class="space-y-6">
-      <!-- 1A. Academic Term Tab Bar (Separates & Groups Classes by Academic Term) -->
+      <!-- 1A. Academic Term Tab Bar -->
       <section class="surface-card rounded-2xl border p-3.5 sm:p-4">
         <div class="flex flex-wrap items-center justify-between gap-2.5">
           <div class="flex items-center gap-2 overflow-x-auto pb-1 max-w-full">
@@ -359,18 +294,27 @@
             class="shrink-0 inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold theme-btn-secondary cursor-pointer"
           >
             <i class="fa-solid fa-plus text-indigo-400"></i>
-            <span>Add Class</span>
+            <span>+ Add Class</span>
           </button>
         </div>
 
-        <div class="flex items-center gap-2">
+        <div class="flex flex-wrap items-center gap-2">
           <button
             id="btnDuplicateClass"
             type="button"
             class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold theme-btn-secondary cursor-pointer"
           >
             <i class="fa-regular fa-copy text-indigo-400"></i>
-            <span>Duplicate Class</span>
+            <span>Duplicate</span>
+          </button>
+          <button
+            id="btnRestoreDemoCourses"
+            type="button"
+            class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold theme-btn-secondary cursor-pointer"
+            title="Restore any missing default example courses (CS 61A, DATA C8, MATH 54) without deleting your classes"
+          >
+            <i class="fa-solid fa-book-bookmark text-emerald-400"></i>
+            <span>Restore Demo Courses</span>
           </button>
           <button
             id="btnDeleteClass"
@@ -432,23 +376,23 @@
                 Current Actual Grade
               </span>
               <span id="badgeActualWeight" class="text-[11px] font-medium px-2.5 py-0.5 rounded-full surface-pill text-theme-muted border">
-                30% weight graded
+                75% weight graded
               </span>
             </div>
 
             <div class="mt-4 flex items-baseline justify-between gap-4">
               <div>
                 <div id="displayActualPct" class="text-4xl sm:text-5xl font-extrabold tracking-tight font-mono text-theme-primary">
-                  90.00%
+                  94.30%
                 </div>
                 <div id="displayActualPts" class="text-xs text-theme-muted mt-1">
-                  Graded points: 45 / 50 • 3.7 GPA
+                  Graded points: 132 / 142 • 4.0 GPA
                 </div>
               </div>
 
               <div class="text-right shrink-0">
                 <div id="badgeActualLetter" class="inline-flex items-center justify-center min-w-[64px] h-16 px-4 rounded-2xl text-3xl font-extrabold border bg-emerald-500/15 text-emerald-300 border-emerald-500/35">
-                  A-
+                  A
                 </div>
                 <div class="text-[11px] text-theme-faint mt-1">Letter Grade</div>
               </div>
@@ -469,14 +413,14 @@
                 Forecast / What-If Grade
               </span>
               <span id="badgeForecastDelta" class="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-white/10 text-indigo-100 border border-white/15">
-                Matches Actual
+                Projected
               </span>
             </div>
 
             <div class="mt-4 flex items-baseline justify-between gap-4">
               <div>
                 <div id="displayForecastPct" class="text-4xl sm:text-5xl font-extrabold tracking-tight font-mono text-white">
-                  90.00%
+                  93.39%
                 </div>
                 <div class="text-xs text-indigo-200/80 mt-1">
                   Combines Actuals + What-If Overrides
@@ -485,7 +429,7 @@
 
               <div class="text-right shrink-0">
                 <div id="badgeForecastLetter" class="inline-flex items-center justify-center min-w-[64px] h-16 px-4 rounded-2xl text-3xl font-extrabold bg-indigo-500/20 text-white border border-indigo-400/35">
-                  A-
+                  A
                 </div>
                 <div class="text-[11px] text-indigo-300 mt-1">Projected Letter</div>
               </div>
@@ -498,14 +442,14 @@
             </div>
             <div class="flex items-center justify-between gap-2">
               <span id="labelWhatIfCount" class="text-[11px] text-indigo-300">
-                0 active What-If overrides
+                1 active What-If override
               </span>
               <button
                 id="btnClearWhatIfs"
                 type="button"
                 class="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-white/10 hover:bg-white/20 text-white border border-white/15 transition cursor-pointer"
               >
-                Clear What-Ifs
+                Clear All What-Ifs
               </button>
             </div>
           </div>
@@ -517,9 +461,9 @@
             <div class="flex items-center justify-between gap-2">
               <span class="text-xs font-bold uppercase tracking-wider text-theme-muted flex items-center gap-1.5">
                 <i class="fa-solid fa-bullseye text-emerald-400"></i>
-                Target Grade Forecaster
+                Target Grade Planner
               </span>
-              <span class="text-[11px] text-theme-faint">Goal Planner</span>
+              <span class="text-[11px] text-theme-faint">Goal Forecaster</span>
             </div>
 
             <div class="mt-3 flex items-center gap-2">
@@ -534,22 +478,22 @@
 
           <div class="mt-4 pt-3 border-t border-theme-subtle flex items-center justify-between text-[11px] text-theme-muted">
             <span>Remaining ungraded course weight:</span>
-            <span id="displayRemainingWeight" class="font-mono font-bold text-theme-primary">70.0%</span>
+            <span id="displayRemainingWeight" class="font-mono font-bold text-theme-primary">25.0%</span>
           </div>
         </div>
       </section>
 
-      <!-- 4. Two-Column Configuration Row: Assignment Groups & Class Grade Buckets -->
-      <section class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        <!-- Left Column: Assignment Groups & Weights -->
-        <div class="lg:col-span-7 surface-card rounded-2xl border flex flex-col overflow-hidden">
+      <!-- 4. Two-Column Configuration Row: Assignment Groups & Class Grade Bucket Distribution -->
+      <section class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+        <!-- Left Column: Assignment Groups & Weights (With Drag-and-Drop Slider Handle) -->
+        <div class="lg:col-span-7 surface-card rounded-2xl border flex flex-col h-full justify-between overflow-hidden">
           <div class="px-5 py-4 border-b border-theme surface-alt flex flex-wrap items-center justify-between gap-2">
             <div>
               <h2 class="text-sm font-bold text-theme-primary flex items-center gap-2">
                 <i class="fa-solid fa-layer-group text-indigo-400"></i>
                 <span>Assignment Groups &amp; Weights</span>
               </h2>
-              <p class="text-xs text-theme-muted">Configure category weights toward your final class grade.</p>
+              <p class="text-xs text-theme-muted">Drag any group by its left slider handle to reorder groups and gradebook sections.</p>
             </div>
             <div class="flex flex-wrap items-center gap-2">
               <span id="badgeWeightWarning" class="hidden px-2.5 py-1 rounded-lg text-[11px] font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30">
@@ -573,7 +517,7 @@
             </div>
           </div>
 
-          <div class="p-4 flex-1 overflow-x-auto">
+          <div class="p-4 flex-1 flex flex-col justify-between overflow-x-auto">
             <table class="w-full text-left border-collapse">
               <thead>
                 <tr class="border-b border-theme text-[11px] font-bold uppercase tracking-wider text-theme-faint">
@@ -590,25 +534,34 @@
                 <tr class="border-t-2 border-theme font-bold text-xs">
                   <td class="py-3 pl-2 text-theme-secondary">Total Configured Weight</td>
                   <td id="cellTotalWeight" class="py-3 text-right font-mono text-emerald-400">100.0%</td>
-                  <td id="cellTotalGroupPts" class="py-3 text-right font-mono text-theme-muted">45 / 50</td>
-                  <td id="cellFooterActualPct" class="py-3 text-right font-mono text-theme-primary">90.00%</td>
-                  <td id="cellFooterForecastPct" class="py-3 text-right font-mono text-indigo-400">90.00%</td>
+                  <td id="cellTotalGroupPts" class="py-3 text-right font-mono text-theme-muted">0 / 0</td>
+                  <td id="cellFooterActualPct" class="py-3 text-right font-mono text-theme-primary">--%</td>
+                  <td id="cellFooterForecastPct" class="py-3 text-right font-mono text-indigo-400">--%</td>
                   <td></td>
                 </tr>
               </tfoot>
             </table>
+
+            <!-- Visual Category Weight Breakdown Bar -->
+            <div class="mt-4 pt-3.5 border-t border-theme-subtle space-y-2">
+              <div class="flex items-center justify-between text-[11px] text-theme-muted">
+                <span class="font-semibold uppercase tracking-wider text-theme-faint">Category Weight Distribution</span>
+                <span id="labelGroupCountSummary" class="font-mono text-theme-secondary">5 groups • 100.0% total</span>
+              </div>
+              <div id="barGroupWeightBreakdown" class="w-full h-2.5 rounded-full surface-pill overflow-hidden flex gap-0.5 p-0.5 border border-theme-subtle"></div>
+            </div>
           </div>
         </div>
 
-        <!-- Right Column: Class Grade Bucket Distribution -->
-        <div class="lg:col-span-5 surface-card rounded-2xl border flex flex-col overflow-hidden">
+        <!-- Right Column: Class Grade Bucket Distribution (Fills 100% Dedicated Space) -->
+        <div class="lg:col-span-5 surface-card rounded-2xl border flex flex-col justify-between h-full overflow-hidden">
           <div class="px-5 py-4 border-b border-theme surface-alt flex flex-wrap items-center justify-between gap-2">
             <div>
               <h2 class="text-sm font-bold text-theme-primary flex items-center gap-2">
                 <i class="fa-solid fa-chart-simple text-indigo-400"></i>
                 <span>Class Grade Bucket Distribution</span>
               </h2>
-              <p class="text-xs text-theme-muted">Minimum percentage thresholds (<code class="font-mono">&ge;</code>) for this class.</p>
+              <p class="text-xs text-theme-muted">Minimum percentage thresholds (<code class="font-mono">&ge;</code>) &amp; GPA scale for this class.</p>
             </div>
             <button
               id="btnResetClassBuckets"
@@ -620,18 +573,39 @@
             </button>
           </div>
 
-          <div class="p-4 flex-1 overflow-y-auto max-h-[380px]">
-            <table class="w-full text-left border-collapse">
-              <thead>
-                <tr class="border-b border-theme text-[11px] font-bold uppercase tracking-wider text-theme-faint">
-                  <th class="pb-2 pl-2">Grade</th>
-                  <th class="pb-2 text-right">Min Cutoff</th>
-                  <th class="pb-2 text-center">Range</th>
-                  <th class="pb-2 text-right pr-2">Status</th>
-                </tr>
-              </thead>
-              <tbody id="tbodyClassBuckets" class="text-xs"></tbody>
-            </table>
+          <!-- Full-Height Stretched Bucket Rows -->
+          <div class="px-4 py-2.5 flex-1 flex flex-col justify-between">
+            <div class="grid grid-cols-12 items-center pb-2 border-b border-theme text-[10px] font-bold uppercase tracking-wider text-theme-faint px-2">
+              <div class="col-span-3">Grade &amp; GPA</div>
+              <div class="col-span-6">Threshold Span &amp; Status</div>
+              <div class="col-span-3 text-right">Min Cutoff</div>
+            </div>
+
+            <div id="tbodyClassBuckets" class="flex-1 flex flex-col justify-between divide-y border-theme-subtle text-xs"></div>
+          </div>
+
+          <!-- Anchored Footer Status Bar -->
+          <div class="px-5 py-3 border-t border-theme surface-alt flex flex-wrap items-center justify-between gap-2 text-[11px]">
+            <div class="flex items-center gap-2">
+              <span class="px-2 py-0.5 rounded-md font-semibold accent-pill border text-[10px] uppercase tracking-wider">
+                UC Berkeley 4.0 Scale
+              </span>
+              <span class="text-theme-muted">
+                Actual: <strong id="footerBucketActualGpa" class="font-mono text-theme-primary">4.00 GPA</strong>
+              </span>
+              <span class="text-theme-faint">•</span>
+              <span class="text-theme-muted">
+                Forecast: <strong id="footerBucketForecastGpa" class="font-mono text-indigo-400">4.00 GPA</strong>
+              </span>
+            </div>
+            <button
+              type="button"
+              data-action="open-profile-scale"
+              class="text-indigo-400 hover:text-indigo-300 font-semibold transition cursor-pointer inline-flex items-center gap-1"
+            >
+              <span>Customize Defaults</span>
+              <i class="fa-solid fa-arrow-right text-[10px]"></i>
+            </button>
           </div>
         </div>
       </section>
@@ -655,8 +629,6 @@
               <button
                 id="btnViewGrouped"
                 type="button"
-                data-action="set-gb-view"
-                data-mode="grouped"
                 class="px-3 py-1.5 rounded-lg transition cursor-pointer bg-indigo-600 text-white shadow-xs"
               >
                 <i class="fa-solid fa-folder-tree mr-1"></i>Grouped by Category
@@ -664,8 +636,6 @@
               <button
                 id="btnViewUnified"
                 type="button"
-                data-action="set-gb-view"
-                data-mode="unified"
                 class="px-3 py-1.5 rounded-lg transition cursor-pointer text-theme-muted hover:text-theme-primary"
               >
                 <i class="fa-solid fa-table-list mr-1"></i>Unified Table (Sorted by Group)
@@ -687,12 +657,10 @@
       </section>
     </div>
 
-    <!-- =======================================================================
-         VIEW 2: PROFILE & SETTINGS VIEW (#viewProfile - Static Container)
-         ======================================================================= -->
+    <!-- VIEW 2: PROFILE & SETTINGS VIEW -->
     <div id="viewProfile" class="hidden space-y-6">
       <div class="max-w-5xl mx-auto space-y-6">
-        <!-- 1. Student Profile Card -->
+        <!-- 1. Student Profile Card (Generic Filler Data Only, No Academic Standing Field) -->
         <section class="surface-card rounded-2xl border p-6 space-y-5">
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-theme pb-4">
             <div class="flex items-center gap-4">
@@ -701,7 +669,7 @@
               </div>
               <div>
                 <h2 class="text-lg font-extrabold text-theme-primary">Student Profile</h2>
-                <p class="text-xs text-theme-muted">Personalize your generic academic profile metadata. Saved automatically in your browser.</p>
+                <p class="text-xs text-theme-muted">Generic academic profile metadata saved locally in your browser.</p>
               </div>
             </div>
             <span id="profileClassesCountBadge" class="px-3 py-1 rounded-full text-xs font-mono surface-pill border text-theme-muted self-start sm:self-center">
@@ -735,19 +703,19 @@
               <input
                 id="profileInstitution"
                 type="text"
-                value="University Name"
-                placeholder="University Name"
+                value="University Campus"
+                placeholder="University Campus"
                 class="w-full text-xs font-semibold theme-input rounded-xl px-3.5 py-2.5"
               />
             </div>
             <div>
-              <label for="profileStudentId" class="block text-xs font-semibold text-theme-secondary mb-1.5">Student ID</label>
+              <label for="profileMajor" class="block text-xs font-semibold text-theme-secondary mb-1.5">Major / Program</label>
               <input
-                id="profileStudentId"
+                id="profileMajor"
                 type="text"
-                value="ID-00000000"
-                placeholder="ID-00000000"
-                class="w-full text-xs font-mono font-semibold theme-input rounded-xl px-3.5 py-2.5"
+                value="Computer Science"
+                placeholder="Computer Science"
+                class="w-full text-xs font-semibold theme-input rounded-xl px-3.5 py-2.5"
               />
             </div>
           </div>
@@ -755,7 +723,6 @@
 
         <!-- 2. Appearance Theme & Language/Locale Cascade Row -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <!-- Appearance Theme Switcher -->
           <section class="surface-card rounded-2xl border p-6 flex flex-col justify-between space-y-4">
             <div>
               <h3 class="text-sm font-bold text-theme-primary flex items-center gap-2 mb-1">
@@ -799,7 +766,6 @@
             </div>
           </section>
 
-          <!-- Language & Locale Cascade Selector -->
           <section class="surface-card rounded-2xl border p-6 flex flex-col justify-between space-y-4">
             <div>
               <h3 class="text-sm font-bold text-theme-primary flex items-center gap-2 mb-1">
@@ -807,17 +773,16 @@
                 <span>Language &amp; Locale Cascade</span>
               </h3>
               <p class="text-xs text-theme-muted mb-4">
-                Configures regional locale cascade (<code class="font-mono text-[11px]">selectedLocale &rarr; lang &rarr; en-US fallback</code>) and <code class="font-mono text-[11px]">Intl.NumberFormat</code> formatting.
+                Configures regional locale cascade (<code class="font-mono text-[11px]">selectedLocale &rarr; lang &rarr; en-US fallback</code>).
               </p>
 
               <label for="selectLocaleCascade" class="block text-xs font-semibold text-theme-secondary mb-1.5">Regional Locale</label>
               <select id="selectLocaleCascade" class="w-full text-xs font-semibold theme-select rounded-xl px-3.5 py-2.5">
                 <option value="en-US">English (United States) — en-US</option>
                 <option value="es-ES">Español (España) — es-ES</option>
+                <option value="uk-UA">Українська (Україна) — uk-UA</option>
                 <option value="fr-FR">Français (France) — fr-FR</option>
                 <option value="de-DE">Deutsch (Deutschland) — de-DE</option>
-                <option value="uk-UA">Українська (Україна) — uk-UA</option>
-                <option value="pt-BR">Português (Brasil) — pt-BR</option>
                 <option value="zh-CN">中文 (简体) — zh-CN</option>
                 <option value="ja-JP">日本語 (日本) — ja-JP</option>
                 <option value="ko-KR">한국어 (대한민국) — ko-KR</option>
@@ -840,7 +805,7 @@
                 <span>Custom Grade Definitions (UC Berkeley Default Scale)</span>
               </h3>
               <p class="text-xs text-theme-muted mt-0.5">
-                Default thresholds follow official UC Berkeley Registrar Grade Definitions (<code class="font-mono">A+</code> through <code class="font-mono">F</code>). Customize minimum cutoffs below.
+                Default thresholds follow official UC Berkeley Registrar Grade Definitions (<code class="font-mono">A+</code> through <code class="font-mono">F</code>).
               </p>
             </div>
 
@@ -887,7 +852,7 @@
           </div>
         </section>
 
-        <!-- 4. Authorization UI Placeholder Card (Zero Auth Logic) -->
+        <!-- 4. Authorization UI Placeholder Card -->
         <section class="surface-card rounded-2xl border p-6 space-y-5">
           <div class="flex flex-wrap items-center justify-between gap-3 border-b border-theme pb-4">
             <div>
@@ -907,23 +872,11 @@
           <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end opacity-80">
             <div class="md:col-span-4 space-y-1.5">
               <label for="authPreviewEmail" class="block text-xs font-semibold text-theme-secondary">Academic Email</label>
-              <input
-                id="authPreviewEmail"
-                type="email"
-                disabled
-                placeholder="student@university.edu"
-                class="w-full text-xs theme-input rounded-xl px-3.5 py-2.5 cursor-not-allowed"
-              />
+              <input id="authPreviewEmail" type="email" disabled placeholder="student@university.edu" class="w-full text-xs theme-input rounded-xl px-3.5 py-2.5 cursor-not-allowed" />
             </div>
             <div class="md:col-span-4 space-y-1.5">
               <label for="authPreviewPassword" class="block text-xs font-semibold text-theme-secondary">Password</label>
-              <input
-                id="authPreviewPassword"
-                type="password"
-                disabled
-                placeholder="••••••••••••"
-                class="w-full text-xs theme-input rounded-xl px-3.5 py-2.5 cursor-not-allowed"
-              />
+              <input id="authPreviewPassword" type="password" disabled placeholder="••••••••••••" class="w-full text-xs theme-input rounded-xl px-3.5 py-2.5 cursor-not-allowed" />
             </div>
             <div class="md:col-span-4 flex items-center gap-2">
               <button type="button" disabled class="flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-semibold bg-indigo-600/60 text-white/80 cursor-not-allowed">
@@ -936,21 +889,6 @@
               </button>
             </div>
           </div>
-
-          <div class="flex flex-wrap items-center gap-2.5 pt-2 border-t border-theme-subtle opacity-80">
-            <button type="button" disabled class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold theme-btn-secondary cursor-not-allowed">
-              <i class="fa-solid fa-building-columns text-indigo-400"></i>
-              <span>Institutional SSO</span>
-            </button>
-            <button type="button" disabled class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold theme-btn-secondary cursor-not-allowed">
-              <i class="fa-brands fa-google text-indigo-400"></i>
-              <span>Continue with Google</span>
-            </button>
-            <button type="button" disabled class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold theme-btn-secondary cursor-not-allowed">
-              <i class="fa-brands fa-github"></i>
-              <span>Continue with GitHub</span>
-            </button>
-          </div>
         </section>
 
         <!-- 5. Data & Backup Controls -->
@@ -960,53 +898,42 @@
               <i class="fa-solid fa-database text-indigo-400"></i>
               <span>Data Management &amp; Local Backup</span>
             </h3>
-            <p class="text-xs text-theme-muted">Export your classes and custom grade definitions as a JSON file, import a previous backup, or reset all data to fresh demo defaults.</p>
+            <p class="text-xs text-theme-muted">Export your classes and custom grade definitions as JSON, import a backup, restore default courses alongside your own, or factory reset.</p>
           </div>
 
           <div class="flex flex-wrap items-center gap-3 pt-1">
-            <button
-              id="btnExportJson"
-              type="button"
-              class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold theme-btn-secondary cursor-pointer"
-            >
+            <button id="btnExportJson" type="button" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold theme-btn-secondary cursor-pointer">
               <i class="fa-solid fa-download text-indigo-400"></i>
               <span>Export JSON Backup</span>
             </button>
 
-            <label
-              for="inputImportJson"
-              class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold theme-btn-secondary cursor-pointer"
-            >
+            <label for="inputImportJson" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold theme-btn-secondary cursor-pointer">
               <i class="fa-solid fa-upload text-indigo-400"></i>
               <span>Import JSON Backup</span>
               <input id="inputImportJson" type="file" accept=".json,application/json" class="hidden" />
             </label>
 
-            <button
-              id="btnResetDemoData"
-              type="button"
-              class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 transition cursor-pointer"
-            >
+            <button id="btnRestoreDefaultKeepMine" type="button" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold theme-btn-secondary cursor-pointer">
+              <i class="fa-solid fa-book-bookmark text-emerald-400"></i>
+              <span>Restore Default Courses (Keep Mine)</span>
+            </button>
+
+            <button id="btnResetDemoData" type="button" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 transition cursor-pointer">
               <i class="fa-solid fa-rotate-left"></i>
-              <span>Reset All Data to Defaults</span>
+              <span>Factory Reset</span>
             </button>
           </div>
         </section>
       </div>
     </div>
-
   </main>
 
-  <!-- =========================================================================
-       FOOTER
-       ========================================================================= -->
+  <!-- FOOTER -->
   <footer class="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 text-center text-xs text-theme-faint border-t border-theme mt-10">
     <p>GradeCraft — Class Grade Calculator &amp; Forecaster. All course configurations, grade definitions, and assignment forecasts are saved locally in your browser.</p>
   </footer>
 
-  <!-- =========================================================================
-       CUSTOM CONFIRMATION MODAL (No browser alert/confirm)
-       ========================================================================= -->
+  <!-- CUSTOM CONFIRMATION MODAL -->
   <div id="confirmModalBackdrop" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-xs hidden items-center justify-center p-4">
     <div class="surface-card rounded-2xl border max-w-md w-full p-6 space-y-4">
       <div class="flex items-start gap-3">
@@ -1019,12 +946,8 @@
         </div>
       </div>
       <div class="flex items-center justify-end gap-2 pt-2">
-        <button id="confirmModalCancelBtn" type="button" class="px-4 py-2 rounded-xl text-xs font-semibold theme-btn-secondary cursor-pointer">
-          Cancel
-        </button>
-        <button id="confirmModalAcceptBtn" type="button" class="px-4 py-2 rounded-xl text-xs font-semibold bg-rose-600 hover:bg-rose-500 text-white shadow-sm transition cursor-pointer">
-          Confirm
-        </button>
+        <button id="confirmModalCancelBtn" type="button" class="px-4 py-2 rounded-xl text-xs font-semibold theme-btn-secondary cursor-pointer">Cancel</button>
+        <button id="confirmModalAcceptBtn" type="button" class="px-4 py-2 rounded-xl text-xs font-semibold bg-rose-600 hover:bg-rose-500 text-white shadow-sm transition cursor-pointer">Confirm</button>
       </div>
     </div>
   </div>
@@ -1032,25 +955,23 @@
   <!-- Toast Notification Stack -->
   <div id="toastContainer" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
-  <!-- =========================================================================
-       MODULAR ES6+ APPLICATION LOGIC
-       ========================================================================= -->
   <script>
     (() => {
       'use strict';
 
-      /*************************************************************************
-       * 1. CONSTANTS & OFFICIAL UC BERKELEY REGISTRAR GRADE DEFINITIONS
-       *************************************************************************/
-      const STORAGE_KEY = 'gradecraft_app_state_v7';
-      const LEGACY_KEYS = [
+      const STORAGE_KEY = 'gradecraft_state_v4';
+      const ALL_STORAGE_KEYS = [
+        'gradecraft_state_v4',
+        'gradecraft_state_v3',
+        'gradecraft_state_v2',
+        'gradecraft_state_v1',
+        'gradecraft_state',
+        'gradecraft_app_state_v7',
         'gradecraft_app_state_v6',
         'gradecraft_app_state_v5',
         'gradecraft_app_state_v4',
         'gradecraft_app_state_v3',
         'gradecraft_app_state_v2',
-        'gradecraft_state_v2',
-        'gradecraft_state_v1',
         'gradecraft_app_state',
         'gradecraft_data'
       ];
@@ -1108,9 +1029,6 @@
         return trimmed || 'Fall 2026';
       }
 
-      /*************************************************************************
-       * 2. RICH EXAMPLE COURSE TEMPLATES (CS 61A, DATA C8, MATH 54)
-       *************************************************************************/
       function createExampleCourses(defaultScale) {
         const scale = cloneGradeScale(defaultScale || UC_BERKELEY_GRADE_DEFINITIONS);
         return [
@@ -1121,23 +1039,21 @@
             term: 'Fall 2026',
             targetLetter: 'A',
             groups: [
-              { id: 'grp_61a_proj', name: 'Projects', weight: 30 },
               { id: 'grp_61a_hw',   name: 'Homework & Labs', weight: 15 },
+              { id: 'grp_61a_proj', name: 'Projects', weight: 30 },
               { id: 'grp_61a_mt1',  name: 'Midterm 1', weight: 15 },
               { id: 'grp_61a_mt2',  name: 'Midterm 2', weight: 15 },
               { id: 'grp_61a_fin',  name: 'Final Exam', weight: 25 }
             ],
             buckets: cloneGradeScale(scale),
             assignments: [
-              { id: 'asg_61a_1', name: 'Project 1: Hog', groupId: 'grp_61a_proj', earned: 25, available: 25, whatIfEarned: null },
-              { id: 'asg_61a_2', name: 'Project 2: Cats', groupId: 'grp_61a_proj', earned: 24, available: 25, whatIfEarned: null },
-              { id: 'asg_61a_3', name: 'Project 3: Ants', groupId: 'grp_61a_proj', earned: 29, available: 30, whatIfEarned: null },
-              { id: 'asg_61a_4', name: 'Project 4: Scheme Interpreter', groupId: 'grp_61a_proj', earned: null, available: 30, whatIfEarned: 28 },
-              { id: 'asg_61a_5', name: 'Homework 01–06 Combined', groupId: 'grp_61a_hw', earned: 58, available: 60, whatIfEarned: null },
-              { id: 'asg_61a_6', name: 'Lab 01–10 Checkoffs', groupId: 'grp_61a_hw', earned: 40, available: 40, whatIfEarned: null },
-              { id: 'asg_61a_7', name: 'Midterm 1 Exam', groupId: 'grp_61a_mt1', earned: 36, available: 40, whatIfEarned: null },
-              { id: 'asg_61a_8', name: 'Midterm 2 Exam', groupId: 'grp_61a_mt2', earned: 43, available: 50, whatIfEarned: null },
-              { id: 'asg_61a_9', name: 'Final Exam', groupId: 'grp_61a_fin', earned: null, available: 75, whatIfEarned: 68 }
+              { id: 'asg_61a_1', name: 'Lab 01: Functions', groupId: 'grp_61a_hw', earned: 10, available: 10, whatIfEarned: null },
+              { id: 'asg_61a_2', name: 'HW 01: Control', groupId: 'grp_61a_hw', earned: 2, available: 2, whatIfEarned: null },
+              { id: 'asg_61a_3', name: 'Project 1: Hog', groupId: 'grp_61a_proj', earned: 25, available: 25, whatIfEarned: null },
+              { id: 'asg_61a_4', name: 'Project 2: Cats', groupId: 'grp_61a_proj', earned: 24, available: 25, whatIfEarned: null },
+              { id: 'asg_61a_5', name: 'Midterm 1', groupId: 'grp_61a_mt1', earned: 36, available: 40, whatIfEarned: null },
+              { id: 'asg_61a_6', name: 'Midterm 2', groupId: 'grp_61a_mt2', earned: 35, available: 40, whatIfEarned: null },
+              { id: 'asg_61a_7', name: 'Final Exam', groupId: 'grp_61a_fin', earned: null, available: 75, whatIfEarned: 68 }
             ]
           },
           {
@@ -1147,21 +1063,19 @@
             term: 'Fall 2026',
             targetLetter: 'A',
             groups: [
+              { id: 'grp_c8_lab',  name: 'Labs', weight: 10 },
+              { id: 'grp_c8_hw',   name: 'Homeworks', weight: 20 },
               { id: 'grp_c8_proj', name: 'Projects', weight: 25 },
-              { id: 'grp_c8_hw',   name: 'Homework', weight: 20 },
-              { id: 'grp_c8_lab',  name: 'Labs & Vitamins', weight: 10 },
               { id: 'grp_c8_mt',   name: 'Midterm Exam', weight: 20 },
               { id: 'grp_c8_fin',  name: 'Final Exam', weight: 25 }
             ],
             buckets: cloneGradeScale(scale),
             assignments: [
-              { id: 'asg_c8_1', name: 'Project 1: World Progress', groupId: 'grp_c8_proj', earned: 96, available: 100, whatIfEarned: null },
-              { id: 'asg_c8_2', name: 'Project 2: Climate & Inference', groupId: 'grp_c8_proj', earned: 94, available: 100, whatIfEarned: null },
-              { id: 'asg_c8_3', name: 'Project 3: Movie Classification', groupId: 'grp_c8_proj', earned: null, available: 100, whatIfEarned: 95 },
-              { id: 'asg_c8_4', name: 'Homework 01–08', groupId: 'grp_c8_hw', earned: 148, available: 160, whatIfEarned: null },
-              { id: 'asg_c8_5', name: 'Lab Assignments 01–09', groupId: 'grp_c8_lab', earned: 90, available: 90, whatIfEarned: null },
-              { id: 'asg_c8_6', name: 'Midterm Exam', groupId: 'grp_c8_mt', earned: 89, available: 100, whatIfEarned: null },
-              { id: 'asg_c8_7', name: 'Final Exam', groupId: 'grp_c8_fin', earned: null, available: 150, whatIfEarned: 138 }
+              { id: 'asg_c8_1', name: 'Lab 01: Expressions', groupId: 'grp_c8_lab', earned: 10, available: 10, whatIfEarned: null },
+              { id: 'asg_c8_2', name: 'HW 01: Causality', groupId: 'grp_c8_hw', earned: 18, available: 20, whatIfEarned: null },
+              { id: 'asg_c8_3', name: 'Project 1: World Progress', groupId: 'grp_c8_proj', earned: 29, available: 30, whatIfEarned: null },
+              { id: 'asg_c8_4', name: 'Midterm Exam', groupId: 'grp_c8_mt', earned: 44, available: 50, whatIfEarned: null },
+              { id: 'asg_c8_5', name: 'Final Exam', groupId: 'grp_c8_fin', earned: null, available: 100, whatIfEarned: 90 }
             ]
           },
           {
@@ -1171,18 +1085,19 @@
             term: 'Spring 2026',
             targetLetter: 'A',
             groups: [
-              { id: 'grp_m54_hw',  name: 'Weekly Problem Sets & Quizzes', weight: 20 },
+              { id: 'grp_m54_hw',  name: 'Homework', weight: 15 },
+              { id: 'grp_m54_qz',  name: 'Quizzes', weight: 15 },
               { id: 'grp_m54_mt1', name: 'Midterm 1', weight: 20 },
               { id: 'grp_m54_mt2', name: 'Midterm 2', weight: 20 },
-              { id: 'grp_m54_fin', name: 'Final Exam', weight: 40 }
+              { id: 'grp_m54_fin', name: 'Final Exam', weight: 30 }
             ],
             buckets: cloneGradeScale(scale),
             assignments: [
-              { id: 'asg_m54_1', name: 'Problem Sets 1–12', groupId: 'grp_m54_hw', earned: 114, available: 120, whatIfEarned: null },
-              { id: 'asg_m54_2', name: 'Discussion Quizzes', groupId: 'grp_m54_hw', earned: 47, available: 50, whatIfEarned: null },
-              { id: 'asg_m54_3', name: 'Midterm 1 (Linear Algebra)', groupId: 'grp_m54_mt1', earned: 91, available: 100, whatIfEarned: null },
-              { id: 'asg_m54_4', name: 'Midterm 2 (Eigenvalues & ODEs)', groupId: 'grp_m54_mt2', earned: 88, available: 100, whatIfEarned: null },
-              { id: 'asg_m54_5', name: 'Comprehensive Final Exam', groupId: 'grp_m54_fin', earned: 186, available: 200, whatIfEarned: null }
+              { id: 'asg_m54_1', name: 'Homework Set 1-5', groupId: 'grp_m54_hw', earned: 50, available: 50, whatIfEarned: null },
+              { id: 'asg_m54_2', name: 'Quizzes 1-4', groupId: 'grp_m54_qz', earned: 38, available: 40, whatIfEarned: null },
+              { id: 'asg_m54_3', name: 'Midterm 1', groupId: 'grp_m54_mt1', earned: 46, available: 50, whatIfEarned: null },
+              { id: 'asg_m54_4', name: 'Midterm 2', groupId: 'grp_m54_mt2', earned: 44, available: 50, whatIfEarned: null },
+              { id: 'asg_m54_5', name: 'Final Exam', groupId: 'grp_m54_fin', earned: 91, available: 100, whatIfEarned: null }
             ]
           }
         ];
@@ -1191,34 +1106,77 @@
       function createDefaultState() {
         const defaultScale = cloneGradeScale(UC_BERKELEY_GRADE_DEFINITIONS);
         return {
-          activeView: 'gradebook', // 'gradebook' | 'profile'
-          activeTermFilter: 'Fall 2026', // 'ALL' or specific Academic Term string
+          activeView: 'gradebook',
+          activeTermFilter: 'Fall 2026',
           activeClassId: 'class_cs61a',
-          gradebookViewMode: 'grouped', // 'grouped' | 'unified'
-          theme: 'black', // 'black' | 'midnight' | 'light'
+          gradebookViewMode: 'grouped',
+          theme: 'black',
           locale: 'en-US',
           profile: {
             displayName: 'Student Name',
             email: 'student@university.edu',
-            institution: 'University Name',
-            studentId: 'ID-00000000'
+            institution: 'University Campus',
+            major: 'Computer Science'
           },
           defaultGradeDefinitions: cloneGradeScale(defaultScale),
           classes: createExampleCourses(defaultScale)
         };
       }
 
-      /*************************************************************************
-       * 3. DEFENSIVE LOCALSTORAGE MIGRATION & STATE PRESERVATION
-       *************************************************************************/
-      function isUnmodifiedStrippedDemo(classes) {
-        if (!Array.isArray(classes) || classes.length > 3) return false;
-        const codes = classes.map(c => String(c?.code || '').trim());
-        return (
-          codes.includes('CS 101') &&
-          codes.includes('DATA 100') &&
-          classes.every(c => (c.assignments || []).length <= 4)
-        );
+      function sanitizeClassObject(c, idx, defaultDefs) {
+        const safeGroups = Array.isArray(c?.groups) && c.groups.length > 0
+          ? c.groups.map((g, gIdx) => ({
+              id: String(g?.id || uid(`grp_${gIdx}`)),
+              name: String(g?.name ?? `Group ${gIdx + 1}`),
+              weight: Math.max(0, Number(g?.weight ?? 0) || 0)
+            }))
+          : [
+              { id: uid('grp_1'), name: 'Assignments', weight: 30 },
+              { id: uid('grp_2'), name: 'Midterm Exam', weight: 30 },
+              { id: uid('grp_3'), name: 'Final Exam', weight: 40 }
+            ];
+
+        const firstGroupId = safeGroups[0].id;
+        const validGroupIds = new Set(safeGroups.map(g => g.id));
+        const rawBuckets = c?.buckets || c?.gradeScale || defaultDefs;
+
+        const safeAssignments = Array.isArray(c?.assignments)
+          ? c.assignments.map((a, aIdx) => {
+              const availVal = a?.available !== undefined ? a.available : a?.possible;
+              const whatIfVal = a?.whatIfEarned !== undefined ? a.whatIfEarned : a?.whatIf;
+              return {
+                id: String(a?.id || uid(`asg_${aIdx}`)),
+                name: String(a?.name ?? `Assignment ${aIdx + 1}`),
+                groupId: validGroupIds.has(a?.groupId) ? a.groupId : firstGroupId,
+                earned: isGradedValue(a?.earned) ? Number(a.earned) : null,
+                available: Math.max(0.01, Number(availVal ?? 100) || 100),
+                whatIfEarned: isGradedValue(whatIfVal) ? Number(whatIfVal) : null
+              };
+            })
+          : [];
+
+        let courseCode = String(c?.code ?? '').trim();
+        let courseName = String(c?.name ?? '').trim();
+        if (!courseCode && courseName) {
+          const splitParts = courseName.split(/[:—-]/);
+          if (splitParts.length > 1) {
+            courseCode = splitParts[0].trim();
+            courseName = splitParts.slice(1).join(':').trim();
+          } else {
+            courseCode = courseName;
+          }
+        }
+
+        return {
+          id: String(c?.id || uid(`class_${idx}`)),
+          code: courseCode || `COURSE ${101 + idx}`,
+          name: courseName || `Academic Course ${idx + 1}`,
+          term: normalizeTermName(c?.term ?? 'Fall 2026'),
+          targetLetter: String(c?.targetLetter || c?.targetGrade || 'A'),
+          groups: safeGroups,
+          buckets: cloneGradeScale(rawBuckets),
+          assignments: safeAssignments
+        };
       }
 
       function sanitizeState(rawState) {
@@ -1239,69 +1197,15 @@
           profile: {
             displayName: String(rawState.profile?.displayName || 'Student Name'),
             email: String(rawState.profile?.email || 'student@university.edu'),
-            institution: String(rawState.profile?.institution || 'University Name'),
-            studentId: String(rawState.profile?.studentId || 'ID-00000000')
+            institution: String(rawState.profile?.institution || 'University Campus'),
+            major: String(rawState.profile?.major || 'Computer Science')
           },
           defaultGradeDefinitions: defaultDefs,
           classes: []
         };
 
-        if (Array.isArray(rawState.classes) && rawState.classes.length > 0 && !isUnmodifiedStrippedDemo(rawState.classes)) {
-          clean.classes = rawState.classes.map((c, idx) => {
-            const safeGroups = Array.isArray(c?.groups) && c.groups.length > 0
-              ? c.groups.map((g, gIdx) => ({
-                  id: String(g?.id || uid(`grp_${gIdx}`)),
-                  name: String(g?.name ?? `Group ${gIdx + 1}`),
-                  weight: Math.max(0, Number(g?.weight ?? 0) || 0)
-                }))
-              : [
-                  { id: uid('grp_1'), name: 'Assignments', weight: 30 },
-                  { id: uid('grp_2'), name: 'Midterm Exam', weight: 30 },
-                  { id: uid('grp_3'), name: 'Final Exam', weight: 40 }
-                ];
-
-            const firstGroupId = safeGroups[0].id;
-            const validGroupIds = new Set(safeGroups.map(g => g.id));
-            const rawBuckets = c?.buckets || c?.gradeScale || clean.defaultGradeDefinitions;
-
-            const safeAssignments = Array.isArray(c?.assignments)
-              ? c.assignments.map((a, aIdx) => {
-                  const availVal = a?.available !== undefined ? a.available : a?.possible;
-                  return {
-                    id: String(a?.id || uid(`asg_${aIdx}`)),
-                    name: String(a?.name ?? `Assignment ${aIdx + 1}`),
-                    groupId: validGroupIds.has(a?.groupId) ? a.groupId : firstGroupId,
-                    earned: isGradedValue(a?.earned) ? Number(a.earned) : null,
-                    available: Math.max(0.01, Number(availVal ?? 100) || 100),
-                    whatIfEarned: isGradedValue(a?.whatIfEarned) ? Number(a.whatIfEarned) : null
-                  };
-                })
-              : [];
-
-            // Support legacy classes where code and name were combined or separate
-            let courseCode = String(c?.code ?? '').trim();
-            let courseName = String(c?.name ?? '').trim();
-            if (!courseCode && courseName) {
-              const splitParts = courseName.split(/[:—-]/);
-              if (splitParts.length > 1) {
-                courseCode = splitParts[0].trim();
-                courseName = splitParts.slice(1).join(':').trim();
-              } else {
-                courseCode = courseName;
-              }
-            }
-
-            return {
-              id: String(c?.id || uid(`class_${idx}`)),
-              code: courseCode || `Course ${101 + idx}`,
-              name: courseName || `Academic Course ${idx + 1}`,
-              term: normalizeTermName(c?.term ?? 'Fall 2026'),
-              targetLetter: String(c?.targetLetter || c?.targetGrade || 'A'),
-              groups: safeGroups,
-              buckets: cloneGradeScale(rawBuckets),
-              assignments: safeAssignments
-            };
-          });
+        if (Array.isArray(rawState.classes) && rawState.classes.length > 0) {
+          clean.classes = rawState.classes.map((c, idx) => sanitizeClassObject(c, idx, defaultDefs));
         } else {
           clean.classes = createExampleCourses(defaultDefs);
         }
@@ -1321,35 +1225,48 @@
 
       function loadState() {
         try {
-          let raw = localStorage.getItem(STORAGE_KEY);
-          if (!raw) {
-            // Look through all previous keys and prefer any key that contains custom user classes
-            for (const legacyKey of LEGACY_KEYS) {
-              const legacyRaw = localStorage.getItem(legacyKey);
-              if (legacyRaw) {
-                try {
-                  const parsed = JSON.parse(legacyRaw);
-                  if (parsed && Array.isArray(parsed.classes) && !isUnmodifiedStrippedDemo(parsed.classes)) {
-                    raw = legacyRaw;
-                    break;
-                  }
-                  if (!raw) raw = legacyRaw;
-                } catch {
-                  // Continue checking other keys
+          // Inspect all current and legacy keys and merge any unique user classes so data is never lost
+          let baseParsed = null;
+          const discoveredClasses = [];
+          const seenClassKeys = new Set();
+
+          for (const key of ALL_STORAGE_KEYS) {
+            const raw = localStorage.getItem(key);
+            if (!raw) continue;
+            try {
+              const parsed = JSON.parse(raw);
+              if (parsed && typeof parsed === 'object') {
+                if (!baseParsed) baseParsed = parsed;
+                if (Array.isArray(parsed.classes)) {
+                  parsed.classes.forEach((c, idx) => {
+                    const cleanCls = sanitizeClassObject(c, idx, UC_BERKELEY_GRADE_DEFINITIONS);
+                    const sig = `${cleanCls.id}::${cleanCls.code.toUpperCase()}`;
+                    if (!seenClassKeys.has(sig)) {
+                      seenClassKeys.add(sig);
+                      discoveredClasses.push(cleanCls);
+                    }
+                  });
                 }
               }
+            } catch {
+              // Ignore malformed key
             }
           }
-          if (!raw) return createDefaultState();
-          return sanitizeState(JSON.parse(raw));
+
+          if (!baseParsed) return createDefaultState();
+          if (discoveredClasses.length > 0) {
+            baseParsed.classes = discoveredClasses;
+          }
+          return sanitizeState(baseParsed);
         } catch (err) {
-          console.warn('Recovering from corrupted localStorage state:', err);
+          console.warn('Recovering default state:', err);
           return createDefaultState();
         }
       }
 
       let state = loadState();
       let highlightedAssignmentId = null;
+      let draggedGroupId = null;
 
       function saveState() {
         try {
@@ -1404,25 +1321,6 @@
         return filtered.length > 0 ? filtered : state.classes;
       }
 
-      function computeTermSummary(classesList) {
-        let gpaSum = 0;
-        let gradedClassesCount = 0;
-        classesList.forEach(c => {
-          const m = computeClassMetrics(c);
-          if (m.actualPct !== null && m.actualBucket.current && m.actualBucket.current.gpa !== null && m.actualBucket.current.gpa !== undefined) {
-            gpaSum += Number(m.actualBucket.current.gpa);
-            gradedClassesCount++;
-          }
-        });
-        return {
-          count: classesList.length,
-          avgGpa: gradedClassesCount > 0 ? (gpaSum / gradedClassesCount) : null
-        };
-      }
-
-      /*************************************************************************
-       * 4. FORMATTING & UI HELPERS
-       *************************************************************************/
       function formatNumber(value, minDecimals = 0, maxDecimals = 2) {
         if (value === null || value === undefined || isNaN(Number(value))) return '--';
         try {
@@ -1460,83 +1358,44 @@
       function getLetterBadgeClasses(letter) {
         const isLight = state.theme === 'light';
         if (!letter || letter === '--') {
-          return isLight
-            ? 'bg-slate-100 text-slate-500 border-slate-200'
-            : 'bg-zinc-900 text-zinc-500 border-zinc-800';
+          return isLight ? 'bg-slate-100 text-slate-500 border-slate-200' : 'bg-zinc-900 text-zinc-500 border-zinc-800';
         }
         const upper = letter.toUpperCase();
-        if (upper.startsWith('A')) {
-          return isLight
-            ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-            : 'bg-emerald-500/15 text-emerald-300 border-emerald-500/35';
-        }
-        if (upper.startsWith('B')) {
-          return isLight
-            ? 'bg-indigo-50 text-indigo-700 border-indigo-200'
-            : 'bg-indigo-500/15 text-indigo-300 border-indigo-500/35';
-        }
-        if (upper.startsWith('C')) {
-          return isLight
-            ? 'bg-amber-50 text-amber-700 border-amber-200'
-            : 'bg-amber-500/15 text-amber-300 border-amber-500/35';
-        }
-        if (upper.startsWith('D')) {
-          return isLight
-            ? 'bg-orange-50 text-orange-700 border-orange-200'
-            : 'bg-orange-500/15 text-orange-300 border-orange-500/35';
-        }
-        return isLight
-          ? 'bg-rose-50 text-rose-700 border-rose-200'
-          : 'bg-rose-500/15 text-rose-300 border-rose-500/35';
+        if (upper.startsWith('A')) return isLight ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-emerald-500/15 text-emerald-300 border-emerald-500/35';
+        if (upper.startsWith('B')) return isLight ? 'bg-indigo-50 text-indigo-700 border-indigo-200' : 'bg-indigo-500/15 text-indigo-300 border-indigo-500/35';
+        if (upper.startsWith('C')) return isLight ? 'bg-amber-50 text-amber-700 border-amber-200' : 'bg-amber-500/15 text-amber-300 border-amber-500/35';
+        if (upper.startsWith('D')) return isLight ? 'bg-orange-50 text-orange-700 border-orange-200' : 'bg-orange-500/15 text-orange-300 border-orange-500/35';
+        return isLight ? 'bg-rose-50 text-rose-700 border-rose-200' : 'bg-rose-500/15 text-rose-300 border-rose-500/35';
       }
 
       function getScorePillClasses(pct) {
         const isLight = state.theme === 'light';
         if (pct === null || pct === undefined || isNaN(pct)) {
-          return isLight
-            ? 'bg-slate-100 text-slate-500 border border-slate-200'
-            : 'bg-zinc-900 text-zinc-400 border border-zinc-800';
+          return isLight ? 'bg-slate-100 text-slate-500 border border-slate-200' : 'bg-zinc-900 text-zinc-400 border border-zinc-800';
         }
-        if (pct >= 90) {
-          return isLight
-            ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-            : 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30';
-        }
-        if (pct >= 80) {
-          return isLight
-            ? 'bg-indigo-50 text-indigo-700 border border-indigo-200'
-            : 'bg-indigo-500/15 text-indigo-300 border border-indigo-500/30';
-        }
-        if (pct >= 70) {
-          return isLight
-            ? 'bg-amber-50 text-amber-700 border border-amber-200'
-            : 'bg-amber-500/15 text-amber-300 border border-amber-500/30';
-        }
-        return isLight
-          ? 'bg-rose-50 text-rose-700 border border-rose-200'
-          : 'bg-rose-500/15 text-rose-300 border border-rose-500/30';
+        if (pct >= 90) return isLight ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30';
+        if (pct >= 80) return isLight ? 'bg-indigo-50 text-indigo-700 border border-indigo-200' : 'bg-indigo-500/15 text-indigo-300 border border-indigo-500/30';
+        if (pct >= 70) return isLight ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-amber-500/15 text-amber-300 border border-amber-500/30';
+        return isLight ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-rose-500/15 text-rose-300 border border-rose-500/30';
       }
 
       function showToast(message, type = 'info') {
         const container = document.getElementById('toastContainer');
         if (!container) return;
-
         const iconMap = {
           info: 'fa-circle-info text-indigo-400',
           success: 'fa-circle-check text-emerald-400',
           warning: 'fa-triangle-exclamation text-amber-400'
         };
-
         const el = document.createElement('div');
         el.className = 'pointer-events-auto flex items-center gap-2.5 px-4 py-2.5 rounded-xl surface-card border text-xs font-medium shadow-xl transition-all duration-200';
         el.innerHTML = `<i class="fa-solid ${iconMap[type] || iconMap.info}"></i><span>${escapeHtml(message)}</span>`;
         container.appendChild(el);
-
         setTimeout(() => {
           el.style.opacity = '0';
           el.style.transform = 'translateY(6px)';
           setTimeout(() => el.remove(), 220);
-        }, 2500);
+        }, 2400);
       }
 
       let pendingModalConfirm = null;
@@ -1545,7 +1404,6 @@
         const titleEl = document.getElementById('confirmModalTitle');
         const msgEl = document.getElementById('confirmModalMessage');
         if (!backdrop || !titleEl || !msgEl) return;
-
         titleEl.textContent = title;
         msgEl.textContent = message;
         pendingModalConfirm = onConfirm;
@@ -1561,9 +1419,6 @@
         pendingModalConfirm = null;
       }
 
-      /*************************************************************************
-       * 5. GRADE CALCULATION & FORECASTING ENGINE
-       *************************************************************************/
       function getSortedBuckets(buckets) {
         return [...(buckets || [])].sort((a, b) => Number(b.min) - Number(a.min));
       }
@@ -1576,7 +1431,6 @@
         const eps = percentage + 1e-9;
         let idx = sorted.findIndex(b => eps >= Number(b.min));
         if (idx === -1) idx = sorted.length - 1;
-
         return {
           current: sorted[idx],
           nextHigher: idx > 0 ? sorted[idx - 1] : null,
@@ -1610,22 +1464,18 @@
         cls.assignments.forEach(a => {
           const g = groupMap[a.groupId];
           if (!g) return;
-
           const avail = Math.max(0, Number(a.available) || 0);
           if (avail <= 0) return;
-
           g.totalAllAvailable += avail;
 
           const hasActual = isGradedValue(a.earned);
           const hasWhatIf = isGradedValue(a.whatIfEarned);
-
           if (hasWhatIf) activeWhatIfCount++;
 
           if (hasActual) {
             g.actualEarned += Number(a.earned);
             g.actualAvailable += avail;
           }
-
           if (hasWhatIf) {
             g.forecastEarned += Number(a.whatIfEarned);
             g.forecastAvailable += avail;
@@ -1639,10 +1489,8 @@
         let actualActiveWeight = 0;
         let totalActualEarnedPts = 0;
         let totalActualAvailPts = 0;
-
         let forecastWeightedNumerator = 0;
         let forecastActiveWeight = 0;
-
         let lockedWeightedContribution = 0;
         let remainingUngradedWeight = 0;
 
@@ -1656,18 +1504,15 @@
             actualWeightedNumerator += st.actualPct * st.weight;
             actualActiveWeight += st.weight;
           }
-
           if (st.forecastAvailable > 0) {
             st.forecastPct = (st.forecastEarned / st.forecastAvailable) * 100;
             forecastWeightedNumerator += st.forecastPct * st.weight;
             forecastActiveWeight += st.weight;
           }
-
           if (st.totalAllAvailable > 0) {
             const gradedFraction = st.actualAvailable / st.totalAllAvailable;
             const ungradedFraction = Math.max(0, 1 - gradedFraction);
             const currentGroupPct = st.actualPct !== null ? st.actualPct : 0;
-
             lockedWeightedContribution += (currentGroupPct / 100) * (st.weight * gradedFraction);
             remainingUngradedWeight += st.weight * ungradedFraction;
           } else {
@@ -1677,7 +1522,6 @@
 
         const actualPct = actualActiveWeight > 0 ? (actualWeightedNumerator / actualActiveWeight) : null;
         const forecastPct = forecastActiveWeight > 0 ? (forecastWeightedNumerator / forecastActiveWeight) : null;
-
         const actualBucket = resolveBucket(cls.buckets, actualPct);
         const forecastBucket = resolveBucket(cls.buckets, forecastPct);
 
@@ -1698,24 +1542,33 @@
         };
       }
 
-      /*************************************************************************
-       * 6. HEADER & VIEW SWITCHER (GRADEBOOK <-> PROFILE & SETTINGS)
-       *************************************************************************/
+      function computeTermSummary(classesList) {
+        let gpaSum = 0;
+        let gradedClassesCount = 0;
+        classesList.forEach(c => {
+          const m = computeClassMetrics(c);
+          if (m.actualPct !== null && m.actualBucket.current && m.actualBucket.current.gpa !== null && m.actualBucket.current.gpa !== undefined) {
+            gpaSum += Number(m.actualBucket.current.gpa);
+            gradedClassesCount++;
+          }
+        });
+        return {
+          count: classesList.length,
+          avgGpa: gradedClassesCount > 0 ? (gpaSum / gradedClassesCount) : null
+        };
+      }
+
       function renderHeaderNavigation() {
         const gbBtn = document.getElementById('navBtnGradebook');
         const profBtn = document.getElementById('navBtnProfile');
         const initialsEl = document.getElementById('headerAvatarInitials');
-
-        if (initialsEl) {
-          initialsEl.textContent = getInitials(state.profile?.displayName);
-        }
+        if (initialsEl) initialsEl.textContent = getInitials(state.profile?.displayName);
 
         const isProfile = state.activeView === 'profile';
         if (gbBtn && profBtn) {
           gbBtn.className = !isProfile
             ? 'inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold bg-indigo-600 text-white shadow-sm shadow-indigo-500/25 transition cursor-pointer'
             : 'inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold text-theme-muted hover:text-theme-primary transition cursor-pointer';
-
           profBtn.className = isProfile
             ? 'inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold bg-indigo-600 text-white shadow-sm shadow-indigo-500/25 transition cursor-pointer'
             : 'inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold text-theme-muted hover:text-theme-primary transition cursor-pointer';
@@ -1728,30 +1581,34 @@
         renderApp(false);
       }
 
-      window.switchAppView = switchAppView;
-      window.reloadGradeCraft = () => window.location.reload();
-
-      /*************************************************************************
-       * 7. IN-PLACE DOM UPDATERS (PRESERVES FOCUS, CARET & SCROLL POSITION)
-       *************************************************************************/
       function updateGroupNameInDOM(groupId, newName) {
         const displayLabel = newName.trim() || 'Unnamed Group';
+        document.querySelectorAll(`[data-section-group-title="${groupId}"]`).forEach(el => { el.textContent = displayLabel; });
+        document.querySelectorAll(`[data-section-add-btn-label="${groupId}"]`).forEach(el => { el.textContent = `Add to ${displayLabel}`; });
+        document.querySelectorAll(`[data-section-empty-group-name="${groupId}"]`).forEach(el => { el.textContent = displayLabel; });
+        document.querySelectorAll(`[data-section-empty-btn-label="${groupId}"]`).forEach(el => { el.textContent = `+ Add to ${displayLabel}`; });
+        document.querySelectorAll(`option[data-group-option-id="${groupId}"]`).forEach(opt => { opt.textContent = displayLabel; });
+      }
 
-        document.querySelectorAll(`[data-section-group-title="${groupId}"]`).forEach(el => {
-          el.textContent = displayLabel;
-        });
-        document.querySelectorAll(`[data-section-add-btn-label="${groupId}"]`).forEach(el => {
-          el.textContent = `Add to ${displayLabel}`;
-        });
-        document.querySelectorAll(`[data-section-empty-group-name="${groupId}"]`).forEach(el => {
-          el.textContent = displayLabel;
-        });
-        document.querySelectorAll(`[data-section-empty-btn-label="${groupId}"]`).forEach(el => {
-          el.textContent = `+ Add to ${displayLabel}`;
-        });
-        document.querySelectorAll(`option[data-group-option-id="${groupId}"]`).forEach(opt => {
-          opt.textContent = displayLabel;
-        });
+      function renderGroupWeightBarInDOM(cls, totalConfiguredWeight) {
+        const barEl = document.getElementById('barGroupWeightBreakdown');
+        const countEl = document.getElementById('labelGroupCountSummary');
+        if (countEl && cls) {
+          countEl.textContent = `${cls.groups.length} ${cls.groups.length === 1 ? 'group' : 'groups'} • ${formatPercent(totalConfiguredWeight, 1)} total`;
+        }
+        if (!barEl || !cls) return;
+        const denom = totalConfiguredWeight > 0 ? totalConfiguredWeight : 100;
+        barEl.innerHTML = cls.groups.map((g, idx) => {
+          const w = Math.max(0, Number(g.weight) || 0);
+          const widthPct = Math.min(100, Math.max(2, (w / denom) * 100));
+          const colorClass = GROUP_DOT_COLORS[idx % GROUP_DOT_COLORS.length];
+          return `<div
+            data-weight-seg-id="${escapeHtml(g.id)}"
+            title="${escapeHtml(g.name)}: ${formatPercent(w, 1)}"
+            style="width: ${widthPct}%"
+            class="h-full first:rounded-l-full last:rounded-r-full transition-all duration-200 ${colorClass}"
+          ></div>`;
+        }).join('');
       }
 
       function updateCalculatedMetricsInDOM() {
@@ -1761,7 +1618,6 @@
         const sortedBuckets = getSortedBuckets(cls.buckets);
         const weightMismatch = Math.abs(metrics.totalConfiguredWeight - 100) > 0.05;
 
-        // Card A: Current Actual Grade
         const badgeActualWeight = document.getElementById('badgeActualWeight');
         const displayActualPct = document.getElementById('displayActualPct');
         const displayActualPts = document.getElementById('displayActualPts');
@@ -1803,7 +1659,6 @@
           }
         }
 
-        // Card B: Forecast / What-If Grade
         const badgeForecastDelta = document.getElementById('badgeForecastDelta');
         const displayForecastPct = document.getElementById('displayForecastPct');
         const badgeForecastLetter = document.getElementById('badgeForecastLetter');
@@ -1814,9 +1669,7 @@
           let lbl = 'Matches Actual';
           if (metrics.actualPct !== null && metrics.forecastPct !== null) {
             const delta = metrics.forecastPct - metrics.actualPct;
-            if (Math.abs(delta) >= 0.005) {
-              lbl = `${delta > 0 ? '+' : ''}${formatPercent(delta, 2)} vs Actual`;
-            }
+            if (Math.abs(delta) >= 0.005) lbl = `${delta > 0 ? '+' : ''}${formatPercent(delta, 2)} vs Actual`;
           } else if (metrics.forecastPct !== null) {
             lbl = 'Projected';
           }
@@ -1827,7 +1680,7 @@
         if (labelWhatIfCount) labelWhatIfCount.textContent = `${metrics.activeWhatIfCount} active What-If ${metrics.activeWhatIfCount === 1 ? 'override' : 'overrides'}`;
         if (boxForecastMargins) {
           if (metrics.forecastPct === null || !metrics.forecastBucket.current) {
-            boxForecastMargins.innerHTML = `<span>Enter a What-If score on any graded or ungraded row below to simulate your final grade.</span>`;
+            boxForecastMargins.innerHTML = `<span>Enter a What-If score on any row below to simulate your final grade.</span>`;
           } else {
             const { current, nextHigher } = metrics.forecastBucket;
             boxForecastMargins.innerHTML = nextHigher
@@ -1836,7 +1689,6 @@
           }
         }
 
-        // Card C: Target Grade Forecaster
         const boxTargetForecastResult = document.getElementById('boxTargetForecastResult');
         const displayRemainingWeight = document.getElementById('displayRemainingWeight');
         if (displayRemainingWeight) displayRemainingWeight.textContent = formatPercent(metrics.remainingUngradedWeight, 1);
@@ -1876,7 +1728,6 @@
           }
         }
 
-        // Assignment Group Weights & Totals
         const badgeWeightWarning = document.getElementById('badgeWeightWarning');
         const btnNormalizeWeights = document.getElementById('btnNormalizeWeights');
         const cellTotalWeight = document.getElementById('cellTotalWeight');
@@ -1894,10 +1745,11 @@
         if (cellFooterActualPct) cellFooterActualPct.textContent = metrics.actualPct !== null ? formatPercent(metrics.actualPct, 2) : '--%';
         if (cellFooterForecastPct) cellFooterForecastPct.textContent = metrics.forecastPct !== null ? formatPercent(metrics.forecastPct, 2) : '--%';
 
+        renderGroupWeightBarInDOM(cls, metrics.totalConfiguredWeight);
+
         cls.groups.forEach(g => {
           const st = metrics.groupMap[g.id];
           if (!st) return;
-
           const ptsCell = document.querySelector(`[data-stat-group-pts="${g.id}"]`);
           const actCell = document.querySelector(`[data-stat-group-actual="${g.id}"]`);
           const foreCell = document.querySelector(`[data-stat-group-forecast="${g.id}"]`);
@@ -1916,31 +1768,55 @@
           }
         });
 
-        // Update Class Bucket Status Badges & Range Labels In-Place
         const activeActualId = metrics.actualBucket.current ? metrics.actualBucket.current.id : null;
         const activeForecastId = metrics.forecastBucket.current ? metrics.forecastBucket.current.id : null;
 
+        const footerActualGpa = document.getElementById('footerBucketActualGpa');
+        const footerForecastGpa = document.getElementById('footerBucketForecastGpa');
+        if (footerActualGpa) {
+          footerActualGpa.textContent = metrics.actualBucket.current && metrics.actualBucket.current.gpa !== undefined
+            ? `${formatNumber(metrics.actualBucket.current.gpa, 2, 2)} GPA (${metrics.actualBucket.current.letter})`
+            : '-- GPA';
+        }
+        if (footerForecastGpa) {
+          footerForecastGpa.textContent = metrics.forecastBucket.current && metrics.forecastBucket.current.gpa !== undefined
+            ? `${formatNumber(metrics.forecastBucket.current.gpa, 2, 2)} GPA (${metrics.forecastBucket.current.letter})`
+            : '-- GPA';
+        }
+
         sortedBuckets.forEach((b, idx) => {
+          const upperBound = idx === 0 ? 100 : Number(sortedBuckets[idx - 1].min);
+          const lowerBound = Number(b.min);
+          const upperLabel = idx === 0 ? '100%' : `< ${formatPercent(upperBound, 0)}`;
+
           const rangeCell = document.querySelector(`[data-bucket-range="${b.id}"]`);
-          if (rangeCell) {
-            const upperLabel = idx === 0 ? '100%' : `< ${formatPercent(sortedBuckets[idx - 1].min, 0)}`;
-            rangeCell.textContent = `${formatPercent(b.min, 0)} – ${upperLabel}`;
+          if (rangeCell) rangeCell.textContent = `${formatPercent(lowerBound, 0)} – ${upperLabel}`;
+
+          const barFill = document.querySelector(`[data-bucket-bar="${b.id}"]`);
+          if (barFill) {
+            const fillWidth = Math.max(6, Math.min(100, lowerBound > 0 ? lowerBound : 12));
+            barFill.style.width = `${fillWidth}%`;
+          }
+
+          const rowEl = document.querySelector(`[data-bucket-row="${b.id}"]`);
+          if (rowEl) {
+            const isHighlightedRow = b.id === activeActualId || b.id === activeForecastId;
+            rowEl.classList.toggle('bg-indigo-500/10', isHighlightedRow);
           }
 
           const cell = document.querySelector(`[data-bucket-status="${b.id}"]`);
           if (!cell) return;
           if (b.id === activeActualId && b.id === activeForecastId) {
-            cell.innerHTML = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">Actual &amp; Forecast</span>`;
+            cell.innerHTML = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">ACTUAL &amp; FORECAST</span>`;
           } else if (b.id === activeActualId) {
-            cell.innerHTML = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/15 text-indigo-400 border border-indigo-500/30">Actual</span>`;
+            cell.innerHTML = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/15 text-indigo-400 border border-indigo-500/30">ACTUAL</span>`;
           } else if (b.id === activeForecastId) {
-            cell.innerHTML = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30">Forecast</span>`;
+            cell.innerHTML = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30">FORECAST</span>`;
           } else {
-            cell.innerHTML = `<span class="text-theme-faint">—</span>`;
+            cell.innerHTML = ``;
           }
         });
 
-        // Update active class tab badge in top strip
         const activeTabBadge = document.querySelector(`[data-action="select-class"][data-class-id="${cls.id}"] [data-tab-grade-badge]`);
         if (activeTabBadge) {
           const ltr = metrics.actualBucket.current ? metrics.actualBucket.current.letter : '--';
@@ -1948,7 +1824,6 @@
           activeTabBadge.textContent = `${ltr} (${pStr})`;
         }
 
-        // Update Term GPA badges in Academic Term tab bar in-place
         const allSummary = computeTermSummary(state.classes);
         const allBadge = document.querySelector(`[data-term-gpa-badge="ALL"]`);
         if (allBadge) {
@@ -1965,14 +1840,10 @@
         });
       }
 
-      /*************************************************************************
-       * 8. GRADEBOOK VIEW POPULATION (STRUCTURAL RENDERS ONLY)
-       *************************************************************************/
       function renderAssignmentRowHtml(cls, a) {
         const avail = Math.max(0, Number(a.available) || 0);
         const hasActual = isGradedValue(a.earned);
         const hasWhatIf = isGradedValue(a.whatIfEarned);
-
         const actualPct = hasActual && avail > 0 ? (Number(a.earned) / avail) * 100 : null;
         const effectiveScore = hasWhatIf ? Number(a.whatIfEarned) : (hasActual ? Number(a.earned) : null);
         const effectivePct = effectiveScore !== null && avail > 0 ? (effectiveScore / avail) * 100 : null;
@@ -2148,73 +2019,94 @@
           existingTermsDatalist.innerHTML = uniqueTerms.map(t => `<option value="${escapeHtml(t)}"></option>`).join('');
         }
 
-        // 1B. Class Tabs Strip (Filtered by Active Academic Term)
+        // 1B. Class Tabs Strip
         const visibleClasses = getFilteredClassesForActiveTerm();
         const tabsContainer = document.getElementById('classTabsContainer');
         if (tabsContainer) {
           tabsContainer.innerHTML = visibleClasses.map(c => {
             const isActive = c.id === cls.id;
             const m = computeClassMetrics(c);
-            const letter = m.actualBucket.current ? m.actualBucket.current.letter : '--';
-            const pctStr = m.actualPct !== null ? formatPercent(m.actualPct, 1) : '--%';
-            const showTermPill = state.activeTermFilter === 'ALL';
+            const ltr = m.actualBucket.current ? m.actualBucket.current.letter : '--';
+            const pStr = m.actualPct !== null ? formatPercent(m.actualPct, 1) : '--%';
+            const termPill = state.activeTermFilter === 'ALL'
+              ? `<span class="text-[10px] px-1.5 py-0.5 rounded bg-white/5 text-theme-faint">${escapeHtml(normalizeTermName(c.term))}</span>`
+              : '';
 
             return `
               <button
                 type="button"
                 data-action="select-class"
                 data-class-id="${escapeHtml(c.id)}"
-                class="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold border transition whitespace-nowrap cursor-pointer ${
+                class="flex items-center gap-2.5 px-3.5 py-2 rounded-xl text-xs font-semibold border transition whitespace-nowrap cursor-pointer ${
                   isActive
-                    ? 'bg-indigo-600 text-white border-indigo-500 shadow-sm shadow-indigo-500/25'
+                    ? 'bg-indigo-600 text-white border-indigo-500 shadow-md shadow-indigo-500/25'
                     : 'surface-card text-theme-secondary hover:text-theme-primary'
                 }"
               >
-                <i class="fa-solid fa-book-open ${isActive ? 'text-indigo-200' : 'text-indigo-400'}"></i>
-                <span data-tab-code class="font-bold">${escapeHtml(c.code || 'Course')}</span>
-                <span data-tab-name class="hidden md:inline max-w-[140px] truncate opacity-85">${escapeHtml(c.name)}</span>
-                ${showTermPill ? `<span class="hidden sm:inline px-1.5 py-0.5 rounded text-[10px] ${isActive ? 'bg-white/15 text-indigo-100' : 'surface-alt text-theme-faint border'}">${escapeHtml(normalizeTermName(c.term))}</span>` : ''}
-                <span data-tab-grade-badge class="px-1.5 py-0.5 rounded-md font-mono text-[10px] ${
+                <span data-tab-code class="font-mono font-bold">${escapeHtml(c.code || 'Course')}</span>
+                <span data-tab-name class="hidden sm:inline truncate max-w-[160px] ${isActive ? 'text-indigo-100' : 'text-theme-muted'}">${escapeHtml(c.name)}</span>
+                ${termPill}
+                <span data-tab-grade-badge class="px-2 py-0.5 rounded-lg font-mono text-[11px] font-bold ${
                   isActive ? 'bg-black/25 text-white' : 'surface-pill text-theme-muted border'
-                }">${escapeHtml(letter)} (${pctStr})</span>
+                }">${ltr} (${pStr})</span>
               </button>
             `;
           }).join('');
         }
 
-        // 2. Class Header Inputs (preserve active element if typing)
-        const inputCode = document.getElementById('inputClassCode');
-        const inputName = document.getElementById('inputClassName');
-        const inputTerm = document.getElementById('inputClassTerm');
-        if (inputCode && document.activeElement !== inputCode) inputCode.value = cls.code;
-        if (inputName && document.activeElement !== inputName) inputName.value = cls.name;
-        if (inputTerm && document.activeElement !== inputTerm) inputTerm.value = cls.term;
+        // 2. Class Header Inputs
+        const codeIn = document.getElementById('inputClassCode');
+        const nameIn = document.getElementById('inputClassName');
+        const termIn = document.getElementById('inputClassTerm');
+        if (codeIn && document.activeElement !== codeIn) codeIn.value = cls.code || '';
+        if (nameIn && document.activeElement !== nameIn) nameIn.value = cls.name || '';
+        if (termIn && document.activeElement !== termIn) termIn.value = cls.term || '';
 
-        // 3. Target Grade Select Dropdown
+        // 3. Target Grade Select Options
         const selectTarget = document.getElementById('selectTargetGrade');
         if (selectTarget) {
-          const selectableTargetBuckets = sortedBuckets.filter(b => Number(b.min) > 0);
-          const activeTargetBucket = selectableTargetBuckets.find(b => b.letter === cls.targetLetter) || selectableTargetBuckets[1] || sortedBuckets[0];
-          if (activeTargetBucket && cls.targetLetter !== activeTargetBucket.letter) {
-            cls.targetLetter = activeTargetBucket.letter;
+          const selectableBuckets = sortedBuckets.filter(b => Number(b.min) > 0);
+          if (!selectableBuckets.some(b => b.letter === cls.targetLetter) && selectableBuckets[0]) {
+            cls.targetLetter = selectableBuckets[1]?.letter || selectableBuckets[0].letter;
           }
-          selectTarget.innerHTML = selectableTargetBuckets.map(b => `
+          selectTarget.innerHTML = selectableBuckets.map(b => `
             <option value="${escapeHtml(b.letter)}" ${b.letter === cls.targetLetter ? 'selected' : ''}>
               ${escapeHtml(b.letter)} (&ge; ${formatPercent(b.min, 0)})
             </option>
           `).join('');
         }
 
-        // 4. Assignment Groups & Weights Table
+        // 4. Assignment Groups & Weights Table (With Drag-and-Drop Slider Handle)
         const tbodyGroups = document.getElementById('tbodyAssignmentGroups');
         if (tbodyGroups) {
           tbodyGroups.innerHTML = cls.groups.map((g, idx) => {
             const st = metrics.groupMap[g.id];
             const dotColor = GROUP_DOT_COLORS[idx % GROUP_DOT_COLORS.length];
             return `
-              <tr class="theme-row-hover transition border-b border-theme-subtle">
-                <td class="py-2.5 pl-2 pr-2">
+              <tr
+                class="theme-row-hover transition border-b border-theme-subtle"
+                data-group-row-id="${escapeHtml(g.id)}"
+              >
+                <td class="py-2.5 pl-1.5 pr-2">
                   <div class="flex items-center gap-2">
+                    <div
+                      draggable="true"
+                      role="button"
+                      tabindex="0"
+                      data-action="reorder-group"
+                      data-group-slider-handle="${escapeHtml(g.id)}"
+                      data-group-id="${escapeHtml(g.id)}"
+                      title="Drag to reorder group (or click to move down / Shift+Click to move up)"
+                      aria-label="Drag to reorder ${escapeHtml(g.name)} assignment group"
+                      class="select-none text-zinc-500 hover:text-indigo-400 cursor-grab active:cursor-grabbing p-1.5 rounded-lg hover:bg-white/5 transition-colors shrink-0 flex items-center gap-1 focus:outline-none focus:ring-1 focus:ring-indigo-400"
+                    >
+                      <svg class="w-4 h-4 pointer-events-none" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <line x1="3" y1="6" x2="17" y2="6"></line>
+                        <circle cx="7.5" cy="6" r="2" fill="currentColor"></circle>
+                        <line x1="3" y1="14" x2="17" y2="14"></line>
+                        <circle cx="12.5" cy="14" r="2" fill="currentColor"></circle>
+                      </svg>
+                    </div>
                     <span class="w-2.5 h-2.5 rounded-full shrink-0 ${dotColor}"></span>
                     <input
                       type="text"
@@ -2267,46 +2159,74 @@
           }).join('');
         }
 
-        // 5. Class Grade Bucket Distribution Table
+        // 5. Class Grade Bucket Distribution (Full-Space Stretched Layout)
         const tbodyBuckets = document.getElementById('tbodyClassBuckets');
         if (tbodyBuckets) {
           tbodyBuckets.innerHTML = sortedBuckets.map((b, idx) => {
             const upperLabel = idx === 0 ? '100%' : `< ${formatPercent(sortedBuckets[idx - 1].min, 0)}`;
+            const gpaVal = b.gpa !== undefined && b.gpa !== null ? `${formatNumber(b.gpa, 1, 1)} GPA` : '';
+            const barWidth = Math.max(6, Math.min(100, Number(b.min) > 0 ? Number(b.min) : 12));
+            const upperLtr = String(b.letter || '').toUpperCase();
+            const barColor = upperLtr.startsWith('A')
+              ? 'bg-emerald-500/50'
+              : upperLtr.startsWith('B')
+              ? 'bg-indigo-500/50'
+              : upperLtr.startsWith('C')
+              ? 'bg-amber-500/50'
+              : upperLtr.startsWith('D')
+              ? 'bg-orange-500/50'
+              : 'bg-rose-500/40';
+
             return `
-              <tr class="theme-row-hover transition border-b border-theme-subtle">
-                <td class="py-2 pl-2">
-                  <span class="inline-flex items-center justify-center w-9 h-6 rounded-lg text-xs font-bold border ${getLetterBadgeClasses(b.letter)}">
+              <div
+                data-bucket-row="${escapeHtml(b.id)}"
+                class="flex-1 grid grid-cols-12 items-center gap-2 px-2 py-1 min-h-[31px] rounded-lg theme-row-hover transition"
+              >
+                <div class="col-span-3 flex items-center gap-2 min-w-0">
+                  <span class="inline-flex items-center justify-center w-8 h-6 rounded-lg text-xs font-bold border shrink-0 ${getLetterBadgeClasses(b.letter)}">
                     ${escapeHtml(b.letter)}
                   </span>
-                </td>
-                <td class="py-2 text-right">
-                  <div class="inline-flex items-center justify-end gap-1">
-                    <span class="text-[11px] text-theme-faint">&ge;</span>
-                    <input
-                      type="number"
-                      step="any"
-                      min="0"
-                      max="100"
-                      value="${b.min}"
-                      data-bucket-cutoff="${escapeHtml(b.id)}"
-                      aria-label="Minimum percentage for ${escapeHtml(b.letter)}"
-                      class="w-16 text-right font-mono text-xs font-bold theme-input rounded-lg px-2 py-1"
-                    />
-                    <span class="text-[11px] text-theme-faint">%</span>
+                  <span class="text-[11px] font-mono font-semibold text-theme-muted truncate">
+                    ${escapeHtml(gpaVal)}
+                  </span>
+                </div>
+
+                <div class="col-span-6 flex flex-col justify-center gap-1 pr-2">
+                  <div class="flex items-center justify-between gap-1.5">
+                    <span data-bucket-range="${escapeHtml(b.id)}" class="font-mono text-[11px] text-theme-secondary">
+                      ${formatPercent(b.min, 0)} – ${upperLabel}
+                    </span>
+                    <span data-bucket-status="${escapeHtml(b.id)}" class="shrink-0"></span>
                   </div>
-                </td>
-                <td data-bucket-range="${escapeHtml(b.id)}" class="py-2 text-center font-mono text-[11px] text-theme-muted">
-                  ${formatPercent(b.min, 0)} – ${upperLabel}
-                </td>
-                <td data-bucket-status="${escapeHtml(b.id)}" class="py-2 text-right pr-2">
-                  <span class="text-theme-faint">—</span>
-                </td>
-              </tr>
+                  <div class="w-full h-1.5 rounded-full surface-pill overflow-hidden border border-theme-subtle">
+                    <div
+                      data-bucket-bar="${escapeHtml(b.id)}"
+                      style="width: ${barWidth}%"
+                      class="h-full rounded-full transition-all duration-200 ${barColor}"
+                    ></div>
+                  </div>
+                </div>
+
+                <div class="col-span-3 flex items-center justify-end gap-1">
+                  <span class="text-[11px] text-theme-faint">&ge;</span>
+                  <input
+                    type="number"
+                    step="any"
+                    min="0"
+                    max="100"
+                    value="${b.min}"
+                    data-bucket-cutoff="${escapeHtml(b.id)}"
+                    aria-label="Minimum percentage for ${escapeHtml(b.letter)}"
+                    class="w-16 text-right font-mono text-xs font-bold theme-input rounded-lg px-2 py-1"
+                  />
+                  <span class="text-[11px] text-theme-faint">%</span>
+                </div>
+              </div>
             `;
           }).join('');
         }
 
-        // 6. Assignments Gradebook Body (Grouped by Category vs Unified Table Sorted by Group)
+        // 6. Assignments Gradebook Body
         const badgeCount = document.getElementById('badgeTotalAssignmentsCount');
         if (badgeCount) badgeCount.textContent = String(cls.assignments.length);
 
@@ -2427,9 +2347,6 @@
         updateCalculatedMetricsInDOM();
       }
 
-      /*************************************************************************
-       * 9. PROFILE & SETTINGS VIEW POPULATION
-       *************************************************************************/
       function renderProfileDOM() {
         const p = state.profile;
         const defs = state.defaultGradeDefinitions;
@@ -2442,14 +2359,13 @@
         const inName = document.getElementById('profileDisplayName');
         const inEmail = document.getElementById('profileEmail');
         const inInst = document.getElementById('profileInstitution');
-        const inId = document.getElementById('profileStudentId');
+        const inMajor = document.getElementById('profileMajor');
 
         if (inName && document.activeElement !== inName) inName.value = p.displayName;
         if (inEmail && document.activeElement !== inEmail) inEmail.value = p.email;
         if (inInst && document.activeElement !== inInst) inInst.value = p.institution;
-        if (inId && document.activeElement !== inId) inId.value = p.studentId;
+        if (inMajor && document.activeElement !== inMajor) inMajor.value = p.major;
 
-        // Theme Buttons Active State
         document.querySelectorAll('[data-action="set-theme"]').forEach(btn => {
           const val = btn.getAttribute('data-theme-value');
           const isSelected = val === state.theme;
@@ -2462,7 +2378,6 @@
         const activeThemeLabel = document.getElementById('activeThemeLabel');
         if (activeThemeLabel) activeThemeLabel.textContent = state.theme;
 
-        // Locale Cascade State
         const selectLocale = document.getElementById('selectLocaleCascade');
         if (selectLocale) selectLocale.value = state.locale;
 
@@ -2472,7 +2387,6 @@
         if (cascadeLabel) cascadeLabel.textContent = `${state.locale} → ${langRoot} → en-US (fallback)`;
         if (sampleNum) sampleNum.textContent = formatPercent(94.75, 2);
 
-        // Default Grade Definitions Table
         const tbodyDefs = document.getElementById('tbodyDefaultGradeDefinitions');
         if (tbodyDefs) {
           tbodyDefs.innerHTML = defs.map(d => `
@@ -2509,9 +2423,27 @@
         }
       }
 
-      /*************************************************************************
-       * 10. MAIN RENDER ORCHESTRATOR
-       *************************************************************************/
+      function restoreMissingDefaultCourses() {
+        const defaults = createExampleCourses(state.defaultGradeDefinitions);
+        let addedCount = 0;
+        defaults.forEach(defCourse => {
+          const exists = state.classes.some(
+            c => c.id === defCourse.id || String(c.code || '').trim().toUpperCase() === defCourse.code.toUpperCase()
+          );
+          if (!exists) {
+            state.classes.push(defCourse);
+            addedCount++;
+          }
+        });
+        if (addedCount > 0) {
+          saveState();
+          renderApp(true);
+          showToast(`Restored ${addedCount} default example ${addedCount === 1 ? 'course' : 'courses'}`, 'success');
+        } else {
+          showToast('All 3 default example courses (CS 61A, DATA C8, MATH 54) are already present.', 'info');
+        }
+      }
+
       function renderApp(preserveScroll = true) {
         const prevScrollY = window.scrollY;
         try {
@@ -2542,35 +2474,30 @@
         }
       }
 
-      /*************************************************************************
-       * 11. UNIFIED DOCUMENT-LEVEL EVENT DELEGATION (100% RELIABLE)
-       *************************************************************************/
       function initEventListeners() {
-        // A. UNIFIED CLICK DELEGATION ON DOCUMENT
+        // A. CLICK DELEGATION
         document.addEventListener('click', (e) => {
           const target = e.target;
           if (!target || typeof target.closest !== 'function') return;
 
-          // 1. Top-left Graduation Cap Reload Button
           if (target.closest('#btnBrandReload')) {
             e.preventDefault();
             window.location.reload();
             return;
           }
 
-          // 2. Top-right Navigation Switcher Buttons
           if (target.closest('#navBtnGradebook')) {
             e.preventDefault();
             switchAppView('gradebook');
             return;
           }
+
           if (target.closest('#navBtnProfile')) {
             e.preventDefault();
             switchAppView('profile');
             return;
           }
 
-          // 3. Academic Term Tab Selection
           const termBtn = target.closest('[data-action="select-term"]');
           if (termBtn) {
             const termVal = termBtn.getAttribute('data-term-value');
@@ -2588,12 +2515,10 @@
             return;
           }
 
-          // 4. Add New Academic Term Button
           if (target.closest('#btnAddTerm')) {
             const existingTerms = getUniqueTerms();
             const candidateNames = ['Spring 2027', 'Fall 2027', 'Summer 2026', 'Winter 2027', 'Spring 2026', 'Fall 2026'];
             const newTermName = candidateNames.find(t => !existingTerms.includes(t)) || `Term ${existingTerms.length + 1}`;
-
             const newId = uid('class');
             const g1 = uid('grp');
             const g2 = uid('grp');
@@ -2632,7 +2557,6 @@
             return;
           }
 
-          // 5. Class Tab Selection
           const classTabBtn = target.closest('[data-action="select-class"]');
           if (classTabBtn) {
             const cid = classTabBtn.getAttribute('data-class-id');
@@ -2644,7 +2568,6 @@
             return;
           }
 
-          // 6. Add / Duplicate / Delete Class Buttons
           if (target.closest('#btnAddClass')) {
             const newId = uid('class');
             const g1 = uid('grp');
@@ -2696,6 +2619,11 @@
             return;
           }
 
+          if (target.closest('#btnRestoreDemoCourses') || target.closest('#btnRestoreDefaultKeepMine')) {
+            restoreMissingDefaultCourses();
+            return;
+          }
+
           if (target.closest('#btnDeleteClass')) {
             const cls = getActiveClass();
             if (!cls) return;
@@ -2726,7 +2654,6 @@
             return;
           }
 
-          // 7. Clear All What-Ifs Button
           if (target.closest('#btnClearWhatIfs')) {
             const cls = getActiveClass();
             if (!cls) return;
@@ -2737,7 +2664,29 @@
             return;
           }
 
-          // 8. Assignment Group Actions (+ Add Group, Normalize to 100%, Delete Group)
+          const reorderGroupBtn = target.closest('[data-action="reorder-group"]');
+          if (reorderGroupBtn) {
+            const cls = getActiveClass();
+            if (!cls || cls.groups.length <= 1) return;
+            const gid = reorderGroupBtn.getAttribute('data-group-id');
+            const idx = cls.groups.findIndex(g => g.id === gid);
+            if (idx === -1) return;
+            const targetIdx = e.shiftKey
+              ? (idx - 1 + cls.groups.length) % cls.groups.length
+              : (idx + 1) % cls.groups.length;
+            const [moved] = cls.groups.splice(idx, 1);
+            cls.groups.splice(targetIdx, 0, moved);
+            saveState();
+            renderApp(true);
+            showToast(`Moved "${moved.name}" to position ${targetIdx + 1}`, 'info');
+            return;
+          }
+
+          if (target.closest('[data-action="open-profile-scale"]')) {
+            switchAppView('profile');
+            return;
+          }
+
           if (target.closest('#btnAddGroup')) {
             const cls = getActiveClass();
             if (!cls) return;
@@ -2808,7 +2757,6 @@
             return;
           }
 
-          // 9. Sync Class Grade Buckets with Profile Default Scale
           if (target.closest('#btnResetClassBuckets')) {
             const cls = getActiveClass();
             if (!cls) return;
@@ -2819,7 +2767,6 @@
             return;
           }
 
-          // 10. Gradebook View Mode Toggles & Assignment Actions
           if (target.closest('#btnViewGrouped')) {
             if (state.gradebookViewMode !== 'grouped') {
               state.gradebookViewMode = 'grouped';
@@ -2909,7 +2856,6 @@
             return;
           }
 
-          // 11. Profile & Settings View Actions (Theme, Grade Definitions, Export/Reset)
           const themeBtn = target.closest('[data-action="set-theme"]');
           if (themeBtn) {
             const themeVal = themeBtn.getAttribute('data-theme-value');
@@ -2959,12 +2905,12 @@
 
           if (target.closest('#btnResetDemoData')) {
             openConfirmModal(
-              'Reset All Data to Defaults?',
+              'Factory Reset All Data?',
               'This will restore the default sample courses (CS 61A, DATA C8, and MATH 54), generic profile defaults, and UC Berkeley Registrar grade definitions.',
               () => {
                 const keepTheme = state.theme;
                 const keepLocale = state.locale;
-                LEGACY_KEYS.forEach(k => localStorage.removeItem(k));
+                ALL_STORAGE_KEYS.forEach(k => localStorage.removeItem(k));
                 state = createDefaultState();
                 state.theme = keepTheme;
                 state.locale = keepLocale;
@@ -2977,26 +2923,22 @@
             return;
           }
 
-          // 12. Confirmation Modal Buttons
           if (target.closest('#confirmModalCancelBtn')) {
             closeConfirmModal();
             return;
           }
           if (target.closest('#confirmModalAcceptBtn')) {
-            if (typeof pendingModalConfirm === 'function') {
-              pendingModalConfirm();
-            }
+            if (typeof pendingModalConfirm === 'function') pendingModalConfirm();
             closeConfirmModal();
             return;
           }
         });
 
-        // B. UNIFIED INPUT DELEGATION ON DOCUMENT (IN-PLACE UPDATES, ZERO CARET/SCROLL LOSS)
+        // B. IN-PLACE INPUT DELEGATION (ZERO CARET/SCROLL LOSS)
         document.addEventListener('input', (e) => {
           const target = e.target;
           if (!target) return;
 
-          // 1. Class Header Inputs (Course Code, Course Title, Academic Term)
           if (target.id === 'inputClassCode') {
             const cls = getActiveClass();
             if (!cls) return;
@@ -3025,7 +2967,6 @@
             return;
           }
 
-          // 2. Assignment Group Name & Weight Inputs (In-place DOM updates)
           const gid = target.getAttribute('data-group-id');
           const gField = target.getAttribute('data-group-field');
           if (gid && gField) {
@@ -3046,7 +2987,6 @@
             return;
           }
 
-          // 3. Class Grade Bucket Cutoffs (In-place DOM updates)
           const bid = target.getAttribute('data-bucket-cutoff');
           if (bid) {
             const cls = getActiveClass();
@@ -3059,7 +2999,6 @@
             return;
           }
 
-          // 4. Assignment Row Inputs (Name, Earned, Available, What-If)
           const aid = target.getAttribute('data-assign-id');
           const aField = target.getAttribute('data-assign-field');
           if (aid && aField && aField !== 'groupId') {
@@ -3100,16 +3039,13 @@
             }
 
             const clearBtn = document.querySelector(`button[data-action="clear-row-whatif"][data-assign-id="${aid}"]`);
-            if (clearBtn) {
-              clearBtn.classList.toggle('hidden', !hasWhatIf);
-            }
+            if (clearBtn) clearBtn.classList.toggle('hidden', !hasWhatIf);
 
             saveState();
             updateCalculatedMetricsInDOM();
             return;
           }
 
-          // 5. Profile Inputs (Display Name, Email, Institution, Student ID)
           if (target.id === 'profileDisplayName') {
             state.profile.displayName = target.value;
             saveState();
@@ -3130,13 +3066,12 @@
             saveState();
             return;
           }
-          if (target.id === 'profileStudentId') {
-            state.profile.studentId = target.value;
+          if (target.id === 'profileMajor') {
+            state.profile.major = target.value;
             saveState();
             return;
           }
 
-          // 6. Default Grade Definitions Cutoffs on Profile Page
           const defGradeId = target.getAttribute('data-default-grade-id');
           if (defGradeId) {
             const def = state.defaultGradeDefinitions.find(d => d.id === defGradeId);
@@ -3146,12 +3081,11 @@
           }
         });
 
-        // C. UNIFIED CHANGE DELEGATION ON DOCUMENT
+        // C. CHANGE DELEGATION
         document.addEventListener('change', (e) => {
           const target = e.target;
           if (!target) return;
 
-          // 1. Academic Term Input Committed -> Sync Term Tabs
           if (target.id === 'inputClassTerm') {
             const cls = getActiveClass();
             if (!cls) return;
@@ -3166,7 +3100,6 @@
             return;
           }
 
-          // 2. Target Grade Select Dropdown
           if (target.id === 'selectTargetGrade') {
             const cls = getActiveClass();
             if (!cls) return;
@@ -3176,7 +3109,6 @@
             return;
           }
 
-          // 3. Assignment Group Reassignment Select Dropdown
           if (target.getAttribute('data-assign-field') === 'groupId') {
             const cls = getActiveClass();
             if (!cls) return;
@@ -3191,13 +3123,10 @@
             saveState();
             renderApp();
             highlightedAssignmentId = null;
-            if (targetGroup) {
-              showToast(`Moved "${assign.name}" to ${targetGroup.name}`, 'info');
-            }
+            if (targetGroup) showToast(`Moved "${assign.name}" to ${targetGroup.name}`, 'info');
             return;
           }
 
-          // 4. Locale Cascade Selector
           if (target.id === 'selectLocaleCascade') {
             applyLocale(target.value);
             saveState();
@@ -3206,7 +3135,6 @@
             return;
           }
 
-          // 5. Import JSON File Input
           if (target.id === 'inputImportJson') {
             const file = target.files && target.files[0];
             if (!file) return;
@@ -3230,6 +3158,94 @@
             reader.readAsText(file);
             target.value = '';
           }
+        });
+
+        // D. SMOOTH DRAG-AND-DROP REORDERING FOR ASSIGNMENT GROUP SLIDER HANDLES
+        function clearGroupDropIndicators() {
+          document.querySelectorAll('tr[data-group-row-id]').forEach(r => {
+            r.classList.remove('drag-over-top', 'drag-over-bottom', 'opacity-50');
+          });
+        }
+
+        document.addEventListener('dragstart', (e) => {
+          const handle = e.target && typeof e.target.closest === 'function'
+            ? e.target.closest('[data-group-slider-handle]')
+            : null;
+          if (!handle) return;
+          const row = handle.closest('tr[data-group-row-id]');
+          if (!row) return;
+
+          draggedGroupId = handle.getAttribute('data-group-slider-handle') || row.getAttribute('data-group-row-id');
+          row.classList.add('opacity-50');
+
+          if (e.dataTransfer) {
+            e.dataTransfer.effectAllowed = 'move';
+            try { e.dataTransfer.setData('text/plain', draggedGroupId); } catch {}
+          }
+        });
+
+        document.addEventListener('dragover', (e) => {
+          if (!draggedGroupId) return;
+          const overRow = e.target && typeof e.target.closest === 'function'
+            ? e.target.closest('tr[data-group-row-id]')
+            : null;
+          if (!overRow) return;
+          e.preventDefault();
+          if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
+
+          const targetId = overRow.getAttribute('data-group-row-id');
+          document.querySelectorAll('tr[data-group-row-id]').forEach(r => {
+            r.classList.remove('drag-over-top', 'drag-over-bottom');
+          });
+          if (targetId && targetId !== draggedGroupId) {
+            const rect = overRow.getBoundingClientRect();
+            const isAfter = (e.clientY - rect.top) > (rect.height / 2);
+            overRow.classList.add(isAfter ? 'drag-over-bottom' : 'drag-over-top');
+          }
+        });
+
+        document.addEventListener('drop', (e) => {
+          if (!draggedGroupId) return;
+          const dropRow = e.target && typeof e.target.closest === 'function'
+            ? e.target.closest('tr[data-group-row-id]')
+            : null;
+          const sourceId = draggedGroupId;
+          draggedGroupId = null;
+
+          if (!dropRow) {
+            clearGroupDropIndicators();
+            return;
+          }
+          e.preventDefault();
+          const targetId = dropRow.getAttribute('data-group-row-id');
+          const rect = dropRow.getBoundingClientRect();
+          const insertAfter = (e.clientY - rect.top) > (rect.height / 2);
+          clearGroupDropIndicators();
+
+          if (!targetId || sourceId === targetId) return;
+
+          const cls = getActiveClass();
+          if (!cls) return;
+          const fromIdx = cls.groups.findIndex(g => g.id === sourceId);
+          if (fromIdx === -1) return;
+
+          const [moved] = cls.groups.splice(fromIdx, 1);
+          let toIdx = cls.groups.findIndex(g => g.id === targetId);
+          if (toIdx === -1) {
+            cls.groups.push(moved);
+          } else {
+            if (insertAfter) toIdx += 1;
+            cls.groups.splice(toIdx, 0, moved);
+          }
+
+          saveState();
+          renderApp(true);
+          showToast(`Reordered "${moved.name}"`, 'info');
+        });
+
+        document.addEventListener('dragend', () => {
+          draggedGroupId = null;
+          clearGroupDropIndicators();
         });
       }
 
