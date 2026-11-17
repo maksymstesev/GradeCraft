@@ -324,7 +324,32 @@
          VIEW 1: GRADEBOOK VIEW (#viewGradebook - Visible by Default)
          ======================================================================= -->
     <div id="viewGradebook" class="space-y-6">
-      <!-- 1. Multi-Class Tab Strip + Class Actions -->
+      <!-- 1A. Academic Term Tab Bar (Separates & Groups Classes by Academic Term) -->
+      <section class="surface-card rounded-2xl border p-3.5 sm:p-4">
+        <div class="flex flex-wrap items-center justify-between gap-2.5">
+          <div class="flex items-center gap-2 overflow-x-auto pb-1 max-w-full">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-theme-faint px-2 flex items-center gap-1.5 shrink-0">
+              <i class="fa-regular fa-calendar-days text-indigo-400"></i>
+              <span>Academic Term</span>
+            </span>
+            <div id="termTabsContainer" class="flex items-center gap-2"></div>
+          </div>
+
+          <div class="flex items-center gap-2 shrink-0">
+            <button
+              id="btnAddTerm"
+              type="button"
+              class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold theme-btn-secondary cursor-pointer"
+              title="Create a new Academic Term with a starter class"
+            >
+              <i class="fa-solid fa-calendar-plus text-indigo-400"></i>
+              <span>+ New Term</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 1B. Multi-Class Tab Strip + Class Actions -->
       <section class="flex flex-wrap items-center justify-between gap-3">
         <div class="flex items-center gap-2 overflow-x-auto pb-1 max-w-full">
           <div id="classTabsContainer" class="flex items-center gap-2"></div>
@@ -366,8 +391,8 @@
             <input
               id="inputClassCode"
               type="text"
-              value="Course 101"
-              placeholder="e.g., Course 101"
+              value="CS 61A"
+              placeholder="e.g., CS 61A"
               class="w-full text-sm font-bold font-mono theme-input rounded-xl px-3 py-2"
             />
           </div>
@@ -376,8 +401,8 @@
             <input
               id="inputClassName"
               type="text"
-              value="Intro to Computer Science"
-              placeholder="e.g., Intro to Computer Science"
+              value="Structure &amp; Interpretation of Computer Programs"
+              placeholder="e.g., Structure &amp; Interpretation of Computer Programs"
               class="w-full text-sm font-bold theme-input rounded-xl px-3 py-2"
             />
           </div>
@@ -386,10 +411,12 @@
             <input
               id="inputClassTerm"
               type="text"
-              value="Fall Semester"
-              placeholder="e.g., Fall Semester"
+              list="existingTermsDatalist"
+              value="Fall 2026"
+              placeholder="e.g., Fall 2026"
               class="w-full text-sm font-semibold theme-input rounded-xl px-3 py-2"
             />
+            <datalist id="existingTermsDatalist"></datalist>
           </div>
         </div>
       </section>
@@ -678,11 +705,11 @@
               </div>
             </div>
             <span id="profileClassesCountBadge" class="px-3 py-1 rounded-full text-xs font-mono surface-pill border text-theme-muted self-start sm:self-center">
-              2 Active Classes
+              3 Active Classes
             </span>
           </div>
 
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div>
               <label for="profileDisplayName" class="block text-xs font-semibold text-theme-secondary mb-1.5">Display Name</label>
               <input
@@ -721,16 +748,6 @@
                 value="ID-00000000"
                 placeholder="ID-00000000"
                 class="w-full text-xs font-mono font-semibold theme-input rounded-xl px-3.5 py-2.5"
-              />
-            </div>
-            <div>
-              <label for="profileStanding" class="block text-xs font-semibold text-theme-secondary mb-1.5">Academic Standing</label>
-              <input
-                id="profileStanding"
-                type="text"
-                value="Undergraduate"
-                placeholder="Undergraduate"
-                class="w-full text-xs font-semibold theme-input rounded-xl px-3.5 py-2.5"
               />
             </div>
           </div>
@@ -1025,8 +1042,18 @@
       /*************************************************************************
        * 1. CONSTANTS & OFFICIAL UC BERKELEY REGISTRAR GRADE DEFINITIONS
        *************************************************************************/
-      const STORAGE_KEY = 'gradecraft_app_state_v5';
-      const LEGACY_KEYS = ['gradecraft_app_state_v4', 'gradecraft_app_state_v3', 'gradecraft_app_state_v2'];
+      const STORAGE_KEY = 'gradecraft_app_state_v7';
+      const LEGACY_KEYS = [
+        'gradecraft_app_state_v6',
+        'gradecraft_app_state_v5',
+        'gradecraft_app_state_v4',
+        'gradecraft_app_state_v3',
+        'gradecraft_app_state_v2',
+        'gradecraft_state_v2',
+        'gradecraft_state_v1',
+        'gradecraft_app_state',
+        'gradecraft_data'
+      ];
 
       const UC_BERKELEY_GRADE_DEFINITIONS = [
         { id: 'grade_ap', letter: 'A+', min: 97, gpa: 4.0, description: 'Extraordinary' },
@@ -1076,14 +1103,97 @@
         return val !== null && val !== undefined && val !== '' && !isNaN(Number(val));
       }
 
+      function normalizeTermName(termStr) {
+        const trimmed = String(termStr ?? '').trim();
+        return trimmed || 'Fall 2026';
+      }
+
       /*************************************************************************
-       * 2. DEFAULT ANONYMOUS FILLER STATE (ZERO PERSONAL INFO)
+       * 2. RICH EXAMPLE COURSE TEMPLATES (CS 61A, DATA C8, MATH 54)
        *************************************************************************/
+      function createExampleCourses(defaultScale) {
+        const scale = cloneGradeScale(defaultScale || UC_BERKELEY_GRADE_DEFINITIONS);
+        return [
+          {
+            id: 'class_cs61a',
+            code: 'CS 61A',
+            name: 'Structure & Interpretation of Computer Programs',
+            term: 'Fall 2026',
+            targetLetter: 'A',
+            groups: [
+              { id: 'grp_61a_proj', name: 'Projects', weight: 30 },
+              { id: 'grp_61a_hw',   name: 'Homework & Labs', weight: 15 },
+              { id: 'grp_61a_mt1',  name: 'Midterm 1', weight: 15 },
+              { id: 'grp_61a_mt2',  name: 'Midterm 2', weight: 15 },
+              { id: 'grp_61a_fin',  name: 'Final Exam', weight: 25 }
+            ],
+            buckets: cloneGradeScale(scale),
+            assignments: [
+              { id: 'asg_61a_1', name: 'Project 1: Hog', groupId: 'grp_61a_proj', earned: 25, available: 25, whatIfEarned: null },
+              { id: 'asg_61a_2', name: 'Project 2: Cats', groupId: 'grp_61a_proj', earned: 24, available: 25, whatIfEarned: null },
+              { id: 'asg_61a_3', name: 'Project 3: Ants', groupId: 'grp_61a_proj', earned: 29, available: 30, whatIfEarned: null },
+              { id: 'asg_61a_4', name: 'Project 4: Scheme Interpreter', groupId: 'grp_61a_proj', earned: null, available: 30, whatIfEarned: 28 },
+              { id: 'asg_61a_5', name: 'Homework 01–06 Combined', groupId: 'grp_61a_hw', earned: 58, available: 60, whatIfEarned: null },
+              { id: 'asg_61a_6', name: 'Lab 01–10 Checkoffs', groupId: 'grp_61a_hw', earned: 40, available: 40, whatIfEarned: null },
+              { id: 'asg_61a_7', name: 'Midterm 1 Exam', groupId: 'grp_61a_mt1', earned: 36, available: 40, whatIfEarned: null },
+              { id: 'asg_61a_8', name: 'Midterm 2 Exam', groupId: 'grp_61a_mt2', earned: 43, available: 50, whatIfEarned: null },
+              { id: 'asg_61a_9', name: 'Final Exam', groupId: 'grp_61a_fin', earned: null, available: 75, whatIfEarned: 68 }
+            ]
+          },
+          {
+            id: 'class_datac8',
+            code: 'DATA C8',
+            name: 'Foundations of Data Science',
+            term: 'Fall 2026',
+            targetLetter: 'A',
+            groups: [
+              { id: 'grp_c8_proj', name: 'Projects', weight: 25 },
+              { id: 'grp_c8_hw',   name: 'Homework', weight: 20 },
+              { id: 'grp_c8_lab',  name: 'Labs & Vitamins', weight: 10 },
+              { id: 'grp_c8_mt',   name: 'Midterm Exam', weight: 20 },
+              { id: 'grp_c8_fin',  name: 'Final Exam', weight: 25 }
+            ],
+            buckets: cloneGradeScale(scale),
+            assignments: [
+              { id: 'asg_c8_1', name: 'Project 1: World Progress', groupId: 'grp_c8_proj', earned: 96, available: 100, whatIfEarned: null },
+              { id: 'asg_c8_2', name: 'Project 2: Climate & Inference', groupId: 'grp_c8_proj', earned: 94, available: 100, whatIfEarned: null },
+              { id: 'asg_c8_3', name: 'Project 3: Movie Classification', groupId: 'grp_c8_proj', earned: null, available: 100, whatIfEarned: 95 },
+              { id: 'asg_c8_4', name: 'Homework 01–08', groupId: 'grp_c8_hw', earned: 148, available: 160, whatIfEarned: null },
+              { id: 'asg_c8_5', name: 'Lab Assignments 01–09', groupId: 'grp_c8_lab', earned: 90, available: 90, whatIfEarned: null },
+              { id: 'asg_c8_6', name: 'Midterm Exam', groupId: 'grp_c8_mt', earned: 89, available: 100, whatIfEarned: null },
+              { id: 'asg_c8_7', name: 'Final Exam', groupId: 'grp_c8_fin', earned: null, available: 150, whatIfEarned: 138 }
+            ]
+          },
+          {
+            id: 'class_math54',
+            code: 'MATH 54',
+            name: 'Linear Algebra & Differential Equations',
+            term: 'Spring 2026',
+            targetLetter: 'A',
+            groups: [
+              { id: 'grp_m54_hw',  name: 'Weekly Problem Sets & Quizzes', weight: 20 },
+              { id: 'grp_m54_mt1', name: 'Midterm 1', weight: 20 },
+              { id: 'grp_m54_mt2', name: 'Midterm 2', weight: 20 },
+              { id: 'grp_m54_fin', name: 'Final Exam', weight: 40 }
+            ],
+            buckets: cloneGradeScale(scale),
+            assignments: [
+              { id: 'asg_m54_1', name: 'Problem Sets 1–12', groupId: 'grp_m54_hw', earned: 114, available: 120, whatIfEarned: null },
+              { id: 'asg_m54_2', name: 'Discussion Quizzes', groupId: 'grp_m54_hw', earned: 47, available: 50, whatIfEarned: null },
+              { id: 'asg_m54_3', name: 'Midterm 1 (Linear Algebra)', groupId: 'grp_m54_mt1', earned: 91, available: 100, whatIfEarned: null },
+              { id: 'asg_m54_4', name: 'Midterm 2 (Eigenvalues & ODEs)', groupId: 'grp_m54_mt2', earned: 88, available: 100, whatIfEarned: null },
+              { id: 'asg_m54_5', name: 'Comprehensive Final Exam', groupId: 'grp_m54_fin', earned: 186, available: 200, whatIfEarned: null }
+            ]
+          }
+        ];
+      }
+
       function createDefaultState() {
         const defaultScale = cloneGradeScale(UC_BERKELEY_GRADE_DEFINITIONS);
         return {
           activeView: 'gradebook', // 'gradebook' | 'profile'
-          activeClassId: 'class_101',
+          activeTermFilter: 'Fall 2026', // 'ALL' or specific Academic Term string
+          activeClassId: 'class_cs61a',
           gradebookViewMode: 'grouped', // 'grouped' | 'unified'
           theme: 'black', // 'black' | 'midnight' | 'light'
           locale: 'en-US',
@@ -1091,63 +1201,37 @@
             displayName: 'Student Name',
             email: 'student@university.edu',
             institution: 'University Name',
-            studentId: 'ID-00000000',
-            standing: 'Undergraduate'
+            studentId: 'ID-00000000'
           },
           defaultGradeDefinitions: cloneGradeScale(defaultScale),
-          classes: [
-            {
-              id: 'class_101',
-              code: 'Course 101',
-              name: 'Intro to Computer Science',
-              term: 'Fall Semester',
-              targetLetter: 'A',
-              groups: [
-                { id: 'grp_101_asg', name: 'Assignments', weight: 30 },
-                { id: 'grp_101_mt', name: 'Midterm Exam', weight: 30 },
-                { id: 'grp_101_fin', name: 'Final Exam', weight: 40 }
-              ],
-              buckets: cloneGradeScale(defaultScale),
-              assignments: [
-                { id: 'asg_101_1', name: 'Homework 1', groupId: 'grp_101_asg', earned: 45, available: 50, whatIfEarned: null },
-                { id: 'asg_101_2', name: 'Homework 2', groupId: 'grp_101_asg', earned: null, available: 50, whatIfEarned: null },
-                { id: 'asg_101_3', name: 'Midterm Exam', groupId: 'grp_101_mt', earned: null, available: 100, whatIfEarned: null },
-                { id: 'asg_101_4', name: 'Final Exam', groupId: 'grp_101_fin', earned: null, available: 150, whatIfEarned: null }
-              ]
-            },
-            {
-              id: 'class_102',
-              code: 'Course 102',
-              name: 'Foundations of Data Science',
-              term: 'Fall Semester',
-              targetLetter: 'A',
-              groups: [
-                { id: 'grp_102_hw', name: 'Homework', weight: 25 },
-                { id: 'grp_102_lab', name: 'Labs', weight: 15 },
-                { id: 'grp_102_mt', name: 'Midterm Exam', weight: 25 },
-                { id: 'grp_102_fin', name: 'Final Exam', weight: 35 }
-              ],
-              buckets: cloneGradeScale(defaultScale),
-              assignments: [
-                { id: 'asg_102_1', name: 'Homework 1', groupId: 'grp_102_hw', earned: 48, available: 50, whatIfEarned: null },
-                { id: 'asg_102_2', name: 'Lab 1', groupId: 'grp_102_lab', earned: 20, available: 20, whatIfEarned: null },
-                { id: 'asg_102_3', name: 'Midterm Exam', groupId: 'grp_102_mt', earned: 88, available: 100, whatIfEarned: null },
-                { id: 'asg_102_4', name: 'Final Exam', groupId: 'grp_102_fin', earned: null, available: 150, whatIfEarned: null }
-              ]
-            }
-          ]
+          classes: createExampleCourses(defaultScale)
         };
       }
 
       /*************************************************************************
-       * 3. DEFENSIVE LOCALSTORAGE MIGRATION & STATE MANAGEMENT
+       * 3. DEFENSIVE LOCALSTORAGE MIGRATION & STATE PRESERVATION
        *************************************************************************/
+      function isUnmodifiedStrippedDemo(classes) {
+        if (!Array.isArray(classes) || classes.length > 3) return false;
+        const codes = classes.map(c => String(c?.code || '').trim());
+        return (
+          codes.includes('CS 101') &&
+          codes.includes('DATA 100') &&
+          classes.every(c => (c.assignments || []).length <= 4)
+        );
+      }
+
       function sanitizeState(rawState) {
         const fallback = createDefaultState();
         if (!rawState || typeof rawState !== 'object') return fallback;
 
+        const defaultDefs = cloneGradeScale(
+          rawState.defaultGradeDefinitions || rawState.defaultBuckets || rawState.customDefaultScale || UC_BERKELEY_GRADE_DEFINITIONS
+        );
+
         const clean = {
           activeView: rawState.activeView === 'profile' ? 'profile' : 'gradebook',
+          activeTermFilter: String(rawState.activeTermFilter || ''),
           activeClassId: String(rawState.activeClassId || ''),
           gradebookViewMode: (rawState.gradebookViewMode === 'unified' || rawState.viewMode === 'unified') ? 'unified' : 'grouped',
           theme: ['black', 'midnight', 'light'].includes(rawState.theme) ? rawState.theme : 'black',
@@ -1156,16 +1240,13 @@
             displayName: String(rawState.profile?.displayName || 'Student Name'),
             email: String(rawState.profile?.email || 'student@university.edu'),
             institution: String(rawState.profile?.institution || 'University Name'),
-            studentId: String(rawState.profile?.studentId || 'ID-00000000'),
-            standing: String(rawState.profile?.standing || 'Undergraduate')
+            studentId: String(rawState.profile?.studentId || 'ID-00000000')
           },
-          defaultGradeDefinitions: cloneGradeScale(
-            rawState.defaultGradeDefinitions || rawState.defaultBuckets || rawState.customDefaultScale || UC_BERKELEY_GRADE_DEFINITIONS
-          ),
+          defaultGradeDefinitions: defaultDefs,
           classes: []
         };
 
-        if (Array.isArray(rawState.classes) && rawState.classes.length > 0) {
+        if (Array.isArray(rawState.classes) && rawState.classes.length > 0 && !isUnmodifiedStrippedDemo(rawState.classes)) {
           clean.classes = rawState.classes.map((c, idx) => {
             const safeGroups = Array.isArray(c?.groups) && c.groups.length > 0
               ? c.groups.map((g, gIdx) => ({
@@ -1197,11 +1278,24 @@
                 })
               : [];
 
+            // Support legacy classes where code and name were combined or separate
+            let courseCode = String(c?.code ?? '').trim();
+            let courseName = String(c?.name ?? '').trim();
+            if (!courseCode && courseName) {
+              const splitParts = courseName.split(/[:—-]/);
+              if (splitParts.length > 1) {
+                courseCode = splitParts[0].trim();
+                courseName = splitParts.slice(1).join(':').trim();
+              } else {
+                courseCode = courseName;
+              }
+            }
+
             return {
               id: String(c?.id || uid(`class_${idx}`)),
-              code: String(c?.code ?? `Course ${101 + idx}`),
-              name: String(c?.name ?? `Academic Course ${idx + 1}`),
-              term: String(c?.term ?? 'Fall Semester'),
+              code: courseCode || `Course ${101 + idx}`,
+              name: courseName || `Academic Course ${idx + 1}`,
+              term: normalizeTermName(c?.term ?? 'Fall 2026'),
               targetLetter: String(c?.targetLetter || c?.targetGrade || 'A'),
               groups: safeGroups,
               buckets: cloneGradeScale(rawBuckets),
@@ -1209,11 +1303,17 @@
             };
           });
         } else {
-          clean.classes = fallback.classes;
+          clean.classes = createExampleCourses(defaultDefs);
         }
 
         if (!clean.classes.some(c => c.id === clean.activeClassId)) {
           clean.activeClassId = clean.classes[0].id;
+        }
+
+        const activeCls = clean.classes.find(c => c.id === clean.activeClassId) || clean.classes[0];
+        const allTerms = new Set(clean.classes.map(c => normalizeTermName(c.term)));
+        if (clean.activeTermFilter !== 'ALL' && !allTerms.has(clean.activeTermFilter)) {
+          clean.activeTermFilter = normalizeTermName(activeCls.term);
         }
 
         return clean;
@@ -1223,11 +1323,20 @@
         try {
           let raw = localStorage.getItem(STORAGE_KEY);
           if (!raw) {
+            // Look through all previous keys and prefer any key that contains custom user classes
             for (const legacyKey of LEGACY_KEYS) {
               const legacyRaw = localStorage.getItem(legacyKey);
               if (legacyRaw) {
-                raw = legacyRaw;
-                break;
+                try {
+                  const parsed = JSON.parse(legacyRaw);
+                  if (parsed && Array.isArray(parsed.classes) && !isUnmodifiedStrippedDemo(parsed.classes)) {
+                    raw = legacyRaw;
+                    break;
+                  }
+                  if (!raw) raw = legacyRaw;
+                } catch {
+                  // Continue checking other keys
+                }
               }
             }
           }
@@ -1272,6 +1381,43 @@
           cls = state.classes[0];
         }
         return cls;
+      }
+
+      function getUniqueTerms() {
+        const terms = [];
+        const seen = new Set();
+        state.classes.forEach(c => {
+          const t = normalizeTermName(c.term);
+          if (!seen.has(t)) {
+            seen.add(t);
+            terms.push(t);
+          }
+        });
+        return terms;
+      }
+
+      function getFilteredClassesForActiveTerm() {
+        if (!state.activeTermFilter || state.activeTermFilter === 'ALL') {
+          return state.classes;
+        }
+        const filtered = state.classes.filter(c => normalizeTermName(c.term) === state.activeTermFilter);
+        return filtered.length > 0 ? filtered : state.classes;
+      }
+
+      function computeTermSummary(classesList) {
+        let gpaSum = 0;
+        let gradedClassesCount = 0;
+        classesList.forEach(c => {
+          const m = computeClassMetrics(c);
+          if (m.actualPct !== null && m.actualBucket.current && m.actualBucket.current.gpa !== null && m.actualBucket.current.gpa !== undefined) {
+            gpaSum += Number(m.actualBucket.current.gpa);
+            gradedClassesCount++;
+          }
+        });
+        return {
+          count: classesList.length,
+          avgGpa: gradedClassesCount > 0 ? (gpaSum / gradedClassesCount) : null
+        };
       }
 
       /*************************************************************************
@@ -1582,7 +1728,6 @@
         renderApp(false);
       }
 
-      // Expose globally for inline onclick fallbacks
       window.switchAppView = switchAppView;
       window.reloadGradeCraft = () => window.location.reload();
 
@@ -1802,6 +1947,22 @@
           const pStr = metrics.actualPct !== null ? formatPercent(metrics.actualPct, 1) : '--%';
           activeTabBadge.textContent = `${ltr} (${pStr})`;
         }
+
+        // Update Term GPA badges in Academic Term tab bar in-place
+        const allSummary = computeTermSummary(state.classes);
+        const allBadge = document.querySelector(`[data-term-gpa-badge="ALL"]`);
+        if (allBadge) {
+          allBadge.textContent = `${allSummary.count} ${allSummary.count === 1 ? 'class' : 'classes'} • ${allSummary.avgGpa !== null ? `${formatNumber(allSummary.avgGpa, 2, 2)} GPA` : '-- GPA'}`;
+        }
+        getUniqueTerms().forEach(termName => {
+          const termClasses = state.classes.filter(c => normalizeTermName(c.term) === termName);
+          const summary = computeTermSummary(termClasses);
+          document.querySelectorAll('[data-term-gpa-badge]').forEach(badge => {
+            if (badge.getAttribute('data-term-gpa-badge') === termName) {
+              badge.textContent = `${summary.count} ${summary.count === 1 ? 'class' : 'classes'} • ${summary.avgGpa !== null ? `${formatNumber(summary.avgGpa, 2, 2)} GPA` : '-- GPA'}`;
+            }
+          });
+        });
       }
 
       /*************************************************************************
@@ -1921,17 +2082,82 @@
         const cls = getActiveClass();
         if (!cls) return;
 
+        const uniqueTerms = getUniqueTerms();
+        if (state.activeTermFilter !== 'ALL' && !uniqueTerms.includes(state.activeTermFilter)) {
+          state.activeTermFilter = normalizeTermName(cls.term);
+        }
+
         const metrics = computeClassMetrics(cls);
         const sortedBuckets = getSortedBuckets(cls.buckets);
 
-        // 1. Class Tabs Strip
+        // 1A. Academic Term Tabs Strip + Datalist
+        const termTabsContainer = document.getElementById('termTabsContainer');
+        if (termTabsContainer) {
+          const allSummary = computeTermSummary(state.classes);
+          const isAllActive = state.activeTermFilter === 'ALL';
+
+          const allTabHtml = `
+            <button
+              type="button"
+              data-action="select-term"
+              data-term-value="ALL"
+              class="flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-semibold border transition whitespace-nowrap cursor-pointer ${
+                isAllActive
+                  ? 'bg-indigo-600 text-white border-indigo-500 shadow-sm shadow-indigo-500/25'
+                  : 'surface-alt text-theme-secondary hover:text-theme-primary'
+              }"
+            >
+              <i class="fa-solid fa-layer-group ${isAllActive ? 'text-indigo-200' : 'text-indigo-400'}"></i>
+              <span class="font-bold">All Terms</span>
+              <span data-term-gpa-badge="ALL" class="px-1.5 py-0.5 rounded-md font-mono text-[10px] ${
+                isAllActive ? 'bg-black/25 text-white' : 'surface-pill text-theme-muted border'
+              }">${allSummary.count} ${allSummary.count === 1 ? 'class' : 'classes'} • ${allSummary.avgGpa !== null ? `${formatNumber(allSummary.avgGpa, 2, 2)} GPA` : '-- GPA'}</span>
+            </button>
+          `;
+
+          const termButtonsHtml = uniqueTerms.map(termName => {
+            const isTermActive = state.activeTermFilter === termName;
+            const termClasses = state.classes.filter(c => normalizeTermName(c.term) === termName);
+            const summary = computeTermSummary(termClasses);
+
+            return `
+              <button
+                type="button"
+                data-action="select-term"
+                data-term-value="${escapeHtml(termName)}"
+                class="flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-semibold border transition whitespace-nowrap cursor-pointer ${
+                  isTermActive
+                    ? 'bg-indigo-600 text-white border-indigo-500 shadow-sm shadow-indigo-500/25'
+                    : 'surface-alt text-theme-secondary hover:text-theme-primary'
+                }"
+              >
+                <i class="fa-regular fa-calendar ${isTermActive ? 'text-indigo-200' : 'text-indigo-400'}"></i>
+                <span class="font-bold">${escapeHtml(termName)}</span>
+                <span data-term-gpa-badge="${escapeHtml(termName)}" class="px-1.5 py-0.5 rounded-md font-mono text-[10px] ${
+                  isTermActive ? 'bg-black/25 text-white' : 'surface-pill text-theme-muted border'
+                }">${summary.count} ${summary.count === 1 ? 'class' : 'classes'} • ${summary.avgGpa !== null ? `${formatNumber(summary.avgGpa, 2, 2)} GPA` : '-- GPA'}</span>
+              </button>
+            `;
+          }).join('');
+
+          termTabsContainer.innerHTML = termButtonsHtml + allTabHtml;
+        }
+
+        const existingTermsDatalist = document.getElementById('existingTermsDatalist');
+        if (existingTermsDatalist) {
+          existingTermsDatalist.innerHTML = uniqueTerms.map(t => `<option value="${escapeHtml(t)}"></option>`).join('');
+        }
+
+        // 1B. Class Tabs Strip (Filtered by Active Academic Term)
+        const visibleClasses = getFilteredClassesForActiveTerm();
         const tabsContainer = document.getElementById('classTabsContainer');
         if (tabsContainer) {
-          tabsContainer.innerHTML = state.classes.map(c => {
+          tabsContainer.innerHTML = visibleClasses.map(c => {
             const isActive = c.id === cls.id;
             const m = computeClassMetrics(c);
             const letter = m.actualBucket.current ? m.actualBucket.current.letter : '--';
             const pctStr = m.actualPct !== null ? formatPercent(m.actualPct, 1) : '--%';
+            const showTermPill = state.activeTermFilter === 'ALL';
 
             return `
               <button
@@ -1947,6 +2173,7 @@
                 <i class="fa-solid fa-book-open ${isActive ? 'text-indigo-200' : 'text-indigo-400'}"></i>
                 <span data-tab-code class="font-bold">${escapeHtml(c.code || 'Course')}</span>
                 <span data-tab-name class="hidden md:inline max-w-[140px] truncate opacity-85">${escapeHtml(c.name)}</span>
+                ${showTermPill ? `<span class="hidden sm:inline px-1.5 py-0.5 rounded text-[10px] ${isActive ? 'bg-white/15 text-indigo-100' : 'surface-alt text-theme-faint border'}">${escapeHtml(normalizeTermName(c.term))}</span>` : ''}
                 <span data-tab-grade-badge class="px-1.5 py-0.5 rounded-md font-mono text-[10px] ${
                   isActive ? 'bg-black/25 text-white' : 'surface-pill text-theme-muted border'
                 }">${escapeHtml(letter)} (${pctStr})</span>
@@ -1955,7 +2182,7 @@
           }).join('');
         }
 
-        // 2. Class Header Inputs
+        // 2. Class Header Inputs (preserve active element if typing)
         const inputCode = document.getElementById('inputClassCode');
         const inputName = document.getElementById('inputClassName');
         const inputTerm = document.getElementById('inputClassTerm');
@@ -1964,21 +2191,25 @@
         if (inputTerm && document.activeElement !== inputTerm) inputTerm.value = cls.term;
 
         // 3. Target Grade Select Dropdown
-        const selectTargetGrade = document.getElementById('selectTargetGrade');
-        if (selectTargetGrade) {
+        const selectTarget = document.getElementById('selectTargetGrade');
+        if (selectTarget) {
           const selectableTargetBuckets = sortedBuckets.filter(b => Number(b.min) > 0);
-          selectTargetGrade.innerHTML = selectableTargetBuckets.map(b => `
+          const activeTargetBucket = selectableTargetBuckets.find(b => b.letter === cls.targetLetter) || selectableTargetBuckets[1] || sortedBuckets[0];
+          if (activeTargetBucket && cls.targetLetter !== activeTargetBucket.letter) {
+            cls.targetLetter = activeTargetBucket.letter;
+          }
+          selectTarget.innerHTML = selectableTargetBuckets.map(b => `
             <option value="${escapeHtml(b.letter)}" ${b.letter === cls.targetLetter ? 'selected' : ''}>
-              ${escapeHtml(b.letter)} (&ge; ${formatPercent(b.min, 0)}${b.gpa !== null ? ` • ${formatNumber(b.gpa, 1, 1)} GPA` : ''})
+              ${escapeHtml(b.letter)} (&ge; ${formatPercent(b.min, 0)})
             </option>
           `).join('');
         }
 
-        // 4. Assignment Groups Table Body
+        // 4. Assignment Groups & Weights Table
         const tbodyGroups = document.getElementById('tbodyAssignmentGroups');
         if (tbodyGroups) {
-          tbodyGroups.innerHTML = cls.groups.map((grp, idx) => {
-            const st = metrics.groupMap[grp.id];
+          tbodyGroups.innerHTML = cls.groups.map((g, idx) => {
+            const st = metrics.groupMap[g.id];
             const dotColor = GROUP_DOT_COLORS[idx % GROUP_DOT_COLORS.length];
             return `
               <tr class="theme-row-hover transition border-b border-theme-subtle">
@@ -1987,11 +2218,11 @@
                     <span class="w-2.5 h-2.5 rounded-full shrink-0 ${dotColor}"></span>
                     <input
                       type="text"
-                      value="${escapeHtml(grp.name)}"
-                      data-group-id="${escapeHtml(grp.id)}"
+                      value="${escapeHtml(g.name)}"
+                      data-group-id="${escapeHtml(g.id)}"
                       data-group-field="name"
                       aria-label="Assignment Group Name"
-                      class="w-full text-xs font-semibold theme-inline-input rounded-lg px-2 py-1"
+                      class="w-full min-w-[130px] text-xs font-semibold theme-inline-input rounded-lg px-2 py-1"
                     />
                   </div>
                 </td>
@@ -2002,31 +2233,31 @@
                       step="any"
                       min="0"
                       max="100"
-                      value="${grp.weight}"
-                      data-group-id="${escapeHtml(grp.id)}"
+                      value="${g.weight}"
+                      data-group-id="${escapeHtml(g.id)}"
                       data-group-field="weight"
                       aria-label="Assignment Group Weight"
-                      class="w-20 text-right font-mono text-xs font-semibold theme-input rounded-lg px-2 py-1"
+                      class="w-20 text-right font-mono text-xs font-bold theme-input rounded-lg px-2 py-1"
                     />
                     <span class="text-xs text-theme-faint">%</span>
                   </div>
                 </td>
-                <td class="py-2.5 text-right font-mono text-xs text-theme-muted" data-stat-group-pts="${escapeHtml(grp.id)}">
+                <td data-stat-group-pts="${escapeHtml(g.id)}" class="py-2.5 text-right font-mono text-xs text-theme-muted">
                   ${st ? `${formatNumber(st.actualEarned)} / ${formatNumber(st.actualAvailable)}` : '0 / 0'}
                 </td>
-                <td class="py-2.5 text-right font-mono text-xs font-semibold text-theme-primary" data-stat-group-actual="${escapeHtml(grp.id)}">
+                <td data-stat-group-actual="${escapeHtml(g.id)}" class="py-2.5 text-right font-mono text-xs font-semibold text-theme-primary">
                   ${st && st.actualPct !== null ? formatPercent(st.actualPct, 1) : '--%'}
                 </td>
-                <td class="py-2.5 text-right font-mono text-xs font-semibold text-indigo-400" data-stat-group-forecast="${escapeHtml(grp.id)}">
+                <td data-stat-group-forecast="${escapeHtml(g.id)}" class="py-2.5 text-right font-mono text-xs font-semibold text-indigo-400">
                   ${st && st.forecastPct !== null ? formatPercent(st.forecastPct, 1) : '--%'}
                 </td>
                 <td class="py-2.5 text-center">
                   <button
                     type="button"
                     data-action="delete-group"
-                    data-group-id="${escapeHtml(grp.id)}"
+                    data-group-id="${escapeHtml(g.id)}"
                     title="Delete Assignment Group"
-                    class="text-theme-faint hover:text-rose-400 p-1 rounded-lg transition cursor-pointer"
+                    class="text-theme-faint hover:text-rose-400 p-1.5 rounded-lg transition cursor-pointer"
                   >
                     <i class="fa-regular fa-trash-can text-xs"></i>
                   </button>
@@ -2036,7 +2267,7 @@
           }).join('');
         }
 
-        // 5. Class Grade Bucket Distribution Table Body
+        // 5. Class Grade Bucket Distribution Table
         const tbodyBuckets = document.getElementById('tbodyClassBuckets');
         if (tbodyBuckets) {
           tbodyBuckets.innerHTML = sortedBuckets.map((b, idx) => {
@@ -2044,7 +2275,7 @@
             return `
               <tr class="theme-row-hover transition border-b border-theme-subtle">
                 <td class="py-2 pl-2">
-                  <span class="inline-flex items-center justify-center w-10 h-6 rounded-md text-xs font-bold border ${getLetterBadgeClasses(b.letter)}">
+                  <span class="inline-flex items-center justify-center w-9 h-6 rounded-lg text-xs font-bold border ${getLetterBadgeClasses(b.letter)}">
                     ${escapeHtml(b.letter)}
                   </span>
                 </td>
@@ -2058,16 +2289,16 @@
                       max="100"
                       value="${b.min}"
                       data-bucket-cutoff="${escapeHtml(b.id)}"
-                      aria-label="Minimum cutoff for ${escapeHtml(b.letter)}"
-                      class="w-16 text-right font-mono text-xs font-semibold theme-input rounded-lg px-2 py-1"
+                      aria-label="Minimum percentage for ${escapeHtml(b.letter)}"
+                      class="w-16 text-right font-mono text-xs font-bold theme-input rounded-lg px-2 py-1"
                     />
                     <span class="text-[11px] text-theme-faint">%</span>
                   </div>
                 </td>
-                <td class="py-2 text-center font-mono text-[11px] text-theme-muted" data-bucket-range="${escapeHtml(b.id)}">
+                <td data-bucket-range="${escapeHtml(b.id)}" class="py-2 text-center font-mono text-[11px] text-theme-muted">
                   ${formatPercent(b.min, 0)} – ${upperLabel}
                 </td>
-                <td class="py-2 text-right pr-2" data-bucket-status="${escapeHtml(b.id)}">
+                <td data-bucket-status="${escapeHtml(b.id)}" class="py-2 text-right pr-2">
                   <span class="text-theme-faint">—</span>
                 </td>
               </tr>
@@ -2075,33 +2306,30 @@
           }).join('');
         }
 
-        // 6. Assignments Gradebook View Toggle Buttons
+        // 6. Assignments Gradebook Body (Grouped by Category vs Unified Table Sorted by Group)
+        const badgeCount = document.getElementById('badgeTotalAssignmentsCount');
+        if (badgeCount) badgeCount.textContent = String(cls.assignments.length);
+
         const btnGrouped = document.getElementById('btnViewGrouped');
         const btnUnified = document.getElementById('btnViewUnified');
-        const countBadge = document.getElementById('badgeTotalAssignmentsCount');
-        if (countBadge) countBadge.textContent = String(cls.assignments.length);
-
         if (btnGrouped && btnUnified) {
-          const isGrouped = state.gradebookViewMode === 'grouped';
+          const isUnified = state.gradebookViewMode === 'unified';
           btnGrouped.className = `px-3 py-1.5 rounded-lg transition cursor-pointer ${
-            isGrouped ? 'bg-indigo-600 text-white shadow-xs' : 'text-theme-muted hover:text-theme-primary'
+            !isUnified ? 'bg-indigo-600 text-white shadow-xs' : 'text-theme-muted hover:text-theme-primary'
           }`;
           btnUnified.className = `px-3 py-1.5 rounded-lg transition cursor-pointer ${
-            !isGrouped ? 'bg-indigo-600 text-white shadow-xs' : 'text-theme-muted hover:text-theme-primary'
+            isUnified ? 'bg-indigo-600 text-white shadow-xs' : 'text-theme-muted hover:text-theme-primary'
           }`;
         }
 
-        // 7. Assignments Gradebook Body
         const gbBody = document.getElementById('gradebookAssignmentsBody');
         if (gbBody) {
           if (state.gradebookViewMode === 'unified') {
-            const groupOrder = {};
-            cls.groups.forEach((g, idx) => { groupOrder[g.id] = idx; });
-
+            const groupOrder = new Map(cls.groups.map((g, i) => [g.id, i]));
             const sortedAssignments = [...cls.assignments].sort((a, b) => {
-              const idxA = groupOrder[a.groupId] ?? 999;
-              const idxB = groupOrder[b.groupId] ?? 999;
-              return idxA - idxB;
+              const oa = groupOrder.has(a.groupId) ? groupOrder.get(a.groupId) : 999;
+              const ob = groupOrder.has(b.groupId) ? groupOrder.get(b.groupId) : 999;
+              return oa - ob;
             });
 
             if (sortedAssignments.length === 0) {
@@ -2215,13 +2443,11 @@
         const inEmail = document.getElementById('profileEmail');
         const inInst = document.getElementById('profileInstitution');
         const inId = document.getElementById('profileStudentId');
-        const inStand = document.getElementById('profileStanding');
 
         if (inName && document.activeElement !== inName) inName.value = p.displayName;
         if (inEmail && document.activeElement !== inEmail) inEmail.value = p.email;
         if (inInst && document.activeElement !== inInst) inInst.value = p.institution;
         if (inId && document.activeElement !== inId) inId.value = p.studentId;
-        if (inStand && document.activeElement !== inStand) inStand.value = p.standing || 'Undergraduate';
 
         // Theme Buttons Active State
         document.querySelectorAll('[data-action="set-theme"]').forEach(btn => {
@@ -2317,383 +2543,327 @@
       }
 
       /*************************************************************************
-       * 11. STATIC EVENT DELEGATION (BOUND ONCE AT STARTUP)
+       * 11. UNIFIED DOCUMENT-LEVEL EVENT DELEGATION (100% RELIABLE)
        *************************************************************************/
       function initEventListeners() {
-        // 1. Header Brand Reload & View Switcher Buttons
-        document.getElementById('btnBrandReload')?.addEventListener('click', (e) => {
-          e.preventDefault();
-          window.location.reload();
-        });
+        // A. UNIFIED CLICK DELEGATION ON DOCUMENT
+        document.addEventListener('click', (e) => {
+          const target = e.target;
+          if (!target || typeof target.closest !== 'function') return;
 
-        document.getElementById('navBtnGradebook')?.addEventListener('click', (e) => {
-          e.preventDefault();
-          switchAppView('gradebook');
-        });
+          // 1. Top-left Graduation Cap Reload Button
+          if (target.closest('#btnBrandReload')) {
+            e.preventDefault();
+            window.location.reload();
+            return;
+          }
 
-        document.getElementById('navBtnProfile')?.addEventListener('click', (e) => {
-          e.preventDefault();
-          switchAppView('profile');
-        });
+          // 2. Top-right Navigation Switcher Buttons
+          if (target.closest('#navBtnGradebook')) {
+            e.preventDefault();
+            switchAppView('gradebook');
+            return;
+          }
+          if (target.closest('#navBtnProfile')) {
+            e.preventDefault();
+            switchAppView('profile');
+            return;
+          }
 
-        // 2. Class Tabs Selection
-        document.getElementById('classTabsContainer')?.addEventListener('click', (e) => {
-          const btn = e.target.closest('[data-action="select-class"]');
-          if (!btn) return;
-          const cid = btn.getAttribute('data-class-id');
-          if (cid && cid !== state.activeClassId) {
-            state.activeClassId = cid;
+          // 3. Academic Term Tab Selection
+          const termBtn = target.closest('[data-action="select-term"]');
+          if (termBtn) {
+            const termVal = termBtn.getAttribute('data-term-value');
+            if (!termVal) return;
+            state.activeTermFilter = termVal;
+            if (termVal !== 'ALL') {
+              const activeCls = getActiveClass();
+              if (!activeCls || normalizeTermName(activeCls.term) !== termVal) {
+                const firstInTerm = state.classes.find(c => normalizeTermName(c.term) === termVal);
+                if (firstInTerm) state.activeClassId = firstInTerm.id;
+              }
+            }
             saveState();
             renderApp(false);
-          }
-        });
-
-        // 3. Add / Duplicate / Delete Class
-        document.getElementById('btnAddClass')?.addEventListener('click', () => {
-          const newId = uid('class');
-          const g1 = uid('grp');
-          const g2 = uid('grp');
-          const g3 = uid('grp');
-          const num = state.classes.length + 1;
-
-          state.classes.push({
-            id: newId,
-            code: `Course ${100 + num}`,
-            name: `Academic Course ${num}`,
-            term: 'Fall Semester',
-            targetLetter: 'A',
-            groups: [
-              { id: g1, name: 'Assignments', weight: 30 },
-              { id: g2, name: 'Midterm Exam', weight: 30 },
-              { id: g3, name: 'Final Exam', weight: 40 }
-            ],
-            buckets: cloneGradeScale(state.defaultGradeDefinitions),
-            assignments: [
-              { id: uid('asg'), name: 'Homework 1', groupId: g1, earned: 45, available: 50, whatIfEarned: null },
-              { id: uid('asg'), name: 'Midterm Exam', groupId: g2, earned: null, available: 100, whatIfEarned: null },
-              { id: uid('asg'), name: 'Final Exam', groupId: g3, earned: null, available: 150, whatIfEarned: null }
-            ]
-          });
-
-          state.activeClassId = newId;
-          saveState();
-          renderApp();
-          showToast('Created new class gradebook', 'success');
-        });
-
-        document.getElementById('btnDuplicateClass')?.addEventListener('click', () => {
-          const cls = getActiveClass();
-          if (!cls) return;
-          const copy = JSON.parse(JSON.stringify(cls));
-          copy.id = uid('class');
-          copy.code = `${cls.code} (Copy)`;
-          state.classes.push(copy);
-          state.activeClassId = copy.id;
-          saveState();
-          renderApp();
-          showToast(`Duplicated "${cls.code}"`, 'success');
-        });
-
-        document.getElementById('btnDeleteClass')?.addEventListener('click', () => {
-          const cls = getActiveClass();
-          if (!cls) return;
-          if (state.classes.length <= 1) {
-            showToast('At least one class gradebook must remain active.', 'warning');
             return;
           }
-          openConfirmModal(
-            `Delete "${cls.code}: ${cls.name}"?`,
-            `This will permanently remove this class and all ${cls.assignments.length} assignment entries.`,
-            () => {
-              state.classes = state.classes.filter(c => c.id !== cls.id);
-              state.activeClassId = state.classes[0].id;
-              saveState();
-              renderApp();
-              showToast('Deleted class gradebook', 'info');
-            }
-          );
-        });
 
-        // 4. Editable Class Header Inputs (In-place update)
-        document.getElementById('inputClassCode')?.addEventListener('input', (e) => {
-          const cls = getActiveClass();
-          if (!cls) return;
-          cls.code = e.target.value;
-          saveState();
-          const tabCode = document.querySelector(`[data-action="select-class"][data-class-id="${cls.id}"] [data-tab-code]`);
-          if (tabCode) tabCode.textContent = cls.code || 'Course';
-        });
+          // 4. Add New Academic Term Button
+          if (target.closest('#btnAddTerm')) {
+            const existingTerms = getUniqueTerms();
+            const candidateNames = ['Spring 2027', 'Fall 2027', 'Summer 2026', 'Winter 2027', 'Spring 2026', 'Fall 2026'];
+            const newTermName = candidateNames.find(t => !existingTerms.includes(t)) || `Term ${existingTerms.length + 1}`;
 
-        document.getElementById('inputClassName')?.addEventListener('input', (e) => {
-          const cls = getActiveClass();
-          if (!cls) return;
-          cls.name = e.target.value;
-          saveState();
-          const tabName = document.querySelector(`[data-action="select-class"][data-class-id="${cls.id}"] [data-tab-name]`);
-          if (tabName) tabName.textContent = cls.name;
-        });
+            const newId = uid('class');
+            const g1 = uid('grp');
+            const g2 = uid('grp');
+            const g3 = uid('grp');
+            const num = state.classes.length + 1;
 
-        document.getElementById('inputClassTerm')?.addEventListener('input', (e) => {
-          const cls = getActiveClass();
-          if (!cls) return;
-          cls.term = e.target.value;
-          saveState();
-        });
-
-        // 5. Clear What-Ifs & Target Grade Selector
-        document.getElementById('btnClearWhatIfs')?.addEventListener('click', () => {
-          const cls = getActiveClass();
-          if (!cls) return;
-          cls.assignments.forEach(a => { a.whatIfEarned = null; });
-          saveState();
-          renderApp();
-          showToast('Cleared all What-If overrides', 'info');
-        });
-
-        document.getElementById('selectTargetGrade')?.addEventListener('change', (e) => {
-          const cls = getActiveClass();
-          if (!cls) return;
-          cls.targetLetter = e.target.value;
-          saveState();
-          updateCalculatedMetricsInDOM();
-        });
-
-        // 6. Assignment Groups Table (In-place updates on input; never loses focus/caret/scroll)
-        document.getElementById('tbodyAssignmentGroups')?.addEventListener('input', (e) => {
-          const cls = getActiveClass();
-          if (!cls) return;
-          const target = e.target;
-          const gid = target.getAttribute('data-group-id');
-          const field = target.getAttribute('data-group-field');
-          if (!gid || !field) return;
-
-          const grp = cls.groups.find(g => g.id === gid);
-          if (!grp) return;
-
-          if (field === 'name') {
-            grp.name = target.value;
-            saveState();
-            updateGroupNameInDOM(gid, grp.name);
-          } else if (field === 'weight') {
-            grp.weight = Math.max(0, parseFloat(target.value) || 0);
-            saveState();
-            updateCalculatedMetricsInDOM();
-          }
-        });
-
-        document.getElementById('tbodyAssignmentGroups')?.addEventListener('click', (e) => {
-          const cls = getActiveClass();
-          if (!cls) return;
-          const btn = e.target.closest('[data-action="delete-group"]');
-          if (!btn) return;
-          const gid = btn.getAttribute('data-group-id');
-          if (cls.groups.length <= 1) {
-            showToast('A class must keep at least one assignment group.', 'warning');
-            return;
-          }
-          const grp = cls.groups.find(g => g.id === gid);
-          const fallback = cls.groups.find(g => g.id !== gid);
-          if (!grp || !fallback) return;
-          const count = cls.assignments.filter(a => a.groupId === gid).length;
-
-          openConfirmModal(
-            `Delete "${grp.name}" Group?`,
-            count > 0
-              ? `This group has ${count} assignment(s). They will be reassigned to "${fallback.name}".`
-              : `Are you sure you want to delete the "${grp.name}" group?`,
-            () => {
-              cls.assignments.forEach(a => {
-                if (a.groupId === gid) a.groupId = fallback.id;
-              });
-              cls.groups = cls.groups.filter(g => g.id !== gid);
-              saveState();
-              renderApp();
-              showToast(`Removed group "${grp.name}"`, 'info');
-            }
-          );
-        });
-
-        document.getElementById('btnAddGroup')?.addEventListener('click', () => {
-          const cls = getActiveClass();
-          if (!cls) return;
-          const currentSum = cls.groups.reduce((acc, g) => acc + (Number(g.weight) || 0), 0);
-          const suggested = currentSum < 100 ? Number((100 - currentSum).toFixed(1)) : 10;
-          cls.groups.push({
-            id: uid('grp'),
-            name: `Group ${cls.groups.length + 1}`,
-            weight: suggested
-          });
-          saveState();
-          renderApp();
-          showToast('Added new assignment group', 'success');
-        });
-
-        document.getElementById('btnNormalizeWeights')?.addEventListener('click', () => {
-          const cls = getActiveClass();
-          if (!cls) return;
-          const total = cls.groups.reduce((acc, g) => acc + (Number(g.weight) || 0), 0);
-          if (total <= 0) {
-            const equal = Number((100 / cls.groups.length).toFixed(2));
-            cls.groups.forEach(g => { g.weight = equal; });
-          } else {
-            cls.groups.forEach(g => {
-              g.weight = Number(((Number(g.weight) / total) * 100).toFixed(2));
+            state.classes.push({
+              id: newId,
+              code: `COURSE ${100 + num}`,
+              name: `New Course (${newTermName})`,
+              term: newTermName,
+              targetLetter: 'A',
+              groups: [
+                { id: g1, name: 'Projects & Homework', weight: 30 },
+                { id: g2, name: 'Midterm Exam', weight: 30 },
+                { id: g3, name: 'Final Exam', weight: 40 }
+              ],
+              buckets: cloneGradeScale(state.defaultGradeDefinitions),
+              assignments: [
+                { id: uid('asg'), name: 'Assignment 1', groupId: g1, earned: null, available: 50, whatIfEarned: null },
+                { id: uid('asg'), name: 'Midterm Exam', groupId: g2, earned: null, available: 100, whatIfEarned: null },
+                { id: uid('asg'), name: 'Final Exam', groupId: g3, earned: null, available: 150, whatIfEarned: null }
+              ]
             });
-          }
-          const sumAfter = cls.groups.reduce((acc, g) => acc + g.weight, 0);
-          if (cls.groups.length > 0 && Math.abs(100 - sumAfter) > 0) {
-            cls.groups[cls.groups.length - 1].weight = Number((cls.groups[cls.groups.length - 1].weight + (100 - sumAfter)).toFixed(2));
-          }
-          saveState();
-          renderApp();
-          showToast('Normalized assignment group weights to 100%', 'success');
-        });
 
-        // 7. Class Grade Buckets Table (In-place updates on input)
-        document.getElementById('tbodyClassBuckets')?.addEventListener('input', (e) => {
-          const cls = getActiveClass();
-          if (!cls) return;
-          const input = e.target;
-          const bid = input.getAttribute('data-bucket-cutoff');
-          if (!bid) return;
-          const bucket = cls.buckets.find(b => b.id === bid);
-          if (!bucket) return;
-
-          bucket.min = Math.max(0, Math.min(100, parseFloat(input.value) || 0));
-          saveState();
-          updateCalculatedMetricsInDOM();
-        });
-
-        document.getElementById('btnResetClassBuckets')?.addEventListener('click', () => {
-          const cls = getActiveClass();
-          if (!cls) return;
-          cls.buckets = cloneGradeScale(state.defaultGradeDefinitions);
-          saveState();
-          renderApp();
-          showToast('Synced class buckets with Profile Default Scale', 'success');
-        });
-
-        // 8. Gradebook View Mode Toggle & Global Add Assignment
-        document.getElementById('btnViewGrouped')?.addEventListener('click', () => {
-          if (state.gradebookViewMode !== 'grouped') {
-            state.gradebookViewMode = 'grouped';
+            state.activeTermFilter = newTermName;
+            state.activeClassId = newId;
             saveState();
             renderApp();
+            const termInput = document.getElementById('inputClassTerm');
+            if (termInput) {
+              termInput.focus();
+              termInput.select();
+            }
+            showToast(`Created new Academic Term "${newTermName}"`, 'success');
+            return;
           }
-        });
 
-        document.getElementById('btnViewUnified')?.addEventListener('click', () => {
-          if (state.gradebookViewMode !== 'unified') {
-            state.gradebookViewMode = 'unified';
+          // 5. Class Tab Selection
+          const classTabBtn = target.closest('[data-action="select-class"]');
+          if (classTabBtn) {
+            const cid = classTabBtn.getAttribute('data-class-id');
+            if (cid && cid !== state.activeClassId) {
+              state.activeClassId = cid;
+              saveState();
+              renderApp(false);
+            }
+            return;
+          }
+
+          // 6. Add / Duplicate / Delete Class Buttons
+          if (target.closest('#btnAddClass')) {
+            const newId = uid('class');
+            const g1 = uid('grp');
+            const g2 = uid('grp');
+            const g3 = uid('grp');
+            const num = state.classes.length + 1;
+            const activeCls = getActiveClass();
+            const inheritedTerm = (state.activeTermFilter && state.activeTermFilter !== 'ALL')
+              ? state.activeTermFilter
+              : normalizeTermName(activeCls?.term || 'Fall 2026');
+
+            state.classes.push({
+              id: newId,
+              code: `COURSE ${100 + num}`,
+              name: `Academic Course ${num}`,
+              term: inheritedTerm,
+              targetLetter: 'A',
+              groups: [
+                { id: g1, name: 'Assignments', weight: 30 },
+                { id: g2, name: 'Midterm Exam', weight: 30 },
+                { id: g3, name: 'Final Exam', weight: 40 }
+              ],
+              buckets: cloneGradeScale(state.defaultGradeDefinitions),
+              assignments: [
+                { id: uid('asg'), name: 'Homework 1', groupId: g1, earned: 45, available: 50, whatIfEarned: null },
+                { id: uid('asg'), name: 'Midterm Exam', groupId: g2, earned: null, available: 100, whatIfEarned: null },
+                { id: uid('asg'), name: 'Final Exam', groupId: g3, earned: null, available: 150, whatIfEarned: null }
+              ]
+            });
+
+            state.activeClassId = newId;
             saveState();
             renderApp();
-          }
-        });
-
-        document.getElementById('btnAddAssignmentGlobal')?.addEventListener('click', () => {
-          const cls = getActiveClass();
-          if (!cls || !cls.groups[0]) return;
-          const firstGroup = cls.groups[0];
-          const newId = uid('asg');
-          cls.assignments.push({
-            id: newId,
-            name: `Assignment ${cls.assignments.length + 1}`,
-            groupId: firstGroup.id,
-            earned: null,
-            available: 100,
-            whatIfEarned: null
-          });
-          highlightedAssignmentId = newId;
-          saveState();
-          renderApp();
-          highlightedAssignmentId = null;
-          showToast(`Added assignment to ${firstGroup.name}`, 'success');
-        });
-
-        // 9. Assignments Gradebook Body Delegation (In-place updates on input)
-        const gbBody = document.getElementById('gradebookAssignmentsBody');
-
-        gbBody?.addEventListener('input', (e) => {
-          const cls = getActiveClass();
-          if (!cls) return;
-          const input = e.target;
-          const aid = input.getAttribute('data-assign-id');
-          const field = input.getAttribute('data-assign-field');
-          if (!aid || !field || field === 'groupId') return;
-
-          const assign = cls.assignments.find(a => a.id === aid);
-          if (!assign) return;
-
-          if (field === 'name') {
-            assign.name = input.value;
-          } else if (field === 'earned') {
-            const raw = input.value.trim();
-            assign.earned = raw === '' ? null : parseFloat(raw);
-          } else if (field === 'possible') {
-            assign.available = Math.max(0.01, parseFloat(input.value) || 0.01);
-          } else if (field === 'whatIfEarned') {
-            const raw = input.value.trim();
-            assign.whatIfEarned = raw === '' ? null : parseFloat(raw);
+            showToast(`Added new class to ${inheritedTerm}`, 'success');
+            return;
           }
 
-          const avail = Math.max(0, Number(assign.available) || 0);
-          const hasActual = isGradedValue(assign.earned);
-          const hasWhatIf = isGradedValue(assign.whatIfEarned);
-          const actualPct = hasActual && avail > 0 ? (Number(assign.earned) / avail) * 100 : null;
-          const effectiveScore = hasWhatIf ? Number(assign.whatIfEarned) : (hasActual ? Number(assign.earned) : null);
-          const effectivePct = effectiveScore !== null && avail > 0 ? (effectiveScore / avail) * 100 : null;
-
-          const pctPill = document.querySelector(`[data-assign-pct-pill="${aid}"]`);
-          if (pctPill) {
-            pctPill.textContent = actualPct !== null ? formatPercent(actualPct, 1) : 'Ungraded';
-            pctPill.className = `inline-block px-2.5 py-0.5 rounded-md font-mono text-[11px] font-bold ${getScorePillClasses(actualPct)}`;
+          if (target.closest('#btnDuplicateClass')) {
+            const cls = getActiveClass();
+            if (!cls) return;
+            const copy = JSON.parse(JSON.stringify(cls));
+            copy.id = uid('class');
+            copy.code = `${cls.code} (Copy)`;
+            state.classes.push(copy);
+            state.activeClassId = copy.id;
+            saveState();
+            renderApp();
+            showToast(`Duplicated "${cls.code}"`, 'success');
+            return;
           }
 
-          const forecastPill = document.querySelector(`[data-assign-forecast-pill="${aid}"]`);
-          if (forecastPill) {
-            forecastPill.textContent = effectivePct !== null ? formatPercent(effectivePct, 1) : '--%';
-            forecastPill.className = `inline-block px-2 py-0.5 rounded-md font-mono text-[11px] font-semibold ${hasWhatIf ? 'accent-pill border' : 'text-theme-faint'}`;
+          if (target.closest('#btnDeleteClass')) {
+            const cls = getActiveClass();
+            if (!cls) return;
+            if (state.classes.length <= 1) {
+              showToast('At least one class gradebook must remain active.', 'warning');
+              return;
+            }
+            openConfirmModal(
+              `Delete "${cls.code}: ${cls.name}"?`,
+              `This will permanently remove this class and all ${cls.assignments.length} assignment entries.`,
+              () => {
+                const deletedTerm = normalizeTermName(cls.term);
+                state.classes = state.classes.filter(c => c.id !== cls.id);
+                const remainingInTerm = state.classes.filter(c => normalizeTermName(c.term) === deletedTerm);
+                if (state.activeTermFilter !== 'ALL' && remainingInTerm.length > 0) {
+                  state.activeClassId = remainingInTerm[0].id;
+                } else {
+                  state.activeClassId = state.classes[0].id;
+                  if (state.activeTermFilter !== 'ALL') {
+                    state.activeTermFilter = normalizeTermName(state.classes[0].term);
+                  }
+                }
+                saveState();
+                renderApp();
+                showToast('Deleted class gradebook', 'info');
+              }
+            );
+            return;
           }
 
-          const clearBtn = document.querySelector(`button[data-action="clear-row-whatif"][data-assign-id="${aid}"]`);
-          if (clearBtn) {
-            clearBtn.classList.toggle('hidden', !hasWhatIf);
+          // 7. Clear All What-Ifs Button
+          if (target.closest('#btnClearWhatIfs')) {
+            const cls = getActiveClass();
+            if (!cls) return;
+            cls.assignments.forEach(a => { a.whatIfEarned = null; });
+            saveState();
+            renderApp();
+            showToast('Cleared all What-If overrides', 'info');
+            return;
           }
 
-          saveState();
-          updateCalculatedMetricsInDOM();
-        });
-
-        gbBody?.addEventListener('change', (e) => {
-          const cls = getActiveClass();
-          if (!cls) return;
-          const select = e.target;
-          if (select.getAttribute('data-assign-field') !== 'groupId') return;
-          const aid = select.getAttribute('data-assign-id');
-          const assign = cls.assignments.find(a => a.id === aid);
-          if (!assign) return;
-
-          assign.groupId = select.value;
-          highlightedAssignmentId = aid;
-          const targetGroup = cls.groups.find(g => g.id === select.value);
-
-          saveState();
-          renderApp();
-          highlightedAssignmentId = null;
-          if (targetGroup) {
-            showToast(`Moved "${assign.name}" to ${targetGroup.name}`, 'info');
+          // 8. Assignment Group Actions (+ Add Group, Normalize to 100%, Delete Group)
+          if (target.closest('#btnAddGroup')) {
+            const cls = getActiveClass();
+            if (!cls) return;
+            const currentSum = cls.groups.reduce((acc, g) => acc + (Number(g.weight) || 0), 0);
+            const suggested = currentSum < 100 ? Number((100 - currentSum).toFixed(1)) : 10;
+            cls.groups.push({
+              id: uid('grp'),
+              name: `Group ${cls.groups.length + 1}`,
+              weight: suggested
+            });
+            saveState();
+            renderApp();
+            showToast('Added new assignment group', 'success');
+            return;
           }
-        });
 
-        gbBody?.addEventListener('click', (e) => {
-          const cls = getActiveClass();
-          if (!cls) return;
-          const btn = e.target.closest('button[data-action]');
-          if (!btn) return;
-          const action = btn.getAttribute('data-action');
+          if (target.closest('#btnNormalizeWeights')) {
+            const cls = getActiveClass();
+            if (!cls) return;
+            const total = cls.groups.reduce((acc, g) => acc + (Number(g.weight) || 0), 0);
+            if (total <= 0) {
+              const equal = Number((100 / cls.groups.length).toFixed(2));
+              cls.groups.forEach(g => { g.weight = equal; });
+            } else {
+              cls.groups.forEach(g => {
+                g.weight = Number(((Number(g.weight) / total) * 100).toFixed(2));
+              });
+            }
+            const sumAfter = cls.groups.reduce((acc, g) => acc + g.weight, 0);
+            if (cls.groups.length > 0 && Math.abs(100 - sumAfter) > 0) {
+              cls.groups[cls.groups.length - 1].weight = Number((cls.groups[cls.groups.length - 1].weight + (100 - sumAfter)).toFixed(2));
+            }
+            saveState();
+            renderApp();
+            showToast('Normalized assignment group weights to 100%', 'success');
+            return;
+          }
 
-          if (action === 'add-to-group') {
-            const gid = btn.getAttribute('data-group-id');
+          const deleteGroupBtn = target.closest('[data-action="delete-group"]');
+          if (deleteGroupBtn) {
+            const cls = getActiveClass();
+            if (!cls) return;
+            const gid = deleteGroupBtn.getAttribute('data-group-id');
+            if (cls.groups.length <= 1) {
+              showToast('A class must keep at least one assignment group.', 'warning');
+              return;
+            }
+            const grp = cls.groups.find(g => g.id === gid);
+            const fallback = cls.groups.find(g => g.id !== gid);
+            if (!grp || !fallback) return;
+            const count = cls.assignments.filter(a => a.groupId === gid).length;
+
+            openConfirmModal(
+              `Delete "${grp.name}" Group?`,
+              count > 0
+                ? `This group has ${count} assignment(s). They will be reassigned to "${fallback.name}".`
+                : `Are you sure you want to delete the "${grp.name}" group?`,
+              () => {
+                cls.assignments.forEach(a => {
+                  if (a.groupId === gid) a.groupId = fallback.id;
+                });
+                cls.groups = cls.groups.filter(g => g.id !== gid);
+                saveState();
+                renderApp();
+                showToast(`Removed group "${grp.name}"`, 'info');
+              }
+            );
+            return;
+          }
+
+          // 9. Sync Class Grade Buckets with Profile Default Scale
+          if (target.closest('#btnResetClassBuckets')) {
+            const cls = getActiveClass();
+            if (!cls) return;
+            cls.buckets = cloneGradeScale(state.defaultGradeDefinitions);
+            saveState();
+            renderApp();
+            showToast('Synced class buckets with Profile Default Scale', 'success');
+            return;
+          }
+
+          // 10. Gradebook View Mode Toggles & Assignment Actions
+          if (target.closest('#btnViewGrouped')) {
+            if (state.gradebookViewMode !== 'grouped') {
+              state.gradebookViewMode = 'grouped';
+              saveState();
+              renderApp();
+            }
+            return;
+          }
+
+          if (target.closest('#btnViewUnified')) {
+            if (state.gradebookViewMode !== 'unified') {
+              state.gradebookViewMode = 'unified';
+              saveState();
+              renderApp();
+            }
+            return;
+          }
+
+          if (target.closest('#btnAddAssignmentGlobal')) {
+            const cls = getActiveClass();
+            if (!cls || !cls.groups[0]) return;
+            const firstGroup = cls.groups[0];
+            const newId = uid('asg');
+            cls.assignments.push({
+              id: newId,
+              name: `Assignment ${cls.assignments.length + 1}`,
+              groupId: firstGroup.id,
+              earned: null,
+              available: 100,
+              whatIfEarned: null
+            });
+            highlightedAssignmentId = newId;
+            saveState();
+            renderApp();
+            highlightedAssignmentId = null;
+            showToast(`Added assignment to ${firstGroup.name}`, 'success');
+            return;
+          }
+
+          const addToGroupBtn = target.closest('[data-action="add-to-group"]');
+          if (addToGroupBtn) {
+            const cls = getActiveClass();
+            if (!cls) return;
+            const gid = addToGroupBtn.getAttribute('data-group-id');
             const grp = cls.groups.find(g => g.id === gid);
             if (!grp) return;
             const countInGroup = cls.assignments.filter(a => a.groupId === gid).length + 1;
@@ -2711,163 +2881,355 @@
             renderApp();
             highlightedAssignmentId = null;
             showToast(`Added entry to ${grp.name}`, 'success');
-          } else if (action === 'delete-assignment') {
-            const aid = btn.getAttribute('data-assign-id');
+            return;
+          }
+
+          const deleteAssignBtn = target.closest('[data-action="delete-assignment"]');
+          if (deleteAssignBtn) {
+            const cls = getActiveClass();
+            if (!cls) return;
+            const aid = deleteAssignBtn.getAttribute('data-assign-id');
             cls.assignments = cls.assignments.filter(a => a.id !== aid);
             saveState();
             renderApp();
             showToast('Deleted assignment entry', 'info');
-          } else if (action === 'clear-row-whatif') {
-            const aid = btn.getAttribute('data-assign-id');
+            return;
+          }
+
+          const clearRowWhatIfBtn = target.closest('[data-action="clear-row-whatif"]');
+          if (clearRowWhatIfBtn) {
+            const cls = getActiveClass();
+            if (!cls) return;
+            const aid = clearRowWhatIfBtn.getAttribute('data-assign-id');
             const assign = cls.assignments.find(a => a.id === aid);
             if (!assign) return;
             assign.whatIfEarned = null;
             saveState();
             renderApp();
+            return;
           }
-        });
 
-        // 10. Profile & Settings View Listeners
-        document.getElementById('profileDisplayName')?.addEventListener('input', (e) => {
-          state.profile.displayName = e.target.value;
-          saveState();
-          const initials = getInitials(state.profile.displayName);
-          const avatarEl = document.getElementById('profileAvatarCircle');
-          const headerAvatarEl = document.getElementById('headerAvatarInitials');
-          if (avatarEl) avatarEl.textContent = initials;
-          if (headerAvatarEl) headerAvatarEl.textContent = initials;
-        });
+          // 11. Profile & Settings View Actions (Theme, Grade Definitions, Export/Reset)
+          const themeBtn = target.closest('[data-action="set-theme"]');
+          if (themeBtn) {
+            const themeVal = themeBtn.getAttribute('data-theme-value');
+            applyTheme(themeVal);
+            saveState();
+            renderApp();
+            showToast(`Switched theme to ${themeVal}`, 'info');
+            return;
+          }
 
-        document.getElementById('profileEmail')?.addEventListener('input', (e) => {
-          state.profile.email = e.target.value;
-          saveState();
-        });
+          if (target.closest('#btnSaveDefaultDefinitions')) {
+            saveState();
+            showToast('Saved default grade definitions', 'success');
+            return;
+          }
 
-        document.getElementById('profileInstitution')?.addEventListener('input', (e) => {
-          state.profile.institution = e.target.value;
-          saveState();
-        });
+          if (target.closest('#btnApplyDefaultsToAllClasses')) {
+            state.classes.forEach(c => {
+              c.buckets = cloneGradeScale(state.defaultGradeDefinitions);
+            });
+            saveState();
+            showToast('Applied default grade definitions to all classes', 'success');
+            return;
+          }
 
-        document.getElementById('profileStudentId')?.addEventListener('input', (e) => {
-          state.profile.studentId = e.target.value;
-          saveState();
-        });
+          if (target.closest('#btnResetUcbDefaults')) {
+            state.defaultGradeDefinitions = cloneGradeScale(UC_BERKELEY_GRADE_DEFINITIONS);
+            saveState();
+            renderApp();
+            showToast('Reset to UC Berkeley Registrar defaults', 'success');
+            return;
+          }
 
-        document.getElementById('profileStanding')?.addEventListener('input', (e) => {
-          state.profile.standing = e.target.value;
-          saveState();
-        });
+          if (target.closest('#btnExportJson')) {
+            const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'gradecraft-data.json';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            URL.revokeObjectURL(url);
+            showToast('Downloaded gradecraft-data.json', 'success');
+            return;
+          }
 
-        document.getElementById('themeButtonsContainer')?.addEventListener('click', (e) => {
-          const btn = e.target.closest('[data-action="set-theme"]');
-          if (!btn) return;
-          const themeVal = btn.getAttribute('data-theme-value');
-          applyTheme(themeVal);
-          saveState();
-          renderApp();
-          showToast(`Switched theme to ${themeVal}`, 'info');
-        });
-
-        document.getElementById('selectLocaleCascade')?.addEventListener('change', (e) => {
-          applyLocale(e.target.value);
-          saveState();
-          renderApp();
-          showToast(`Locale cascade set to ${state.locale}`, 'info');
-        });
-
-        document.getElementById('tbodyDefaultGradeDefinitions')?.addEventListener('input', (e) => {
-          const input = e.target;
-          const id = input.getAttribute('data-default-grade-id');
-          if (!id) return;
-          const def = state.defaultGradeDefinitions.find(d => d.id === id);
-          if (!def) return;
-          def.min = Math.max(0, Math.min(100, parseFloat(input.value) || 0));
-          saveState();
-        });
-
-        document.getElementById('btnSaveDefaultDefinitions')?.addEventListener('click', () => {
-          saveState();
-          showToast('Saved default grade definitions', 'success');
-        });
-
-        document.getElementById('btnApplyDefaultsToAllClasses')?.addEventListener('click', () => {
-          state.classes.forEach(c => {
-            c.buckets = cloneGradeScale(state.defaultGradeDefinitions);
-          });
-          saveState();
-          showToast('Applied default grade definitions to all classes', 'success');
-        });
-
-        document.getElementById('btnResetUcbDefaults')?.addEventListener('click', () => {
-          state.defaultGradeDefinitions = cloneGradeScale(UC_BERKELEY_GRADE_DEFINITIONS);
-          saveState();
-          renderApp();
-          showToast('Reset to UC Berkeley Registrar defaults', 'success');
-        });
-
-        document.getElementById('btnExportJson')?.addEventListener('click', () => {
-          const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = 'gradecraft-data.json';
-          document.body.appendChild(a);
-          a.click();
-          a.remove();
-          URL.revokeObjectURL(url);
-          showToast('Downloaded gradecraft-data.json', 'success');
-        });
-
-        document.getElementById('inputImportJson')?.addEventListener('change', (e) => {
-          const file = e.target.files && e.target.files[0];
-          if (!file) return;
-          const reader = new FileReader();
-          reader.onload = (ev) => {
-            try {
-              const parsed = JSON.parse(ev.target.result);
-              if (!parsed || !Array.isArray(parsed.classes) || parsed.classes.length === 0) {
-                showToast('Invalid JSON backup: missing classes list.', 'warning');
-                return;
+          if (target.closest('#btnResetDemoData')) {
+            openConfirmModal(
+              'Reset All Data to Defaults?',
+              'This will restore the default sample courses (CS 61A, DATA C8, and MATH 54), generic profile defaults, and UC Berkeley Registrar grade definitions.',
+              () => {
+                const keepTheme = state.theme;
+                const keepLocale = state.locale;
+                LEGACY_KEYS.forEach(k => localStorage.removeItem(k));
+                state = createDefaultState();
+                state.theme = keepTheme;
+                state.locale = keepLocale;
+                state.activeView = 'profile';
+                saveState();
+                renderApp();
+                showToast('Restored CS 61A, DATA C8, and MATH 54 example courses', 'success');
               }
-              state = sanitizeState(parsed);
-              state.activeView = 'profile';
-              saveState();
-              renderApp();
-              showToast('Imported JSON backup successfully', 'success');
-            } catch {
-              showToast('Failed to parse JSON file.', 'warning');
-            }
-          };
-          reader.readAsText(file);
-          e.target.value = '';
-        });
-
-        document.getElementById('btnResetDemoData')?.addEventListener('click', () => {
-          openConfirmModal(
-            'Reset All Data to Defaults?',
-            'This will restore the default sample courses (Course 101 and Course 102), generic profile defaults, and UC Berkeley Registrar grade definitions.',
-            () => {
-              const keepTheme = state.theme;
-              const keepLocale = state.locale;
-              LEGACY_KEYS.forEach(k => localStorage.removeItem(k));
-              state = createDefaultState();
-              state.theme = keepTheme;
-              state.locale = keepLocale;
-              state.activeView = 'profile';
-              saveState();
-              renderApp();
-              showToast('Restored default demo data', 'success');
-            }
-          );
-        });
-
-        // 11. Confirmation Modal Buttons
-        document.getElementById('confirmModalCancelBtn')?.addEventListener('click', closeConfirmModal);
-        document.getElementById('confirmModalAcceptBtn')?.addEventListener('click', () => {
-          if (typeof pendingModalConfirm === 'function') {
-            pendingModalConfirm();
+            );
+            return;
           }
-          closeConfirmModal();
+
+          // 12. Confirmation Modal Buttons
+          if (target.closest('#confirmModalCancelBtn')) {
+            closeConfirmModal();
+            return;
+          }
+          if (target.closest('#confirmModalAcceptBtn')) {
+            if (typeof pendingModalConfirm === 'function') {
+              pendingModalConfirm();
+            }
+            closeConfirmModal();
+            return;
+          }
+        });
+
+        // B. UNIFIED INPUT DELEGATION ON DOCUMENT (IN-PLACE UPDATES, ZERO CARET/SCROLL LOSS)
+        document.addEventListener('input', (e) => {
+          const target = e.target;
+          if (!target) return;
+
+          // 1. Class Header Inputs (Course Code, Course Title, Academic Term)
+          if (target.id === 'inputClassCode') {
+            const cls = getActiveClass();
+            if (!cls) return;
+            cls.code = target.value;
+            saveState();
+            const tabCode = document.querySelector(`[data-action="select-class"][data-class-id="${cls.id}"] [data-tab-code]`);
+            if (tabCode) tabCode.textContent = cls.code || 'Course';
+            return;
+          }
+
+          if (target.id === 'inputClassName') {
+            const cls = getActiveClass();
+            if (!cls) return;
+            cls.name = target.value;
+            saveState();
+            const tabName = document.querySelector(`[data-action="select-class"][data-class-id="${cls.id}"] [data-tab-name]`);
+            if (tabName) tabName.textContent = cls.name;
+            return;
+          }
+
+          if (target.id === 'inputClassTerm') {
+            const cls = getActiveClass();
+            if (!cls) return;
+            cls.term = target.value;
+            saveState();
+            return;
+          }
+
+          // 2. Assignment Group Name & Weight Inputs (In-place DOM updates)
+          const gid = target.getAttribute('data-group-id');
+          const gField = target.getAttribute('data-group-field');
+          if (gid && gField) {
+            const cls = getActiveClass();
+            if (!cls) return;
+            const grp = cls.groups.find(g => g.id === gid);
+            if (!grp) return;
+
+            if (gField === 'name') {
+              grp.name = target.value;
+              saveState();
+              updateGroupNameInDOM(gid, grp.name);
+            } else if (gField === 'weight') {
+              grp.weight = Math.max(0, parseFloat(target.value) || 0);
+              saveState();
+              updateCalculatedMetricsInDOM();
+            }
+            return;
+          }
+
+          // 3. Class Grade Bucket Cutoffs (In-place DOM updates)
+          const bid = target.getAttribute('data-bucket-cutoff');
+          if (bid) {
+            const cls = getActiveClass();
+            if (!cls) return;
+            const bucket = cls.buckets.find(b => b.id === bid);
+            if (!bucket) return;
+            bucket.min = Math.max(0, Math.min(100, parseFloat(target.value) || 0));
+            saveState();
+            updateCalculatedMetricsInDOM();
+            return;
+          }
+
+          // 4. Assignment Row Inputs (Name, Earned, Available, What-If)
+          const aid = target.getAttribute('data-assign-id');
+          const aField = target.getAttribute('data-assign-field');
+          if (aid && aField && aField !== 'groupId') {
+            const cls = getActiveClass();
+            if (!cls) return;
+            const assign = cls.assignments.find(a => a.id === aid);
+            if (!assign) return;
+
+            if (aField === 'name') {
+              assign.name = target.value;
+            } else if (aField === 'earned') {
+              const raw = target.value.trim();
+              assign.earned = raw === '' ? null : parseFloat(raw);
+            } else if (aField === 'possible') {
+              assign.available = Math.max(0.01, parseFloat(target.value) || 0.01);
+            } else if (aField === 'whatIfEarned') {
+              const raw = target.value.trim();
+              assign.whatIfEarned = raw === '' ? null : parseFloat(raw);
+            }
+
+            const avail = Math.max(0, Number(assign.available) || 0);
+            const hasActual = isGradedValue(assign.earned);
+            const hasWhatIf = isGradedValue(assign.whatIfEarned);
+            const actualPct = hasActual && avail > 0 ? (Number(assign.earned) / avail) * 100 : null;
+            const effectiveScore = hasWhatIf ? Number(assign.whatIfEarned) : (hasActual ? Number(assign.earned) : null);
+            const effectivePct = effectiveScore !== null && avail > 0 ? (effectiveScore / avail) * 100 : null;
+
+            const pctPill = document.querySelector(`[data-assign-pct-pill="${aid}"]`);
+            if (pctPill) {
+              pctPill.textContent = actualPct !== null ? formatPercent(actualPct, 1) : 'Ungraded';
+              pctPill.className = `inline-block px-2.5 py-0.5 rounded-md font-mono text-[11px] font-bold ${getScorePillClasses(actualPct)}`;
+            }
+
+            const forecastPill = document.querySelector(`[data-assign-forecast-pill="${aid}"]`);
+            if (forecastPill) {
+              forecastPill.textContent = effectivePct !== null ? formatPercent(effectivePct, 1) : '--%';
+              forecastPill.className = `inline-block px-2 py-0.5 rounded-md font-mono text-[11px] font-semibold ${hasWhatIf ? 'accent-pill border' : 'text-theme-faint'}`;
+            }
+
+            const clearBtn = document.querySelector(`button[data-action="clear-row-whatif"][data-assign-id="${aid}"]`);
+            if (clearBtn) {
+              clearBtn.classList.toggle('hidden', !hasWhatIf);
+            }
+
+            saveState();
+            updateCalculatedMetricsInDOM();
+            return;
+          }
+
+          // 5. Profile Inputs (Display Name, Email, Institution, Student ID)
+          if (target.id === 'profileDisplayName') {
+            state.profile.displayName = target.value;
+            saveState();
+            const initials = getInitials(state.profile.displayName);
+            const avatarEl = document.getElementById('profileAvatarCircle');
+            const headerAvatarEl = document.getElementById('headerAvatarInitials');
+            if (avatarEl) avatarEl.textContent = initials;
+            if (headerAvatarEl) headerAvatarEl.textContent = initials;
+            return;
+          }
+          if (target.id === 'profileEmail') {
+            state.profile.email = target.value;
+            saveState();
+            return;
+          }
+          if (target.id === 'profileInstitution') {
+            state.profile.institution = target.value;
+            saveState();
+            return;
+          }
+          if (target.id === 'profileStudentId') {
+            state.profile.studentId = target.value;
+            saveState();
+            return;
+          }
+
+          // 6. Default Grade Definitions Cutoffs on Profile Page
+          const defGradeId = target.getAttribute('data-default-grade-id');
+          if (defGradeId) {
+            const def = state.defaultGradeDefinitions.find(d => d.id === defGradeId);
+            if (!def) return;
+            def.min = Math.max(0, Math.min(100, parseFloat(target.value) || 0));
+            saveState();
+          }
+        });
+
+        // C. UNIFIED CHANGE DELEGATION ON DOCUMENT
+        document.addEventListener('change', (e) => {
+          const target = e.target;
+          if (!target) return;
+
+          // 1. Academic Term Input Committed -> Sync Term Tabs
+          if (target.id === 'inputClassTerm') {
+            const cls = getActiveClass();
+            if (!cls) return;
+            const normalized = normalizeTermName(target.value);
+            cls.term = normalized;
+            target.value = normalized;
+            if (state.activeTermFilter !== 'ALL') {
+              state.activeTermFilter = normalized;
+            }
+            saveState();
+            renderApp(true);
+            return;
+          }
+
+          // 2. Target Grade Select Dropdown
+          if (target.id === 'selectTargetGrade') {
+            const cls = getActiveClass();
+            if (!cls) return;
+            cls.targetLetter = target.value;
+            saveState();
+            updateCalculatedMetricsInDOM();
+            return;
+          }
+
+          // 3. Assignment Group Reassignment Select Dropdown
+          if (target.getAttribute('data-assign-field') === 'groupId') {
+            const cls = getActiveClass();
+            if (!cls) return;
+            const aid = target.getAttribute('data-assign-id');
+            const assign = cls.assignments.find(a => a.id === aid);
+            if (!assign) return;
+
+            assign.groupId = target.value;
+            highlightedAssignmentId = aid;
+            const targetGroup = cls.groups.find(g => g.id === target.value);
+
+            saveState();
+            renderApp();
+            highlightedAssignmentId = null;
+            if (targetGroup) {
+              showToast(`Moved "${assign.name}" to ${targetGroup.name}`, 'info');
+            }
+            return;
+          }
+
+          // 4. Locale Cascade Selector
+          if (target.id === 'selectLocaleCascade') {
+            applyLocale(target.value);
+            saveState();
+            renderApp();
+            showToast(`Locale cascade set to ${state.locale}`, 'info');
+            return;
+          }
+
+          // 5. Import JSON File Input
+          if (target.id === 'inputImportJson') {
+            const file = target.files && target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+              try {
+                const parsed = JSON.parse(ev.target.result);
+                if (!parsed || !Array.isArray(parsed.classes) || parsed.classes.length === 0) {
+                  showToast('Invalid JSON backup: missing classes list.', 'warning');
+                  return;
+                }
+                state = sanitizeState(parsed);
+                state.activeView = 'profile';
+                saveState();
+                renderApp();
+                showToast('Imported JSON backup successfully', 'success');
+              } catch {
+                showToast('Failed to parse JSON file.', 'warning');
+              }
+            };
+            reader.readAsText(file);
+            target.value = '';
+          }
         });
       }
 
