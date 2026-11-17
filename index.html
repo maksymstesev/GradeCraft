@@ -65,7 +65,7 @@
 
     html[data-theme="midnight"] {
       color-scheme: dark;
-      --bg-canvas: #090d16;
+      --bg-canvas: #0b0f19;
       --bg-header: rgba(15, 23, 42, 0.92);
       --bg-surface: #111827;
       --bg-surface-alt: #0f172a;
@@ -86,7 +86,7 @@
       --accent-soft-border: rgba(99, 102, 241, 0.35);
       --card-shadow: 0 6px 24px -4px rgba(0, 0, 0, 0.55), inset 0 1px 0 0 rgba(255, 255, 255, 0.04);
       --ambient-glow: radial-gradient(ellipse 80% 35% at 50% -8%, rgba(99, 102, 241, 0.16), transparent);
-      --scroll-track: #090d16;
+      --scroll-track: #0b0f19;
       --scroll-thumb: #334155;
       --scroll-thumb-hover: #475569;
     }
@@ -119,9 +119,6 @@
       --scroll-thumb-hover: #94a3b8;
     }
 
-    /* =========================================================================
-       SEMANTIC THEME CLASSES
-       ========================================================================= */
     body {
       background-color: var(--bg-canvas);
       background-image: var(--ambient-glow);
@@ -236,7 +233,6 @@
       color: var(--text-primary);
     }
 
-    /* Custom Scrollbars */
     ::-webkit-scrollbar {
       width: 6px;
       height: 6px;
@@ -252,7 +248,6 @@
       background: var(--scroll-thumb-hover);
     }
 
-    /* Subtle pulse highlight when an assignment moves groups */
     .row-highlight-anim {
       animation: pulseHighlight 1.15s ease-out;
     }
@@ -270,10 +265,11 @@
   <header class="sticky top-0 z-30 app-header backdrop-blur-md border-b">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex flex-wrap items-center justify-between py-3 gap-3">
-        <!-- Top-Left Brand Reload Button (#btnBrandReload) -->
+        <!-- Top-Left Graduation Cap Reload Button (#btnBrandReload) -->
         <button
           id="btnBrandReload"
           type="button"
+          onclick="window.reloadGradeCraft && window.reloadGradeCraft()"
           title="Reload GradeCraft"
           aria-label="Reload GradeCraft"
           class="group flex items-center gap-3 text-left cursor-pointer rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-400 transition-transform duration-150 hover:scale-[1.02] active:scale-95"
@@ -295,19 +291,21 @@
         <!-- Right Navigation Switcher Pills -->
         <nav aria-label="Primary Workspace Navigation" class="flex items-center gap-1.5 p-1 rounded-2xl surface-pill border">
           <button
-            id="navGradebookBtn"
+            id="navBtnGradebook"
             type="button"
+            onclick="window.switchAppView && window.switchAppView('gradebook')"
             data-nav-view="gradebook"
-            class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold transition cursor-pointer"
+            class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold bg-indigo-600 text-white shadow-sm shadow-indigo-500/25 transition cursor-pointer"
           >
             <i class="fa-solid fa-table-columns"></i>
             <span>Gradebook</span>
           </button>
           <button
-            id="navProfileBtn"
+            id="navBtnProfile"
             type="button"
+            onclick="window.switchAppView && window.switchAppView('profile')"
             data-nav-view="profile"
-            class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold transition cursor-pointer"
+            class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold text-theme-muted hover:text-theme-primary transition cursor-pointer"
           >
             <span id="headerAvatarInitials" class="w-5 h-5 rounded-full bg-indigo-600 text-white flex items-center justify-center text-[10px] font-bold">SN</span>
             <span>Profile &amp; Settings</span>
@@ -318,10 +316,668 @@
   </header>
 
   <!-- =========================================================================
-       MAIN WORKSPACE CONTAINER
+       MAIN WORKSPACE CONTAINER (STATIC CONTAINERS PREVENT BLANK SCREEN)
        ========================================================================= -->
-  <main id="mainWorkspace" class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-    <!-- Dynamically rendered by JavaScript -->
+  <main id="mainWorkspace" class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+    <!-- =======================================================================
+         VIEW 1: GRADEBOOK VIEW (#viewGradebook - Visible by Default)
+         ======================================================================= -->
+    <div id="viewGradebook" class="space-y-6">
+      <!-- 1. Multi-Class Tab Strip + Class Actions -->
+      <section class="flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center gap-2 overflow-x-auto pb-1 max-w-full">
+          <div id="classTabsContainer" class="flex items-center gap-2"></div>
+          <button
+            id="btnAddClass"
+            type="button"
+            class="shrink-0 inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold theme-btn-secondary cursor-pointer"
+          >
+            <i class="fa-solid fa-plus text-indigo-400"></i>
+            <span>Add Class</span>
+          </button>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button
+            id="btnDuplicateClass"
+            type="button"
+            class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold theme-btn-secondary cursor-pointer"
+          >
+            <i class="fa-regular fa-copy text-indigo-400"></i>
+            <span>Duplicate Class</span>
+          </button>
+          <button
+            id="btnDeleteClass"
+            type="button"
+            class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 transition cursor-pointer"
+          >
+            <i class="fa-regular fa-trash-can"></i>
+            <span>Delete Class</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- 2. Editable Class Header Card -->
+      <section class="surface-card rounded-2xl border p-4 sm:p-5">
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
+          <div class="md:col-span-3">
+            <label for="inputClassCode" class="block text-[10px] font-bold uppercase tracking-wider text-theme-faint mb-1">Course Code</label>
+            <input
+              id="inputClassCode"
+              type="text"
+              value="Course 101"
+              placeholder="e.g., Course 101"
+              class="w-full text-sm font-bold font-mono theme-input rounded-xl px-3 py-2"
+            />
+          </div>
+          <div class="md:col-span-6">
+            <label for="inputClassName" class="block text-[10px] font-bold uppercase tracking-wider text-theme-faint mb-1">Course Title</label>
+            <input
+              id="inputClassName"
+              type="text"
+              value="Intro to Computer Science"
+              placeholder="e.g., Intro to Computer Science"
+              class="w-full text-sm font-bold theme-input rounded-xl px-3 py-2"
+            />
+          </div>
+          <div class="md:col-span-3">
+            <label for="inputClassTerm" class="block text-[10px] font-bold uppercase tracking-wider text-theme-faint mb-1">Academic Term</label>
+            <input
+              id="inputClassTerm"
+              type="text"
+              value="Fall Semester"
+              placeholder="e.g., Fall Semester"
+              class="w-full text-sm font-semibold theme-input rounded-xl px-3 py-2"
+            />
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. Grade Summary & Forecast Banner (3 Cards) -->
+      <section class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+        <!-- Card A: Current Actual Grade -->
+        <div class="lg:col-span-4 surface-card rounded-2xl border p-5 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between gap-2">
+              <span class="text-xs font-bold uppercase tracking-wider text-theme-muted flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-indigo-500"></span>
+                Current Actual Grade
+              </span>
+              <span id="badgeActualWeight" class="text-[11px] font-medium px-2.5 py-0.5 rounded-full surface-pill text-theme-muted border">
+                30% weight graded
+              </span>
+            </div>
+
+            <div class="mt-4 flex items-baseline justify-between gap-4">
+              <div>
+                <div id="displayActualPct" class="text-4xl sm:text-5xl font-extrabold tracking-tight font-mono text-theme-primary">
+                  90.00%
+                </div>
+                <div id="displayActualPts" class="text-xs text-theme-muted mt-1">
+                  Graded points: 45 / 50 • 3.7 GPA
+                </div>
+              </div>
+
+              <div class="text-right shrink-0">
+                <div id="badgeActualLetter" class="inline-flex items-center justify-center min-w-[64px] h-16 px-4 rounded-2xl text-3xl font-extrabold border bg-emerald-500/15 text-emerald-300 border-emerald-500/35">
+                  A-
+                </div>
+                <div class="text-[11px] text-theme-faint mt-1">Letter Grade</div>
+              </div>
+            </div>
+          </div>
+
+          <div id="boxActualMargins" class="mt-5 pt-3.5 border-t border-theme-subtle text-xs space-y-1.5">
+            <span class="text-theme-muted">Calculating grade bucket margins...</span>
+          </div>
+        </div>
+
+        <!-- Card B: Forecast / What-If Grade -->
+        <div class="lg:col-span-4 bg-gradient-to-br from-[#0c0d18] via-[#11152c] to-[#1b173b] text-white rounded-2xl border border-indigo-500/35 p-5 shadow-lg flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between gap-2">
+              <span class="text-xs font-bold uppercase tracking-wider text-indigo-300 flex items-center gap-1.5">
+                <i class="fa-solid fa-wand-magic-sparkles text-amber-400"></i>
+                Forecast / What-If Grade
+              </span>
+              <span id="badgeForecastDelta" class="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-white/10 text-indigo-100 border border-white/15">
+                Matches Actual
+              </span>
+            </div>
+
+            <div class="mt-4 flex items-baseline justify-between gap-4">
+              <div>
+                <div id="displayForecastPct" class="text-4xl sm:text-5xl font-extrabold tracking-tight font-mono text-white">
+                  90.00%
+                </div>
+                <div class="text-xs text-indigo-200/80 mt-1">
+                  Combines Actuals + What-If Overrides
+                </div>
+              </div>
+
+              <div class="text-right shrink-0">
+                <div id="badgeForecastLetter" class="inline-flex items-center justify-center min-w-[64px] h-16 px-4 rounded-2xl text-3xl font-extrabold bg-indigo-500/20 text-white border border-indigo-400/35">
+                  A-
+                </div>
+                <div class="text-[11px] text-indigo-300 mt-1">Projected Letter</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-5 pt-3.5 border-t border-white/10 space-y-2.5">
+            <div id="boxForecastMargins" class="text-xs text-indigo-200 leading-relaxed">
+              Enter a What-If score on any row below to simulate your final grade.
+            </div>
+            <div class="flex items-center justify-between gap-2">
+              <span id="labelWhatIfCount" class="text-[11px] text-indigo-300">
+                0 active What-If overrides
+              </span>
+              <button
+                id="btnClearWhatIfs"
+                type="button"
+                class="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-white/10 hover:bg-white/20 text-white border border-white/15 transition cursor-pointer"
+              >
+                Clear What-Ifs
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card C: Target Grade Forecaster -->
+        <div class="lg:col-span-4 surface-card rounded-2xl border p-5 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between gap-2">
+              <span class="text-xs font-bold uppercase tracking-wider text-theme-muted flex items-center gap-1.5">
+                <i class="fa-solid fa-bullseye text-emerald-400"></i>
+                Target Grade Forecaster
+              </span>
+              <span class="text-[11px] text-theme-faint">Goal Planner</span>
+            </div>
+
+            <div class="mt-3 flex items-center gap-2">
+              <label for="selectTargetGrade" class="text-xs font-medium text-theme-secondary shrink-0">Target Grade:</label>
+              <select id="selectTargetGrade" class="flex-1 text-xs font-semibold theme-select rounded-xl px-3 py-2"></select>
+            </div>
+
+            <div id="boxTargetForecastResult" class="mt-3 p-3.5 rounded-xl surface-alt border text-xs">
+              Calculating target grade requirements...
+            </div>
+          </div>
+
+          <div class="mt-4 pt-3 border-t border-theme-subtle flex items-center justify-between text-[11px] text-theme-muted">
+            <span>Remaining ungraded course weight:</span>
+            <span id="displayRemainingWeight" class="font-mono font-bold text-theme-primary">70.0%</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. Two-Column Configuration Row: Assignment Groups & Class Grade Buckets -->
+      <section class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- Left Column: Assignment Groups & Weights -->
+        <div class="lg:col-span-7 surface-card rounded-2xl border flex flex-col overflow-hidden">
+          <div class="px-5 py-4 border-b border-theme surface-alt flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <h2 class="text-sm font-bold text-theme-primary flex items-center gap-2">
+                <i class="fa-solid fa-layer-group text-indigo-400"></i>
+                <span>Assignment Groups &amp; Weights</span>
+              </h2>
+              <p class="text-xs text-theme-muted">Configure category weights toward your final class grade.</p>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+              <span id="badgeWeightWarning" class="hidden px-2.5 py-1 rounded-lg text-[11px] font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30">
+                Weights != 100%
+              </span>
+              <button
+                id="btnNormalizeWeights"
+                type="button"
+                class="hidden px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/35 transition cursor-pointer"
+              >
+                Normalize to 100%
+              </button>
+              <button
+                id="btnAddGroup"
+                type="button"
+                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm transition cursor-pointer"
+              >
+                <i class="fa-solid fa-plus"></i>
+                <span>Add Group</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="p-4 flex-1 overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="border-b border-theme text-[11px] font-bold uppercase tracking-wider text-theme-faint">
+                  <th class="pb-2.5 pl-2">Assignment Group</th>
+                  <th class="pb-2.5 text-right w-28">Weight (%)</th>
+                  <th class="pb-2.5 text-right">Graded Pts</th>
+                  <th class="pb-2.5 text-right">Actual %</th>
+                  <th class="pb-2.5 text-right">Forecast %</th>
+                  <th class="pb-2.5 w-10 text-center"></th>
+                </tr>
+              </thead>
+              <tbody id="tbodyAssignmentGroups" class="text-xs"></tbody>
+              <tfoot>
+                <tr class="border-t-2 border-theme font-bold text-xs">
+                  <td class="py-3 pl-2 text-theme-secondary">Total Configured Weight</td>
+                  <td id="cellTotalWeight" class="py-3 text-right font-mono text-emerald-400">100.0%</td>
+                  <td id="cellTotalGroupPts" class="py-3 text-right font-mono text-theme-muted">45 / 50</td>
+                  <td id="cellFooterActualPct" class="py-3 text-right font-mono text-theme-primary">90.00%</td>
+                  <td id="cellFooterForecastPct" class="py-3 text-right font-mono text-indigo-400">90.00%</td>
+                  <td></td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
+
+        <!-- Right Column: Class Grade Bucket Distribution -->
+        <div class="lg:col-span-5 surface-card rounded-2xl border flex flex-col overflow-hidden">
+          <div class="px-5 py-4 border-b border-theme surface-alt flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <h2 class="text-sm font-bold text-theme-primary flex items-center gap-2">
+                <i class="fa-solid fa-chart-simple text-indigo-400"></i>
+                <span>Class Grade Bucket Distribution</span>
+              </h2>
+              <p class="text-xs text-theme-muted">Minimum percentage thresholds (<code class="font-mono">&ge;</code>) for this class.</p>
+            </div>
+            <button
+              id="btnResetClassBuckets"
+              type="button"
+              class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold theme-btn-secondary cursor-pointer"
+            >
+              <i class="fa-solid fa-rotate-left text-indigo-400"></i>
+              <span>Sync Profile Scale</span>
+            </button>
+          </div>
+
+          <div class="p-4 flex-1 overflow-y-auto max-h-[380px]">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="border-b border-theme text-[11px] font-bold uppercase tracking-wider text-theme-faint">
+                  <th class="pb-2 pl-2">Grade</th>
+                  <th class="pb-2 text-right">Min Cutoff</th>
+                  <th class="pb-2 text-center">Range</th>
+                  <th class="pb-2 text-right pr-2">Status</th>
+                </tr>
+              </thead>
+              <tbody id="tbodyClassBuckets" class="text-xs"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5. Assignments Gradebook (Sorted by Assignment Group) -->
+      <section class="surface-card rounded-2xl border overflow-hidden">
+        <div class="px-5 py-4 border-b border-theme surface-alt flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h2 class="text-base font-bold text-theme-primary flex items-center gap-2">
+              <i class="fa-solid fa-list-check text-indigo-400"></i>
+              <span>Assignments Gradebook</span>
+              <span id="badgeTotalAssignmentsCount" class="px-2 py-0.5 rounded-full text-xs font-mono surface-pill border text-theme-muted">0</span>
+            </h2>
+            <p class="text-xs text-theme-muted mt-0.5">
+              Sorted by Assignment Group. Leave <strong>Points Earned</strong> blank for ungraded items, or enter a <strong>What-If Override</strong> score to forecast outcomes.
+            </p>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-2">
+            <div class="inline-flex items-center p-1 rounded-xl surface-pill border text-xs font-semibold">
+              <button
+                id="btnViewGrouped"
+                type="button"
+                data-action="set-gb-view"
+                data-mode="grouped"
+                class="px-3 py-1.5 rounded-lg transition cursor-pointer bg-indigo-600 text-white shadow-xs"
+              >
+                <i class="fa-solid fa-folder-tree mr-1"></i>Grouped by Category
+              </button>
+              <button
+                id="btnViewUnified"
+                type="button"
+                data-action="set-gb-view"
+                data-mode="unified"
+                class="px-3 py-1.5 rounded-lg transition cursor-pointer text-theme-muted hover:text-theme-primary"
+              >
+                <i class="fa-solid fa-table-list mr-1"></i>Unified Table (Sorted by Group)
+              </button>
+            </div>
+
+            <button
+              id="btnAddAssignmentGlobal"
+              type="button"
+              class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm transition cursor-pointer"
+            >
+              <i class="fa-solid fa-plus"></i>
+              <span>Add Assignment</span>
+            </button>
+          </div>
+        </div>
+
+        <div id="gradebookAssignmentsBody" class="p-4 sm:p-5 space-y-5"></div>
+      </section>
+    </div>
+
+    <!-- =======================================================================
+         VIEW 2: PROFILE & SETTINGS VIEW (#viewProfile - Static Container)
+         ======================================================================= -->
+    <div id="viewProfile" class="hidden space-y-6">
+      <div class="max-w-5xl mx-auto space-y-6">
+        <!-- 1. Student Profile Card -->
+        <section class="surface-card rounded-2xl border p-6 space-y-5">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-theme pb-4">
+            <div class="flex items-center gap-4">
+              <div id="profileAvatarCircle" class="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 via-indigo-600 to-violet-700 flex items-center justify-center text-white text-lg font-extrabold shadow-md">
+                SN
+              </div>
+              <div>
+                <h2 class="text-lg font-extrabold text-theme-primary">Student Profile</h2>
+                <p class="text-xs text-theme-muted">Personalize your generic academic profile metadata. Saved automatically in your browser.</p>
+              </div>
+            </div>
+            <span id="profileClassesCountBadge" class="px-3 py-1 rounded-full text-xs font-mono surface-pill border text-theme-muted self-start sm:self-center">
+              2 Active Classes
+            </span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div>
+              <label for="profileDisplayName" class="block text-xs font-semibold text-theme-secondary mb-1.5">Display Name</label>
+              <input
+                id="profileDisplayName"
+                type="text"
+                value="Student Name"
+                placeholder="Student Name"
+                class="w-full text-xs font-semibold theme-input rounded-xl px-3.5 py-2.5"
+              />
+            </div>
+            <div>
+              <label for="profileEmail" class="block text-xs font-semibold text-theme-secondary mb-1.5">Academic Email</label>
+              <input
+                id="profileEmail"
+                type="email"
+                value="student@university.edu"
+                placeholder="student@university.edu"
+                class="w-full text-xs font-semibold theme-input rounded-xl px-3.5 py-2.5"
+              />
+            </div>
+            <div>
+              <label for="profileInstitution" class="block text-xs font-semibold text-theme-secondary mb-1.5">Institution</label>
+              <input
+                id="profileInstitution"
+                type="text"
+                value="University Name"
+                placeholder="University Name"
+                class="w-full text-xs font-semibold theme-input rounded-xl px-3.5 py-2.5"
+              />
+            </div>
+            <div>
+              <label for="profileStudentId" class="block text-xs font-semibold text-theme-secondary mb-1.5">Student ID</label>
+              <input
+                id="profileStudentId"
+                type="text"
+                value="ID-00000000"
+                placeholder="ID-00000000"
+                class="w-full text-xs font-mono font-semibold theme-input rounded-xl px-3.5 py-2.5"
+              />
+            </div>
+            <div>
+              <label for="profileStanding" class="block text-xs font-semibold text-theme-secondary mb-1.5">Academic Standing</label>
+              <input
+                id="profileStanding"
+                type="text"
+                value="Undergraduate"
+                placeholder="Undergraduate"
+                class="w-full text-xs font-semibold theme-input rounded-xl px-3.5 py-2.5"
+              />
+            </div>
+          </div>
+        </section>
+
+        <!-- 2. Appearance Theme & Language/Locale Cascade Row -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Appearance Theme Switcher -->
+          <section class="surface-card rounded-2xl border p-6 flex flex-col justify-between space-y-4">
+            <div>
+              <h3 class="text-sm font-bold text-theme-primary flex items-center gap-2 mb-1">
+                <i class="fa-solid fa-palette text-indigo-400"></i>
+                <span>Appearance Theme</span>
+              </h3>
+              <p class="text-xs text-theme-muted mb-5">Choose your preferred surface palette across all gradebooks.</p>
+
+              <div id="themeButtonsContainer" class="flex items-center gap-2">
+                <button
+                  type="button"
+                  data-action="set-theme"
+                  data-theme-value="black"
+                  class="flex-1 inline-flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-bold transition cursor-pointer bg-indigo-600 text-white shadow-md shadow-indigo-500/25 ring-2 ring-indigo-400/40"
+                >
+                  <i class="fa-solid fa-moon"></i>
+                  <span>Black (OLED)</span>
+                </button>
+                <button
+                  type="button"
+                  data-action="set-theme"
+                  data-theme-value="midnight"
+                  class="flex-1 inline-flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-bold transition cursor-pointer theme-btn-secondary"
+                >
+                  <i class="fa-solid fa-cloud-moon"></i>
+                  <span>Midnight</span>
+                </button>
+                <button
+                  type="button"
+                  data-action="set-theme"
+                  data-theme-value="light"
+                  class="flex-1 inline-flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-bold transition cursor-pointer theme-btn-secondary"
+                >
+                  <i class="fa-solid fa-sun"></i>
+                  <span>Light</span>
+                </button>
+              </div>
+            </div>
+            <div class="pt-3 border-t border-theme-subtle text-[11px] text-theme-faint">
+              Active theme: <span id="activeThemeLabel" class="font-mono font-semibold text-indigo-400">black</span>
+            </div>
+          </section>
+
+          <!-- Language & Locale Cascade Selector -->
+          <section class="surface-card rounded-2xl border p-6 flex flex-col justify-between space-y-4">
+            <div>
+              <h3 class="text-sm font-bold text-theme-primary flex items-center gap-2 mb-1">
+                <i class="fa-solid fa-globe text-indigo-400"></i>
+                <span>Language &amp; Locale Cascade</span>
+              </h3>
+              <p class="text-xs text-theme-muted mb-4">
+                Configures regional locale cascade (<code class="font-mono text-[11px]">selectedLocale &rarr; lang &rarr; en-US fallback</code>) and <code class="font-mono text-[11px]">Intl.NumberFormat</code> formatting.
+              </p>
+
+              <label for="selectLocaleCascade" class="block text-xs font-semibold text-theme-secondary mb-1.5">Regional Locale</label>
+              <select id="selectLocaleCascade" class="w-full text-xs font-semibold theme-select rounded-xl px-3.5 py-2.5">
+                <option value="en-US">English (United States) — en-US</option>
+                <option value="es-ES">Español (España) — es-ES</option>
+                <option value="fr-FR">Français (France) — fr-FR</option>
+                <option value="de-DE">Deutsch (Deutschland) — de-DE</option>
+                <option value="uk-UA">Українська (Україна) — uk-UA</option>
+                <option value="pt-BR">Português (Brasil) — pt-BR</option>
+                <option value="zh-CN">中文 (简体) — zh-CN</option>
+                <option value="ja-JP">日本語 (日本) — ja-JP</option>
+                <option value="ko-KR">한국어 (대한민국) — ko-KR</option>
+              </select>
+            </div>
+
+            <div class="pt-3 border-t border-theme-subtle flex flex-wrap items-center justify-between gap-2 text-[11px] text-theme-faint">
+              <span>Cascade: <strong id="localeCascadeChainLabel" class="font-mono text-indigo-400">en-US &rarr; en &rarr; en-US (fallback)</strong></span>
+              <span>Sample: <strong id="localeSampleNumber" class="font-mono text-theme-primary">94.75%</strong></span>
+            </div>
+          </section>
+        </div>
+
+        <!-- 3. Custom Grade Definitions Editor (UC Berkeley Registrar Default Scale) -->
+        <section class="surface-card rounded-2xl border overflow-hidden">
+          <div class="px-6 py-4 border-b border-theme surface-alt flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+            <div>
+              <h3 class="text-base font-bold text-theme-primary flex items-center gap-2">
+                <i class="fa-solid fa-award text-indigo-400"></i>
+                <span>Custom Grade Definitions (UC Berkeley Default Scale)</span>
+              </h3>
+              <p class="text-xs text-theme-muted mt-0.5">
+                Default thresholds follow official UC Berkeley Registrar Grade Definitions (<code class="font-mono">A+</code> through <code class="font-mono">F</code>). Customize minimum cutoffs below.
+              </p>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-2 shrink-0">
+              <button
+                id="btnSaveDefaultDefinitions"
+                type="button"
+                class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white shadow-xs transition cursor-pointer"
+              >
+                <i class="fa-solid fa-floppy-disk"></i>
+                <span>Save Default Definitions</span>
+              </button>
+              <button
+                id="btnApplyDefaultsToAllClasses"
+                type="button"
+                class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white shadow-xs transition cursor-pointer"
+              >
+                <i class="fa-solid fa-arrows-rotate"></i>
+                <span>Apply to All Classes</span>
+              </button>
+              <button
+                id="btnResetUcbDefaults"
+                type="button"
+                class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold theme-btn-secondary cursor-pointer"
+              >
+                <i class="fa-solid fa-rotate-left text-indigo-400"></i>
+                <span>Reset to UC Berkeley Defaults</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="p-4 sm:p-6 overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="border-b border-theme text-[11px] font-bold uppercase tracking-wider text-theme-faint">
+                  <th class="pb-3 pl-3 w-24">Letter Grade</th>
+                  <th class="pb-3 text-right w-36">Min Cutoff (&ge; %)</th>
+                  <th class="pb-3 text-center w-28">Grade Points</th>
+                  <th class="pb-3 pl-4">Registrar Grade Description</th>
+                </tr>
+              </thead>
+              <tbody id="tbodyDefaultGradeDefinitions" class="text-xs"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- 4. Authorization UI Placeholder Card (Zero Auth Logic) -->
+        <section class="surface-card rounded-2xl border p-6 space-y-5">
+          <div class="flex flex-wrap items-center justify-between gap-3 border-b border-theme pb-4">
+            <div>
+              <div class="flex flex-wrap items-center gap-2">
+                <h3 class="text-sm font-bold text-theme-primary flex items-center gap-2">
+                  <i class="fa-solid fa-shield-halved text-indigo-400"></i>
+                  <span>Account &amp; Cloud Sync Authorization</span>
+                </h3>
+                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30">
+                  UI Preview Only — Auth Logic Not Yet Implemented
+                </span>
+              </div>
+              <p class="text-xs text-theme-muted mt-1">Sign in, create an account, or link institutional SSO to synchronize gradebooks across devices in a future release.</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end opacity-80">
+            <div class="md:col-span-4 space-y-1.5">
+              <label for="authPreviewEmail" class="block text-xs font-semibold text-theme-secondary">Academic Email</label>
+              <input
+                id="authPreviewEmail"
+                type="email"
+                disabled
+                placeholder="student@university.edu"
+                class="w-full text-xs theme-input rounded-xl px-3.5 py-2.5 cursor-not-allowed"
+              />
+            </div>
+            <div class="md:col-span-4 space-y-1.5">
+              <label for="authPreviewPassword" class="block text-xs font-semibold text-theme-secondary">Password</label>
+              <input
+                id="authPreviewPassword"
+                type="password"
+                disabled
+                placeholder="••••••••••••"
+                class="w-full text-xs theme-input rounded-xl px-3.5 py-2.5 cursor-not-allowed"
+              />
+            </div>
+            <div class="md:col-span-4 flex items-center gap-2">
+              <button type="button" disabled class="flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-semibold bg-indigo-600/60 text-white/80 cursor-not-allowed">
+                <i class="fa-solid fa-right-to-bracket"></i>
+                <span>Sign In</span>
+              </button>
+              <button type="button" disabled class="flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-semibold theme-btn-secondary opacity-70 cursor-not-allowed">
+                <i class="fa-solid fa-user-plus"></i>
+                <span>Create Account</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-2.5 pt-2 border-t border-theme-subtle opacity-80">
+            <button type="button" disabled class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold theme-btn-secondary cursor-not-allowed">
+              <i class="fa-solid fa-building-columns text-indigo-400"></i>
+              <span>Institutional SSO</span>
+            </button>
+            <button type="button" disabled class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold theme-btn-secondary cursor-not-allowed">
+              <i class="fa-brands fa-google text-indigo-400"></i>
+              <span>Continue with Google</span>
+            </button>
+            <button type="button" disabled class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold theme-btn-secondary cursor-not-allowed">
+              <i class="fa-brands fa-github"></i>
+              <span>Continue with GitHub</span>
+            </button>
+          </div>
+        </section>
+
+        <!-- 5. Data & Backup Controls -->
+        <section class="surface-card rounded-2xl border p-6 space-y-4">
+          <div>
+            <h3 class="text-sm font-bold text-theme-primary flex items-center gap-2 mb-1">
+              <i class="fa-solid fa-database text-indigo-400"></i>
+              <span>Data Management &amp; Local Backup</span>
+            </h3>
+            <p class="text-xs text-theme-muted">Export your classes and custom grade definitions as a JSON file, import a previous backup, or reset all data to fresh demo defaults.</p>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-3 pt-1">
+            <button
+              id="btnExportJson"
+              type="button"
+              class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold theme-btn-secondary cursor-pointer"
+            >
+              <i class="fa-solid fa-download text-indigo-400"></i>
+              <span>Export JSON Backup</span>
+            </button>
+
+            <label
+              for="inputImportJson"
+              class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold theme-btn-secondary cursor-pointer"
+            >
+              <i class="fa-solid fa-upload text-indigo-400"></i>
+              <span>Import JSON Backup</span>
+              <input id="inputImportJson" type="file" accept=".json,application/json" class="hidden" />
+            </label>
+
+            <button
+              id="btnResetDemoData"
+              type="button"
+              class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 transition cursor-pointer"
+            >
+              <i class="fa-solid fa-rotate-left"></i>
+              <span>Reset All Data to Defaults</span>
+            </button>
+          </div>
+        </section>
+      </div>
+    </div>
+
   </main>
 
   <!-- =========================================================================
@@ -367,12 +1023,13 @@
       'use strict';
 
       /*************************************************************************
-       * 1. CONSTANTS & UC BERKELEY REGISTRAR GRADE DEFINITIONS
+       * 1. CONSTANTS & OFFICIAL UC BERKELEY REGISTRAR GRADE DEFINITIONS
        *************************************************************************/
-      const STORAGE_KEY = 'gradecraft_app_state_v4';
+      const STORAGE_KEY = 'gradecraft_app_state_v5';
+      const LEGACY_KEYS = ['gradecraft_app_state_v4', 'gradecraft_app_state_v3', 'gradecraft_app_state_v2'];
 
       const UC_BERKELEY_GRADE_DEFINITIONS = [
-        { id: 'grade_ap', letter: 'A+', min: 97, gpa: 4.0, description: 'Remarkable / Extraordinary Achievement' },
+        { id: 'grade_ap', letter: 'A+', min: 97, gpa: 4.0, description: 'Extraordinary' },
         { id: 'grade_a',  letter: 'A',  min: 93, gpa: 4.0, description: 'Excellent' },
         { id: 'grade_am', letter: 'A-', min: 90, gpa: 3.7, description: 'Excellent' },
         { id: 'grade_bp', letter: 'B+', min: 87, gpa: 3.3, description: 'Good' },
@@ -381,21 +1038,10 @@
         { id: 'grade_cp', letter: 'C+', min: 77, gpa: 2.3, description: 'Fair' },
         { id: 'grade_c',  letter: 'C',  min: 73, gpa: 2.0, description: 'Fair' },
         { id: 'grade_cm', letter: 'C-', min: 70, gpa: 1.7, description: 'Fair' },
-        { id: 'grade_dp', letter: 'D+', min: 67, gpa: 1.3, description: 'Barely Passing' },
-        { id: 'grade_d',  letter: 'D',  min: 63, gpa: 1.0, description: 'Barely Passing' },
-        { id: 'grade_dm', letter: 'D-', min: 60, gpa: 0.7, description: 'Barely Passing' },
-        { id: 'grade_f',  letter: 'F',  min: 0,  gpa: 0.0, description: 'Failing' }
-      ];
-
-      const SUPPORTED_LOCALES = [
-        { code: 'en-US', label: 'English (United States) — en-US' },
-        { code: 'es-ES', label: 'Español (España) — es-ES' },
-        { code: 'fr-FR', label: 'Français (France) — fr-FR' },
-        { code: 'de-DE', label: 'Deutsch (Deutschland) — de-DE' },
-        { code: 'uk-UA', label: 'Українська (Україна) — uk-UA' },
-        { code: 'zh-CN', label: '中文 (简体) — zh-CN' },
-        { code: 'ja-JP', label: '日本語 (日本) — ja-JP' },
-        { code: 'ko-KR', label: '한국어 (대한민국) — ko-KR' }
+        { id: 'grade_dp', letter: 'D+', min: 67, gpa: 1.3, description: 'Barely passed' },
+        { id: 'grade_d',  letter: 'D',  min: 63, gpa: 1.0, description: 'Barely passed' },
+        { id: 'grade_dm', letter: 'D-', min: 60, gpa: 0.7, description: 'Barely passed' },
+        { id: 'grade_f',  letter: 'F',  min: 0,  gpa: 0.0, description: 'Failure' }
       ];
 
       const GROUP_DOT_COLORS = [
@@ -414,23 +1060,30 @@
 
       function cloneGradeScale(scale) {
         const src = Array.isArray(scale) && scale.length > 0 ? scale : UC_BERKELEY_GRADE_DEFINITIONS;
-        return src.map((item, idx) => ({
-          id: item.id || uid(`b_${idx}`),
-          letter: String(item.letter || 'F'),
-          min: Number(item.min ?? 0),
-          gpa: item.gpa !== undefined && item.gpa !== null ? Number(item.gpa) : null,
-          description: String(item.description || '')
-        }));
+        return src.map((item, idx) => {
+          const ucbMatch = UC_BERKELEY_GRADE_DEFINITIONS.find(u => u.letter === item.letter) || UC_BERKELEY_GRADE_DEFINITIONS[idx] || {};
+          return {
+            id: String(item.id || ucbMatch.id || uid(`b_${idx}`)),
+            letter: String(item.letter || ucbMatch.letter || 'F'),
+            min: Number(item.min ?? ucbMatch.min ?? 0),
+            gpa: item.gpa !== undefined && item.gpa !== null ? Number(item.gpa) : (ucbMatch.gpa ?? 0.0),
+            description: String(item.description || ucbMatch.description || '')
+          };
+        });
+      }
+
+      function isGradedValue(val) {
+        return val !== null && val !== undefined && val !== '' && !isNaN(Number(val));
       }
 
       /*************************************************************************
-       * 2. DEFAULT ANONYMOUS FILLER STATE
+       * 2. DEFAULT ANONYMOUS FILLER STATE (ZERO PERSONAL INFO)
        *************************************************************************/
       function createDefaultState() {
         const defaultScale = cloneGradeScale(UC_BERKELEY_GRADE_DEFINITIONS);
         return {
           activeView: 'gradebook', // 'gradebook' | 'profile'
-          activeClassId: 'class_cs101',
+          activeClassId: 'class_101',
           gradebookViewMode: 'grouped', // 'grouped' | 'unified'
           theme: 'black', // 'black' | 'midnight' | 'light'
           locale: 'en-US',
@@ -438,47 +1091,48 @@
             displayName: 'Student Name',
             email: 'student@university.edu',
             institution: 'University Name',
-            studentId: 'ID-00000000'
+            studentId: 'ID-00000000',
+            standing: 'Undergraduate'
           },
           defaultGradeDefinitions: cloneGradeScale(defaultScale),
           classes: [
             {
-              id: 'class_cs101',
-              code: 'CS 101',
-              name: 'Computer Science 101',
-              term: 'Term 1',
+              id: 'class_101',
+              code: 'Course 101',
+              name: 'Intro to Computer Science',
+              term: 'Fall Semester',
               targetLetter: 'A',
               groups: [
-                { id: 'grp_cs_asg', name: 'Assignments', weight: 30 },
-                { id: 'grp_cs_mt', name: 'Midterm Exam', weight: 30 },
-                { id: 'grp_cs_fin', name: 'Final Exam', weight: 40 }
+                { id: 'grp_101_asg', name: 'Assignments', weight: 30 },
+                { id: 'grp_101_mt', name: 'Midterm Exam', weight: 30 },
+                { id: 'grp_101_fin', name: 'Final Exam', weight: 40 }
               ],
               buckets: cloneGradeScale(defaultScale),
               assignments: [
-                { id: 'asg_cs_1', name: 'Assignment 1', groupId: 'grp_cs_asg', earned: 45, available: 50, whatIfEarned: null },
-                { id: 'asg_cs_2', name: 'Assignment 2', groupId: 'grp_cs_asg', earned: null, available: 50, whatIfEarned: null },
-                { id: 'asg_cs_3', name: 'Midterm Exam', groupId: 'grp_cs_mt', earned: null, available: 100, whatIfEarned: null },
-                { id: 'asg_cs_4', name: 'Final Exam', groupId: 'grp_cs_fin', earned: null, available: 150, whatIfEarned: null }
+                { id: 'asg_101_1', name: 'Homework 1', groupId: 'grp_101_asg', earned: 45, available: 50, whatIfEarned: null },
+                { id: 'asg_101_2', name: 'Homework 2', groupId: 'grp_101_asg', earned: null, available: 50, whatIfEarned: null },
+                { id: 'asg_101_3', name: 'Midterm Exam', groupId: 'grp_101_mt', earned: null, available: 100, whatIfEarned: null },
+                { id: 'asg_101_4', name: 'Final Exam', groupId: 'grp_101_fin', earned: null, available: 150, whatIfEarned: null }
               ]
             },
             {
-              id: 'class_ds100',
-              code: 'DATA 100',
-              name: 'Data Science 100',
-              term: 'Term 1',
+              id: 'class_102',
+              code: 'Course 102',
+              name: 'Foundations of Data Science',
+              term: 'Fall Semester',
               targetLetter: 'A',
               groups: [
-                { id: 'grp_ds_hw', name: 'Assignments', weight: 25 },
-                { id: 'grp_ds_lab', name: 'Labs', weight: 15 },
-                { id: 'grp_ds_mt', name: 'Midterm Exam', weight: 25 },
-                { id: 'grp_ds_fin', name: 'Final Exam', weight: 35 }
+                { id: 'grp_102_hw', name: 'Homework', weight: 25 },
+                { id: 'grp_102_lab', name: 'Labs', weight: 15 },
+                { id: 'grp_102_mt', name: 'Midterm Exam', weight: 25 },
+                { id: 'grp_102_fin', name: 'Final Exam', weight: 35 }
               ],
               buckets: cloneGradeScale(defaultScale),
               assignments: [
-                { id: 'asg_ds_1', name: 'Assignment 1', groupId: 'grp_ds_hw', earned: 48, available: 50, whatIfEarned: null },
-                { id: 'asg_ds_2', name: 'Lab 1', groupId: 'grp_ds_lab', earned: 20, available: 20, whatIfEarned: null },
-                { id: 'asg_ds_3', name: 'Midterm Exam', groupId: 'grp_ds_mt', earned: 88, available: 100, whatIfEarned: null },
-                { id: 'asg_ds_4', name: 'Final Exam', groupId: 'grp_ds_fin', earned: null, available: 150, whatIfEarned: null }
+                { id: 'asg_102_1', name: 'Homework 1', groupId: 'grp_102_hw', earned: 48, available: 50, whatIfEarned: null },
+                { id: 'asg_102_2', name: 'Lab 1', groupId: 'grp_102_lab', earned: 20, available: 20, whatIfEarned: null },
+                { id: 'asg_102_3', name: 'Midterm Exam', groupId: 'grp_102_mt', earned: 88, available: 100, whatIfEarned: null },
+                { id: 'asg_102_4', name: 'Final Exam', groupId: 'grp_102_fin', earned: null, available: 150, whatIfEarned: null }
               ]
             }
           ]
@@ -486,44 +1140,113 @@
       }
 
       /*************************************************************************
-       * 3. STATE PERSISTENCE, THEME & LOCALE CASCADE
+       * 3. DEFENSIVE LOCALSTORAGE MIGRATION & STATE MANAGEMENT
        *************************************************************************/
-      let state = loadState();
-      let highlightedAssignmentId = null;
+      function sanitizeState(rawState) {
+        const fallback = createDefaultState();
+        if (!rawState || typeof rawState !== 'object') return fallback;
+
+        const clean = {
+          activeView: rawState.activeView === 'profile' ? 'profile' : 'gradebook',
+          activeClassId: String(rawState.activeClassId || ''),
+          gradebookViewMode: (rawState.gradebookViewMode === 'unified' || rawState.viewMode === 'unified') ? 'unified' : 'grouped',
+          theme: ['black', 'midnight', 'light'].includes(rawState.theme) ? rawState.theme : 'black',
+          locale: String(rawState.locale || rawState.language || 'en-US'),
+          profile: {
+            displayName: String(rawState.profile?.displayName || 'Student Name'),
+            email: String(rawState.profile?.email || 'student@university.edu'),
+            institution: String(rawState.profile?.institution || 'University Name'),
+            studentId: String(rawState.profile?.studentId || 'ID-00000000'),
+            standing: String(rawState.profile?.standing || 'Undergraduate')
+          },
+          defaultGradeDefinitions: cloneGradeScale(
+            rawState.defaultGradeDefinitions || rawState.defaultBuckets || rawState.customDefaultScale || UC_BERKELEY_GRADE_DEFINITIONS
+          ),
+          classes: []
+        };
+
+        if (Array.isArray(rawState.classes) && rawState.classes.length > 0) {
+          clean.classes = rawState.classes.map((c, idx) => {
+            const safeGroups = Array.isArray(c?.groups) && c.groups.length > 0
+              ? c.groups.map((g, gIdx) => ({
+                  id: String(g?.id || uid(`grp_${gIdx}`)),
+                  name: String(g?.name ?? `Group ${gIdx + 1}`),
+                  weight: Math.max(0, Number(g?.weight ?? 0) || 0)
+                }))
+              : [
+                  { id: uid('grp_1'), name: 'Assignments', weight: 30 },
+                  { id: uid('grp_2'), name: 'Midterm Exam', weight: 30 },
+                  { id: uid('grp_3'), name: 'Final Exam', weight: 40 }
+                ];
+
+            const firstGroupId = safeGroups[0].id;
+            const validGroupIds = new Set(safeGroups.map(g => g.id));
+            const rawBuckets = c?.buckets || c?.gradeScale || clean.defaultGradeDefinitions;
+
+            const safeAssignments = Array.isArray(c?.assignments)
+              ? c.assignments.map((a, aIdx) => {
+                  const availVal = a?.available !== undefined ? a.available : a?.possible;
+                  return {
+                    id: String(a?.id || uid(`asg_${aIdx}`)),
+                    name: String(a?.name ?? `Assignment ${aIdx + 1}`),
+                    groupId: validGroupIds.has(a?.groupId) ? a.groupId : firstGroupId,
+                    earned: isGradedValue(a?.earned) ? Number(a.earned) : null,
+                    available: Math.max(0.01, Number(availVal ?? 100) || 100),
+                    whatIfEarned: isGradedValue(a?.whatIfEarned) ? Number(a.whatIfEarned) : null
+                  };
+                })
+              : [];
+
+            return {
+              id: String(c?.id || uid(`class_${idx}`)),
+              code: String(c?.code ?? `Course ${101 + idx}`),
+              name: String(c?.name ?? `Academic Course ${idx + 1}`),
+              term: String(c?.term ?? 'Fall Semester'),
+              targetLetter: String(c?.targetLetter || c?.targetGrade || 'A'),
+              groups: safeGroups,
+              buckets: cloneGradeScale(rawBuckets),
+              assignments: safeAssignments
+            };
+          });
+        } else {
+          clean.classes = fallback.classes;
+        }
+
+        if (!clean.classes.some(c => c.id === clean.activeClassId)) {
+          clean.activeClassId = clean.classes[0].id;
+        }
+
+        return clean;
+      }
 
       function loadState() {
         try {
-          const raw = localStorage.getItem(STORAGE_KEY);
+          let raw = localStorage.getItem(STORAGE_KEY);
+          if (!raw) {
+            for (const legacyKey of LEGACY_KEYS) {
+              const legacyRaw = localStorage.getItem(legacyKey);
+              if (legacyRaw) {
+                raw = legacyRaw;
+                break;
+              }
+            }
+          }
           if (!raw) return createDefaultState();
-          const parsed = JSON.parse(raw);
-          if (!parsed || !Array.isArray(parsed.classes) || parsed.classes.length === 0) {
-            return createDefaultState();
-          }
-          if (!['black', 'midnight', 'light'].includes(parsed.theme)) parsed.theme = 'black';
-          if (!parsed.locale) parsed.locale = 'en-US';
-          if (!parsed.profile) {
-            parsed.profile = {
-              displayName: 'Student Name',
-              email: 'student@university.edu',
-              institution: 'University Name',
-              studentId: 'ID-00000000'
-            };
-          }
-          if (!Array.isArray(parsed.defaultGradeDefinitions) || parsed.defaultGradeDefinitions.length === 0) {
-            parsed.defaultGradeDefinitions = cloneGradeScale(UC_BERKELEY_GRADE_DEFINITIONS);
-          }
-          return parsed;
+          return sanitizeState(JSON.parse(raw));
         } catch (err) {
-          console.error('Error reading localStorage state:', err);
+          console.warn('Recovering from corrupted localStorage state:', err);
           return createDefaultState();
         }
       }
+
+      let state = loadState();
+      let highlightedAssignmentId = null;
 
       function saveState() {
         try {
           localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
         } catch (err) {
-          console.error('Error saving localStorage state:', err);
+          console.error('Failed to save state:', err);
         }
       }
 
@@ -540,9 +1263,6 @@
         document.documentElement.lang = chosen;
         document.documentElement.setAttribute('data-locale', chosen);
         document.documentElement.style.setProperty('--locale', `'${chosen}'`);
-        if (document.body) {
-          document.body.setAttribute('data-locale', chosen);
-        }
       }
 
       function getActiveClass() {
@@ -555,7 +1275,7 @@
       }
 
       /*************************************************************************
-       * 4. LOCALE-AWARE NUMBER FORMATTING & UI HELPERS
+       * 4. FORMATTING & UI HELPERS
        *************************************************************************/
       function formatNumber(value, minDecimals = 0, maxDecimals = 2) {
         if (value === null || value === undefined || isNaN(Number(value))) return '--';
@@ -589,10 +1309,6 @@
         const parts = clean.split(/\s+/).filter(Boolean);
         if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
         return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-      }
-
-      function isGradedValue(val) {
-        return val !== null && val !== undefined && val !== '' && !isNaN(Number(val));
       }
 
       function getLetterBadgeClasses(letter) {
@@ -677,9 +1393,7 @@
         }, 2500);
       }
 
-      // Custom Confirmation Modal
       let pendingModalConfirm = null;
-
       function openConfirmModal(title, message, onConfirm) {
         const backdrop = document.getElementById('confirmModalBackdrop');
         const titleEl = document.getElementById('confirmModalTitle');
@@ -759,18 +1473,13 @@
           const hasActual = isGradedValue(a.earned);
           const hasWhatIf = isGradedValue(a.whatIfEarned);
 
-          if (hasWhatIf) {
-            activeWhatIfCount++;
-          }
+          if (hasWhatIf) activeWhatIfCount++;
 
-          // Actual grade only includes graded assignments
           if (hasActual) {
             g.actualEarned += Number(a.earned);
             g.actualAvailable += avail;
           }
 
-          // Forecast grade includes graded assignments (with What-If override if present)
-          // PLUS ungraded assignments that have a What-If override score
           if (hasWhatIf) {
             g.forecastEarned += Number(a.whatIfEarned);
             g.forecastAvailable += avail;
@@ -787,10 +1496,7 @@
 
         let forecastWeightedNumerator = 0;
         let forecastActiveWeight = 0;
-        let totalForecastEarnedPts = 0;
-        let totalForecastAvailPts = 0;
 
-        // Track exact earned weighted points vs remaining ungraded course weight for Target Forecaster
         let lockedWeightedContribution = 0;
         let remainingUngradedWeight = 0;
 
@@ -798,8 +1504,6 @@
           const st = groupMap[grp.id];
           totalActualEarnedPts += st.actualEarned;
           totalActualAvailPts += st.actualAvailable;
-          totalForecastEarnedPts += st.forecastEarned;
-          totalForecastAvailPts += st.forecastAvailable;
 
           if (st.actualAvailable > 0) {
             st.actualPct = (st.actualEarned / st.actualAvailable) * 100;
@@ -813,7 +1517,6 @@
             forecastActiveWeight += st.weight;
           }
 
-          // Exact proportional weight allocation within each group for Target Forecaster
           if (st.totalAllAvailable > 0) {
             const gradedFraction = st.actualAvailable / st.totalAllAvailable;
             const ungradedFraction = Math.max(0, 1 - gradedFraction);
@@ -822,7 +1525,6 @@
             lockedWeightedContribution += (currentGroupPct / 100) * (st.weight * gradedFraction);
             remainingUngradedWeight += st.weight * ungradedFraction;
           } else {
-            // Group has no assignment rows yet -> entire group weight is remaining ungraded weight
             remainingUngradedWeight += st.weight;
           }
         });
@@ -840,8 +1542,6 @@
           forecastActiveWeight,
           totalActualEarnedPts,
           totalActualAvailPts,
-          totalForecastEarnedPts,
-          totalForecastAvailPts,
           actualPct,
           forecastPct,
           actualBucket,
@@ -853,854 +1553,70 @@
       }
 
       /*************************************************************************
-       * 6. HEADER & NAVIGATION RENDERER
+       * 6. HEADER & VIEW SWITCHER (GRADEBOOK <-> PROFILE & SETTINGS)
        *************************************************************************/
       function renderHeaderNavigation() {
-        const gbBtn = document.getElementById('navGradebookBtn');
-        const profBtn = document.getElementById('navProfileBtn');
+        const gbBtn = document.getElementById('navBtnGradebook');
+        const profBtn = document.getElementById('navBtnProfile');
         const initialsEl = document.getElementById('headerAvatarInitials');
 
         if (initialsEl) {
-          initialsEl.textContent = getInitials(state.profile.displayName);
+          initialsEl.textContent = getInitials(state.profile?.displayName);
         }
 
+        const isProfile = state.activeView === 'profile';
         if (gbBtn && profBtn) {
-          const isGradebook = state.activeView === 'gradebook';
-          gbBtn.className = isGradebook
+          gbBtn.className = !isProfile
             ? 'inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold bg-indigo-600 text-white shadow-sm shadow-indigo-500/25 transition cursor-pointer'
             : 'inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold text-theme-muted hover:text-theme-primary transition cursor-pointer';
 
-          profBtn.className = !isGradebook
+          profBtn.className = isProfile
             ? 'inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold bg-indigo-600 text-white shadow-sm shadow-indigo-500/25 transition cursor-pointer'
             : 'inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold text-theme-muted hover:text-theme-primary transition cursor-pointer';
         }
       }
+
+      function switchAppView(viewName) {
+        state.activeView = viewName === 'profile' ? 'profile' : 'gradebook';
+        saveState();
+        renderApp(false);
+      }
+
+      // Expose globally for inline onclick fallbacks
+      window.switchAppView = switchAppView;
+      window.reloadGradeCraft = () => window.location.reload();
 
       /*************************************************************************
-       * 7. GRADEBOOK VIEW RENDERER
+       * 7. IN-PLACE DOM UPDATERS (PRESERVES FOCUS, CARET & SCROLL POSITION)
        *************************************************************************/
-      function renderGradebookView(root) {
-        const cls = getActiveClass();
-        if (!cls) return;
+      function updateGroupNameInDOM(groupId, newName) {
+        const displayLabel = newName.trim() || 'Unnamed Group';
 
-        const metrics = computeClassMetrics(cls);
-        const sortedBuckets = getSortedBuckets(cls.buckets);
-        const weightMismatch = Math.abs(metrics.totalConfiguredWeight - 100) > 0.05;
-
-        // Class Tabs Strip
-        const tabsHtml = state.classes.map(c => {
-          const isActive = c.id === cls.id;
-          const m = computeClassMetrics(c);
-          const letter = m.actualBucket.current ? m.actualBucket.current.letter : '--';
-          const pctStr = m.actualPct !== null ? formatPercent(m.actualPct, 1) : '--%';
-
-          return `
-            <button
-              type="button"
-              data-action="select-class"
-              data-class-id="${escapeHtml(c.id)}"
-              class="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold border transition whitespace-nowrap cursor-pointer ${
-                isActive
-                  ? 'bg-indigo-600 text-white border-indigo-500 shadow-sm shadow-indigo-500/25'
-                  : 'surface-card text-theme-secondary hover:text-theme-primary'
-              }"
-            >
-              <i class="fa-solid fa-book-open ${isActive ? 'text-indigo-200' : 'text-indigo-400'}"></i>
-              <span class="font-bold">${escapeHtml(c.code || 'COURSE')}</span>
-              <span class="hidden md:inline max-w-[140px] truncate opacity-85">${escapeHtml(c.name)}</span>
-              <span class="px-1.5 py-0.5 rounded-md font-mono text-[10px] ${
-                isActive ? 'bg-black/25 text-white' : 'surface-pill text-theme-muted border'
-              }">${escapeHtml(letter)} (${pctStr})</span>
-            </button>
-          `;
-        }).join('');
-
-        // Card 1: Current Actual Grade Margins
-        let actualMarginHtml = `<span class="text-theme-faint">Enter earned points on assignments to see grade bucket margins.</span>`;
-        if (metrics.actualPct !== null && metrics.actualBucket.current) {
-          const { current, nextHigher, nextLower } = metrics.actualBucket;
-          const upLine = nextHigher
-            ? `<div class="flex items-center justify-between text-emerald-400">
-                 <span><i class="fa-solid fa-arrow-up mr-1.5"></i>To reach <strong>${escapeHtml(nextHigher.letter)}</strong> (&ge;${formatPercent(nextHigher.min, 0)}):</span>
-                 <span class="font-mono font-bold">+${formatPercent(Number(nextHigher.min) - metrics.actualPct, 2)}</span>
-               </div>`
-            : `<div class="text-emerald-400 font-semibold"><i class="fa-solid fa-crown mr-1.5"></i>Top grade bucket achieved (${escapeHtml(current.letter)})</div>`;
-
-          const downLine = nextLower
-            ? `<div class="flex items-center justify-between text-theme-muted">
-                 <span><i class="fa-solid fa-shield-halved mr-1.5"></i>Margin above <strong>${escapeHtml(nextLower.letter)}</strong> (&lt;${formatPercent(current.min, 0)}):</span>
-                 <span class="font-mono font-semibold">+${formatPercent(metrics.actualPct - Number(current.min), 2)}</span>
-               </div>`
-            : '';
-
-          actualMarginHtml = upLine + downLine;
-        }
-
-        // Card 2: Forecast / What-If Grade Details
-        let forecastDiffLabel = 'Matches Actual';
-        if (metrics.actualPct !== null && metrics.forecastPct !== null) {
-          const delta = metrics.forecastPct - metrics.actualPct;
-          if (Math.abs(delta) >= 0.005) {
-            forecastDiffLabel = `${delta > 0 ? '+' : ''}${formatPercent(delta, 2)} vs Actual`;
-          }
-        } else if (metrics.forecastPct !== null) {
-          forecastDiffLabel = 'Projected';
-        }
-
-        let forecastMarginHtml = `<span>Enter a What-If score on any graded or ungraded row below to simulate your final grade.</span>`;
-        if (metrics.forecastPct !== null && metrics.forecastBucket.current) {
-          const { current, nextHigher } = metrics.forecastBucket;
-          forecastMarginHtml = nextHigher
-            ? `Projected <strong>${escapeHtml(current.letter)}</strong> — needs <strong>+${formatPercent(Number(nextHigher.min) - metrics.forecastPct, 2)}</strong> to reach <strong>${escapeHtml(nextHigher.letter)}</strong> (&ge;${formatPercent(nextHigher.min, 0)}).`
-            : `Projected in the highest grade bucket <strong>${escapeHtml(current.letter)}</strong> (&ge;${formatPercent(current.min, 0)}).`;
-        }
-
-        // Card 3: Target Grade Forecaster
-        const selectableTargetBuckets = sortedBuckets.filter(b => Number(b.min) > 0);
-        const activeTargetBucket = selectableTargetBuckets.find(b => b.letter === cls.targetLetter) || selectableTargetBuckets[1] || sortedBuckets[0];
-
-        let targetPlannerHtml = `<span class="text-theme-faint">Configure grade buckets to forecast target scores.</span>`;
-        if (activeTargetBucket) {
-          const targetCutoff = Number(activeTargetBucket.min);
-          const remWeight = Math.max(0, metrics.remainingUngradedWeight);
-
-          if (remWeight <= 0.01) {
-            const reached = metrics.actualPct !== null && metrics.actualPct + 1e-9 >= targetCutoff;
-            targetPlannerHtml = reached
-              ? `<div class="text-emerald-400 font-semibold"><i class="fa-solid fa-circle-check mr-1.5"></i>All course weight is graded! You achieved <strong>${escapeHtml(activeTargetBucket.letter)}</strong> (${formatPercent(metrics.actualPct, 2)}).</div>`
-              : `<div class="text-amber-400 font-semibold"><i class="fa-solid fa-circle-info mr-1.5"></i>All course weight is graded at ${formatPercent(metrics.actualPct, 2)} (cutoff for ${escapeHtml(activeTargetBucket.letter)} is ${formatPercent(targetCutoff, 0)}).</div>`;
-          } else {
-            const neededWeightedPts = (targetCutoff / 100) * metrics.totalConfiguredWeight - metrics.lockedWeightedContribution;
-            const neededAvgPct = (neededWeightedPts / remWeight) * 100;
-
-            if (neededAvgPct <= 0) {
-              targetPlannerHtml = `
-                <div class="text-emerald-400 font-semibold">
-                  <i class="fa-solid fa-lock mr-1.5"></i><strong>${escapeHtml(activeTargetBucket.letter)}</strong> (&ge;${formatPercent(targetCutoff, 0)}) is already locked in even with 0% on the remaining ${formatPercent(remWeight, 1)} weight!
-                </div>`;
-            } else if (neededAvgPct > 100) {
-              const maxPossible = ((metrics.lockedWeightedContribution + remWeight) / (metrics.totalConfiguredWeight || 100)) * 100;
-              targetPlannerHtml = `
-                <div class="text-rose-400 font-semibold">
-                  <i class="fa-solid fa-triangle-exclamation mr-1.5"></i>Requires <strong>${formatPercent(neededAvgPct, 2)}</strong> across remaining ${formatPercent(remWeight, 1)} weight (max without extra credit: <strong>${formatPercent(maxPossible, 2)}</strong>).
-                </div>`;
-            } else {
-              targetPlannerHtml = `
-                <div class="text-theme-secondary">
-                  To finish with <strong class="text-indigo-400">${escapeHtml(activeTargetBucket.letter)} (&ge;${formatPercent(targetCutoff, 0)})</strong>, you need an average of:
-                </div>
-                <div class="text-2xl font-extrabold font-mono text-indigo-400 mt-1">
-                  ${formatPercent(neededAvgPct, 2)}
-                  <span class="text-xs font-sans font-normal text-theme-muted">across remaining ${formatPercent(remWeight, 1)} weight</span>
-                </div>`;
-            }
-          }
-        }
-
-        // Assignment Groups Table Rows
-        const groupsRowsHtml = cls.groups.map((grp, idx) => {
-          const st = metrics.groupMap[grp.id];
-          const dotColor = GROUP_DOT_COLORS[idx % GROUP_DOT_COLORS.length];
-          return `
-            <tr class="theme-row-hover transition border-b border-theme-subtle">
-              <td class="py-2.5 pl-2 pr-2">
-                <div class="flex items-center gap-2">
-                  <span class="w-2.5 h-2.5 rounded-full shrink-0 ${dotColor}"></span>
-                  <input
-                    type="text"
-                    value="${escapeHtml(grp.name)}"
-                    data-group-id="${escapeHtml(grp.id)}"
-                    data-group-field="name"
-                    aria-label="Assignment Group Name"
-                    class="w-full text-xs font-semibold theme-inline-input rounded-lg px-2 py-1"
-                  />
-                </div>
-              </td>
-              <td class="py-2.5 text-right">
-                <div class="inline-flex items-center justify-end gap-1">
-                  <input
-                    type="number"
-                    step="any"
-                    min="0"
-                    max="100"
-                    value="${grp.weight}"
-                    data-group-id="${escapeHtml(grp.id)}"
-                    data-group-field="weight"
-                    aria-label="Assignment Group Weight"
-                    class="w-20 text-right font-mono text-xs font-semibold theme-input rounded-lg px-2 py-1"
-                  />
-                  <span class="text-xs text-theme-faint">%</span>
-                </div>
-              </td>
-              <td class="py-2.5 text-right font-mono text-xs text-theme-muted" data-stat-group-pts="${escapeHtml(grp.id)}">
-                ${st ? `${formatNumber(st.actualEarned)} / ${formatNumber(st.actualAvailable)}` : '0 / 0'}
-              </td>
-              <td class="py-2.5 text-right font-mono text-xs font-semibold text-theme-primary" data-stat-group-actual="${escapeHtml(grp.id)}">
-                ${st && st.actualPct !== null ? formatPercent(st.actualPct, 1) : '--%'}
-              </td>
-              <td class="py-2.5 text-right font-mono text-xs font-semibold text-indigo-400" data-stat-group-forecast="${escapeHtml(grp.id)}">
-                ${st && st.forecastPct !== null ? formatPercent(st.forecastPct, 1) : '--%'}
-              </td>
-              <td class="py-2.5 text-center">
-                <button
-                  type="button"
-                  data-action="delete-group"
-                  data-group-id="${escapeHtml(grp.id)}"
-                  title="Delete Assignment Group"
-                  class="text-theme-faint hover:text-rose-400 p-1 rounded-lg transition cursor-pointer"
-                >
-                  <i class="fa-regular fa-trash-can text-xs"></i>
-                </button>
-              </td>
-            </tr>
-          `;
-        }).join('');
-
-        // Class Grade Bucket Distribution Table Rows
-        const activeActualBucketId = metrics.actualBucket.current ? metrics.actualBucket.current.id : null;
-        const activeForecastBucketId = metrics.forecastBucket.current ? metrics.forecastBucket.current.id : null;
-
-        const bucketsRowsHtml = sortedBuckets.map((b, idx) => {
-          const upperLabel = idx === 0 ? '100%' : `< ${formatPercent(sortedBuckets[idx - 1].min, 0)}`;
-          const isCurActual = b.id === activeActualBucketId;
-          const isCurForecast = b.id === activeForecastBucketId;
-
-          let statusBadge = `<span class="text-theme-faint">—</span>`;
-          if (isCurActual && isCurForecast) {
-            statusBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">Actual &amp; Forecast</span>`;
-          } else if (isCurActual) {
-            statusBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/15 text-indigo-400 border border-indigo-500/30">Actual</span>`;
-          } else if (isCurForecast) {
-            statusBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30">Forecast</span>`;
-          }
-
-          return `
-            <tr class="theme-row-hover transition border-b border-theme-subtle">
-              <td class="py-2 pl-2">
-                <span class="inline-flex items-center justify-center w-10 h-6 rounded-md text-xs font-bold border ${getLetterBadgeClasses(b.letter)}">
-                  ${escapeHtml(b.letter)}
-                </span>
-              </td>
-              <td class="py-2 text-right">
-                <div class="inline-flex items-center justify-end gap-1">
-                  <span class="text-[11px] text-theme-faint">&ge;</span>
-                  <input
-                    type="number"
-                    step="any"
-                    min="0"
-                    max="100"
-                    value="${b.min}"
-                    data-bucket-id="${escapeHtml(b.id)}"
-                    aria-label="Minimum cutoff for ${escapeHtml(b.letter)}"
-                    class="w-16 text-right font-mono text-xs font-semibold theme-input rounded-lg px-2 py-1"
-                  />
-                  <span class="text-[11px] text-theme-faint">%</span>
-                </div>
-              </td>
-              <td class="py-2 text-center font-mono text-[11px] text-theme-muted" data-bucket-range="${escapeHtml(b.id)}">
-                ${formatPercent(b.min, 0)} – ${upperLabel}
-              </td>
-              <td class="py-2 text-right pr-2" data-bucket-status="${escapeHtml(b.id)}">
-                ${statusBadge}
-              </td>
-            </tr>
-          `;
-        }).join('');
-
-        // Assignments Gradebook Content (Grouped vs Unified Table)
-        const assignmentsSectionHtml = renderAssignmentsGradebookHtml(cls, metrics);
-
-        root.innerHTML = `
-          <!-- 1. Multi-Class Tab Strip + Class Actions -->
-          <section class="flex flex-wrap items-center justify-between gap-3">
-            <div class="flex items-center gap-2 overflow-x-auto pb-1 max-w-full">
-              ${tabsHtml}
-              <button
-                id="btnAddClass"
-                type="button"
-                class="shrink-0 inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold theme-btn-secondary cursor-pointer"
-              >
-                <i class="fa-solid fa-plus text-indigo-400"></i>
-                <span>Add Class</span>
-              </button>
-            </div>
-
-            <div class="flex items-center gap-2">
-              <button
-                id="btnDuplicateClass"
-                type="button"
-                class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold theme-btn-secondary cursor-pointer"
-              >
-                <i class="fa-regular fa-copy text-indigo-400"></i>
-                <span>Duplicate Class</span>
-              </button>
-              <button
-                id="btnDeleteClass"
-                type="button"
-                class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 transition cursor-pointer"
-              >
-                <i class="fa-regular fa-trash-can"></i>
-                <span>Delete Class</span>
-              </button>
-            </div>
-          </section>
-
-          <!-- 2. Editable Class Header Card -->
-          <section class="surface-card rounded-2xl border p-4 sm:p-5">
-            <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
-              <div class="md:col-span-3">
-                <label for="inputClassCode" class="block text-[10px] font-bold uppercase tracking-wider text-theme-faint mb-1">Course Code</label>
-                <input
-                  id="inputClassCode"
-                  type="text"
-                  value="${escapeHtml(cls.code)}"
-                  placeholder="e.g., CS 101"
-                  class="w-full text-sm font-bold font-mono theme-input rounded-xl px-3 py-2"
-                />
-              </div>
-              <div class="md:col-span-6">
-                <label for="inputClassName" class="block text-[10px] font-bold uppercase tracking-wider text-theme-faint mb-1">Course Title</label>
-                <input
-                  id="inputClassName"
-                  type="text"
-                  value="${escapeHtml(cls.name)}"
-                  placeholder="e.g., Introduction to Computer Science"
-                  class="w-full text-sm font-bold theme-input rounded-xl px-3 py-2"
-                />
-              </div>
-              <div class="md:col-span-3">
-                <label for="inputClassTerm" class="block text-[10px] font-bold uppercase tracking-wider text-theme-faint mb-1">Academic Term</label>
-                <input
-                  id="inputClassTerm"
-                  type="text"
-                  value="${escapeHtml(cls.term)}"
-                  placeholder="e.g., Term 1"
-                  class="w-full text-sm font-semibold theme-input rounded-xl px-3 py-2"
-                />
-              </div>
-            </div>
-          </section>
-
-          <!-- 3. Grade Summary & Forecast Banner (3 Cards) -->
-          <section class="grid grid-cols-1 lg:grid-cols-12 gap-5">
-            <!-- Card A: Current Actual Grade -->
-            <div class="lg:col-span-4 surface-card rounded-2xl border p-5 flex flex-col justify-between">
-              <div>
-                <div class="flex items-center justify-between gap-2">
-                  <span class="text-xs font-bold uppercase tracking-wider text-theme-muted flex items-center gap-1.5">
-                    <span class="w-2 h-2 rounded-full bg-indigo-500"></span>
-                    Current Actual Grade
-                  </span>
-                  <span id="badgeActualWeight" class="text-[11px] font-medium px-2.5 py-0.5 rounded-full surface-pill text-theme-muted border">
-                    ${formatPercent(metrics.actualActiveWeight, 0)} weight graded
-                  </span>
-                </div>
-
-                <div class="mt-4 flex items-baseline justify-between gap-4">
-                  <div>
-                    <div id="displayActualPct" class="text-4xl sm:text-5xl font-extrabold tracking-tight font-mono text-theme-primary">
-                      ${metrics.actualPct !== null ? formatPercent(metrics.actualPct, 2) : '--%'}
-                    </div>
-                    <div id="displayActualPts" class="text-xs text-theme-muted mt-1">
-                      Graded points: ${formatNumber(metrics.totalActualEarnedPts)} / ${formatNumber(metrics.totalActualAvailPts)}
-                    </div>
-                  </div>
-
-                  <div class="text-right shrink-0">
-                    <div id="badgeActualLetter" class="inline-flex items-center justify-center min-w-[64px] h-16 px-4 rounded-2xl text-3xl font-extrabold border ${getLetterBadgeClasses(metrics.actualBucket.current ? metrics.actualBucket.current.letter : '--')}">
-                      ${escapeHtml(metrics.actualBucket.current ? metrics.actualBucket.current.letter : '--')}
-                    </div>
-                    <div class="text-[11px] text-theme-faint mt-1">Letter Grade</div>
-                  </div>
-                </div>
-              </div>
-
-              <div id="boxActualMargins" class="mt-5 pt-3.5 border-t border-theme-subtle text-xs space-y-1.5">
-                ${actualMarginHtml}
-              </div>
-            </div>
-
-            <!-- Card B: Forecast / What-If Grade -->
-            <div class="lg:col-span-4 bg-gradient-to-br from-[#0c0d18] via-[#11152c] to-[#1b173b] text-white rounded-2xl border border-indigo-500/35 p-5 shadow-lg flex flex-col justify-between">
-              <div>
-                <div class="flex items-center justify-between gap-2">
-                  <span class="text-xs font-bold uppercase tracking-wider text-indigo-300 flex items-center gap-1.5">
-                    <i class="fa-solid fa-wand-magic-sparkles text-amber-400"></i>
-                    Forecast / What-If Grade
-                  </span>
-                  <span id="badgeForecastDelta" class="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-white/10 text-indigo-100 border border-white/15">
-                    ${escapeHtml(forecastDiffLabel)}
-                  </span>
-                </div>
-
-                <div class="mt-4 flex items-baseline justify-between gap-4">
-                  <div>
-                    <div id="displayForecastPct" class="text-4xl sm:text-5xl font-extrabold tracking-tight font-mono text-white">
-                      ${metrics.forecastPct !== null ? formatPercent(metrics.forecastPct, 2) : '--%'}
-                    </div>
-                    <div class="text-xs text-indigo-200/80 mt-1">
-                      Includes What-If score overrides
-                    </div>
-                  </div>
-
-                  <div class="text-right shrink-0">
-                    <div id="badgeForecastLetter" class="inline-flex items-center justify-center min-w-[64px] h-16 px-4 rounded-2xl text-3xl font-extrabold bg-indigo-500/20 text-white border border-indigo-400/35">
-                      ${escapeHtml(metrics.forecastBucket.current ? metrics.forecastBucket.current.letter : '--')}
-                    </div>
-                    <div class="text-[11px] text-indigo-300 mt-1">Projected Letter</div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="mt-5 pt-3.5 border-t border-white/10 space-y-2.5">
-                <div id="boxForecastMargins" class="text-xs text-indigo-200 leading-relaxed">
-                  ${forecastMarginHtml}
-                </div>
-                <div class="flex items-center justify-between gap-2">
-                  <span id="labelWhatIfCount" class="text-[11px] text-indigo-300">
-                    ${metrics.activeWhatIfCount} active What-If ${metrics.activeWhatIfCount === 1 ? 'override' : 'overrides'}
-                  </span>
-                  <button
-                    id="btnClearWhatIfs"
-                    type="button"
-                    class="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-white/10 hover:bg-white/20 text-white border border-white/15 transition cursor-pointer"
-                  >
-                    Clear What-Ifs
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <!-- Card C: Target Grade Forecaster -->
-            <div class="lg:col-span-4 surface-card rounded-2xl border p-5 flex flex-col justify-between">
-              <div>
-                <div class="flex items-center justify-between gap-2">
-                  <span class="text-xs font-bold uppercase tracking-wider text-theme-muted flex items-center gap-1.5">
-                    <i class="fa-solid fa-bullseye text-emerald-400"></i>
-                    Target Grade Forecaster
-                  </span>
-                  <span class="text-[11px] text-theme-faint">Goal Planner</span>
-                </div>
-
-                <div class="mt-3 flex items-center gap-2">
-                  <label for="selectTargetGrade" class="text-xs font-medium text-theme-secondary shrink-0">Target Grade:</label>
-                  <select id="selectTargetGrade" class="flex-1 text-xs font-semibold theme-select rounded-xl px-3 py-2">
-                    ${selectableTargetBuckets.map(b => `
-                      <option value="${escapeHtml(b.letter)}" ${b.letter === cls.targetLetter ? 'selected' : ''}>
-                        ${escapeHtml(b.letter)} (&ge; ${formatPercent(b.min, 0)}${b.gpa !== null ? ` • ${formatNumber(b.gpa, 1, 1)} GPA` : ''})
-                      </option>
-                    `).join('')}
-                  </select>
-                </div>
-
-                <div id="boxTargetForecastResult" class="mt-3 p-3.5 rounded-xl surface-alt border text-xs">
-                  ${targetPlannerHtml}
-                </div>
-              </div>
-
-              <div class="mt-4 pt-3 border-t border-theme-subtle flex items-center justify-between text-[11px] text-theme-muted">
-                <span>Remaining ungraded course weight:</span>
-                <span id="displayRemainingWeight" class="font-mono font-bold text-theme-primary">${formatPercent(metrics.remainingUngradedWeight, 1)}</span>
-              </div>
-            </div>
-          </section>
-
-          <!-- 4. Two-Column Configuration Row -->
-          <section class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            <!-- Left Column: Assignment Groups & Weights -->
-            <div class="lg:col-span-7 surface-card rounded-2xl border flex flex-col overflow-hidden">
-              <div class="px-5 py-4 border-b border-theme surface-alt flex flex-wrap items-center justify-between gap-2">
-                <div>
-                  <h2 class="text-sm font-bold text-theme-primary flex items-center gap-2">
-                    <i class="fa-solid fa-layer-group text-indigo-400"></i>
-                    <span>Assignment Groups &amp; Weights</span>
-                  </h2>
-                  <p class="text-xs text-theme-muted">Configure category weights toward your final class grade.</p>
-                </div>
-                <div class="flex flex-wrap items-center gap-2">
-                  <span id="badgeWeightWarning" class="${weightMismatch ? '' : 'hidden'} px-2.5 py-1 rounded-lg text-[11px] font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30">
-                    Weights != 100%
-                  </span>
-                  <button
-                    id="btnNormalizeWeights"
-                    type="button"
-                    class="${weightMismatch ? '' : 'hidden'} px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/35 transition cursor-pointer"
-                  >
-                    Normalize to 100%
-                  </button>
-                  <button
-                    id="btnAddGroup"
-                    type="button"
-                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm transition cursor-pointer"
-                  >
-                    <i class="fa-solid fa-plus"></i>
-                    <span>Add Group</span>
-                  </button>
-                </div>
-              </div>
-
-              <div class="p-4 flex-1 overflow-x-auto">
-                <table class="w-full text-left border-collapse">
-                  <thead>
-                    <tr class="border-b border-theme text-[11px] font-bold uppercase tracking-wider text-theme-faint">
-                      <th class="pb-2.5 pl-2">Assignment Group</th>
-                      <th class="pb-2.5 text-right w-28">Weight (%)</th>
-                      <th class="pb-2.5 text-right">Graded Pts</th>
-                      <th class="pb-2.5 text-right">Actual %</th>
-                      <th class="pb-2.5 text-right">Forecast %</th>
-                      <th class="pb-2.5 w-10 text-center"></th>
-                    </tr>
-                  </thead>
-                  <tbody id="tbodyAssignmentGroups" class="text-xs">
-                    ${groupsRowsHtml}
-                  </tbody>
-                  <tfoot>
-                    <tr class="border-t-2 border-theme font-bold text-xs">
-                      <td class="py-3 pl-2 text-theme-secondary">Total Configured Weight</td>
-                      <td id="cellTotalWeight" class="py-3 text-right font-mono ${weightMismatch ? 'text-amber-400' : 'text-emerald-400'}">
-                        ${formatPercent(metrics.totalConfiguredWeight, 1)}
-                      </td>
-                      <td id="cellTotalGroupPts" class="py-3 text-right font-mono text-theme-muted">
-                        ${formatNumber(metrics.totalActualEarnedPts)} / ${formatNumber(metrics.totalActualAvailPts)}
-                      </td>
-                      <td id="cellFooterActualPct" class="py-3 text-right font-mono text-theme-primary">
-                        ${metrics.actualPct !== null ? formatPercent(metrics.actualPct, 2) : '--%'}
-                      </td>
-                      <td id="cellFooterForecastPct" class="py-3 text-right font-mono text-indigo-400">
-                        ${metrics.forecastPct !== null ? formatPercent(metrics.forecastPct, 2) : '--%'}
-                      </td>
-                      <td></td>
-                    </tr>
-                  </tfoot>
-                </table>
-              </div>
-            </div>
-
-            <!-- Right Column: Class Grade Bucket Distribution -->
-            <div class="lg:col-span-5 surface-card rounded-2xl border flex flex-col overflow-hidden">
-              <div class="px-5 py-4 border-b border-theme surface-alt flex flex-wrap items-center justify-between gap-2">
-                <div>
-                  <h2 class="text-sm font-bold text-theme-primary flex items-center gap-2">
-                    <i class="fa-solid fa-chart-simple text-indigo-400"></i>
-                    <span>Class Grade Bucket Distribution</span>
-                  </h2>
-                  <p class="text-xs text-theme-muted">Minimum percentage thresholds (<code class="font-mono">&ge;</code>) for this class.</p>
-                </div>
-                <button
-                  id="btnResetClassBuckets"
-                  type="button"
-                  class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold theme-btn-secondary cursor-pointer"
-                >
-                  <i class="fa-solid fa-rotate-left text-indigo-400"></i>
-                  <span>Reset to Saved Default Scale</span>
-                </button>
-              </div>
-
-              <div class="p-4 flex-1 overflow-y-auto max-h-[380px]">
-                <table class="w-full text-left border-collapse">
-                  <thead>
-                    <tr class="border-b border-theme text-[11px] font-bold uppercase tracking-wider text-theme-faint">
-                      <th class="pb-2 pl-2">Grade</th>
-                      <th class="pb-2 text-right">Min Cutoff</th>
-                      <th class="pb-2 text-center">Range</th>
-                      <th class="pb-2 text-right pr-2">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody id="tbodyClassBuckets" class="text-xs">
-                    ${bucketsRowsHtml}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </section>
-
-          <!-- 5. Assignments Gradebook (Always Sorted by Assignment Group) -->
-          <section class="surface-card rounded-2xl border overflow-hidden">
-            <div class="px-5 py-4 border-b border-theme surface-alt flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div>
-                <h2 class="text-base font-bold text-theme-primary flex items-center gap-2">
-                  <i class="fa-solid fa-list-check text-indigo-400"></i>
-                  <span>Assignments Gradebook</span>
-                  <span class="px-2 py-0.5 rounded-full text-xs font-mono surface-pill border text-theme-muted">${cls.assignments.length}</span>
-                </h2>
-                <p class="text-xs text-theme-muted mt-0.5">
-                  Sorted by Assignment Group. Leave <strong>Points Earned</strong> blank for ungraded items, or enter a <strong>What-If Override</strong> score to simulate outcomes.
-                </p>
-              </div>
-
-              <div class="flex flex-wrap items-center gap-2">
-                <!-- View Mode Toggle -->
-                <div class="inline-flex items-center p-1 rounded-xl surface-pill border text-xs font-semibold">
-                  <button
-                    type="button"
-                    data-action="set-gb-view"
-                    data-mode="grouped"
-                    class="px-3 py-1.5 rounded-lg transition cursor-pointer ${
-                      state.gradebookViewMode === 'grouped'
-                        ? 'bg-indigo-600 text-white shadow-xs'
-                        : 'text-theme-muted hover:text-theme-primary'
-                    }"
-                  >
-                    <i class="fa-solid fa-folder-tree mr-1"></i>Grouped by Assignment Group
-                  </button>
-                  <button
-                    type="button"
-                    data-action="set-gb-view"
-                    data-mode="unified"
-                    class="px-3 py-1.5 rounded-lg transition cursor-pointer ${
-                      state.gradebookViewMode === 'unified'
-                        ? 'bg-indigo-600 text-white shadow-xs'
-                        : 'text-theme-muted hover:text-theme-primary'
-                    }"
-                  >
-                    <i class="fa-solid fa-table-list mr-1"></i>Unified Table (Sorted by Group)
-                  </button>
-                </div>
-
-                <button
-                  id="btnAddAssignmentGlobal"
-                  type="button"
-                  class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm transition cursor-pointer"
-                >
-                  <i class="fa-solid fa-plus"></i>
-                  <span>Add Assignment</span>
-                </button>
-              </div>
-            </div>
-
-            <div id="gradebookAssignmentsBody" class="p-4 sm:p-5 space-y-5">
-              ${assignmentsSectionHtml}
-            </div>
-          </section>
-        `;
-
-        bindGradebookEvents();
+        document.querySelectorAll(`[data-section-group-title="${groupId}"]`).forEach(el => {
+          el.textContent = displayLabel;
+        });
+        document.querySelectorAll(`[data-section-add-btn-label="${groupId}"]`).forEach(el => {
+          el.textContent = `Add to ${displayLabel}`;
+        });
+        document.querySelectorAll(`[data-section-empty-group-name="${groupId}"]`).forEach(el => {
+          el.textContent = displayLabel;
+        });
+        document.querySelectorAll(`[data-section-empty-btn-label="${groupId}"]`).forEach(el => {
+          el.textContent = `+ Add to ${displayLabel}`;
+        });
+        document.querySelectorAll(`option[data-group-option-id="${groupId}"]`).forEach(opt => {
+          opt.textContent = displayLabel;
+        });
       }
 
-      function renderAssignmentRowHtml(cls, a, showGroupColumn) {
-        const avail = Math.max(0, Number(a.available) || 0);
-        const hasActual = isGradedValue(a.earned);
-        const hasWhatIf = isGradedValue(a.whatIfEarned);
-
-        const actualPct = hasActual && avail > 0 ? (Number(a.earned) / avail) * 100 : null;
-        const effectiveScore = hasWhatIf ? Number(a.whatIfEarned) : (hasActual ? Number(a.earned) : null);
-        const effectivePct = effectiveScore !== null && avail > 0 ? (effectiveScore / avail) * 100 : null;
-        const isHighlighted = a.id === highlightedAssignmentId;
-
-        return `
-          <tr class="theme-row-hover transition border-b border-theme-subtle ${isHighlighted ? 'row-highlight-anim' : ''}" data-assign-id="${escapeHtml(a.id)}">
-            <td class="py-2.5 pl-3 pr-2">
-              <input
-                type="text"
-                value="${escapeHtml(a.name)}"
-                data-assign-id="${escapeHtml(a.id)}"
-                data-assign-field="name"
-                aria-label="Assignment Name"
-                class="w-full min-w-[170px] text-xs font-semibold theme-inline-input rounded-lg px-2 py-1"
-              />
-            </td>
-            <td class="py-2.5 px-2">
-              <select
-                data-assign-id="${escapeHtml(a.id)}"
-                data-assign-field="groupId"
-                aria-label="Assignment Group"
-                class="text-xs font-medium theme-select rounded-lg px-2 py-1"
-              >
-                ${cls.groups.map(g => `
-                  <option value="${escapeHtml(g.id)}" data-group-option-id="${escapeHtml(g.id)}" ${g.id === a.groupId ? 'selected' : ''}>
-                    ${escapeHtml(g.name)}
-                  </option>
-                `).join('')}
-              </select>
-            </td>
-            <td class="py-2.5 px-2 text-right">
-              <input
-                type="number"
-                step="any"
-                min="0"
-                placeholder="Ungraded"
-                value="${hasActual ? a.earned : ''}"
-                data-assign-id="${escapeHtml(a.id)}"
-                data-assign-field="earned"
-                aria-label="Points Earned"
-                class="w-24 text-right font-mono text-xs font-semibold theme-input rounded-lg px-2 py-1"
-              />
-            </td>
-            <td class="py-2.5 px-2 text-right">
-              <input
-                type="number"
-                step="any"
-                min="0.01"
-                value="${a.available}"
-                data-assign-id="${escapeHtml(a.id)}"
-                data-assign-field="available"
-                aria-label="Total Available Points"
-                class="w-24 text-right font-mono text-xs font-semibold theme-input rounded-lg px-2 py-1"
-              />
-            </td>
-            <td class="py-2.5 px-2 text-right">
-              <span data-assign-pct-pill="${escapeHtml(a.id)}" class="inline-block px-2.5 py-0.5 rounded-md font-mono text-[11px] font-bold ${getScorePillClasses(actualPct)}">
-                ${actualPct !== null ? formatPercent(actualPct, 1) : 'Ungraded'}
-              </span>
-            </td>
-            <td class="py-2.5 px-2 text-right">
-              <div class="inline-flex items-center justify-end gap-1">
-                <input
-                  type="number"
-                  step="any"
-                  min="0"
-                  placeholder="What-If"
-                  value="${hasWhatIf ? a.whatIfEarned : ''}"
-                  data-assign-id="${escapeHtml(a.id)}"
-                  data-assign-field="whatIfEarned"
-                  aria-label="What-If Override Score"
-                  class="w-24 text-right font-mono text-xs theme-input rounded-lg px-2 py-1"
-                />
-                ${hasWhatIf ? `
-                  <button
-                    type="button"
-                    data-action="clear-row-whatif"
-                    data-assign-id="${escapeHtml(a.id)}"
-                    title="Clear What-If override"
-                    class="text-theme-faint hover:text-rose-400 p-1 cursor-pointer"
-                  >
-                    <i class="fa-solid fa-xmark text-xs"></i>
-                  </button>
-                ` : ''}
-              </div>
-            </td>
-            <td class="py-2.5 px-2 text-right">
-              <span data-assign-forecast-pill="${escapeHtml(a.id)}" class="inline-block px-2 py-0.5 rounded-md font-mono text-[11px] font-semibold ${hasWhatIf ? 'accent-pill border' : 'text-theme-faint'}">
-                ${effectivePct !== null ? formatPercent(effectivePct, 1) : '--%'}
-              </span>
-            </td>
-            <td class="py-2.5 pr-3 pl-1 text-right">
-              <button
-                type="button"
-                data-action="delete-assignment"
-                data-assign-id="${escapeHtml(a.id)}"
-                title="Delete Assignment"
-                class="text-theme-faint hover:text-rose-400 p-1.5 rounded-lg transition cursor-pointer"
-              >
-                <i class="fa-regular fa-trash-can text-xs"></i>
-              </button>
-            </td>
-          </tr>
-        `;
-      }
-
-      function renderAssignmentsGradebookHtml(cls, metrics) {
-        if (state.gradebookViewMode === 'unified') {
-          const groupOrder = {};
-          cls.groups.forEach((g, idx) => { groupOrder[g.id] = idx; });
-
-          const sortedAssignments = [...cls.assignments].sort((a, b) => {
-            const idxA = groupOrder[a.groupId] ?? 999;
-            const idxB = groupOrder[b.groupId] ?? 999;
-            return idxA - idxB;
-          });
-
-          if (sortedAssignments.length === 0) {
-            return `<div class="text-center py-10 text-xs text-theme-faint">No assignments in this class yet. Click <strong>+ Add Assignment</strong> above to create an entry.</div>`;
-          }
-
-          return `
-            <div class="overflow-x-auto rounded-xl border border-theme">
-              <table class="w-full text-left border-collapse">
-                <thead>
-                  <tr class="border-b border-theme surface-alt text-[11px] font-bold uppercase tracking-wider text-theme-faint">
-                    <th class="py-2.5 pl-3">Assignment Name</th>
-                    <th class="py-2.5 px-2">Assignment Group</th>
-                    <th class="py-2.5 px-2 text-right">Points Earned</th>
-                    <th class="py-2.5 px-2 text-right">Available Pts</th>
-                    <th class="py-2.5 px-2 text-right">Actual %</th>
-                    <th class="py-2.5 px-2 text-right">What-If Override</th>
-                    <th class="py-2.5 px-2 text-right">Forecast %</th>
-                    <th class="py-2.5 pr-3 text-right">Delete</th>
-                  </tr>
-                </thead>
-                <tbody class="text-xs">
-                  ${sortedAssignments.map(a => renderAssignmentRowHtml(cls, a, true)).join('')}
-                </tbody>
-              </table>
-            </div>
-          `;
-        }
-
-        // Default: Grouped by Assignment Group
-        return cls.groups.map((grp, idx) => {
-          const groupAssignments = cls.assignments.filter(a => a.groupId === grp.id);
-          const st = metrics.groupMap[grp.id];
-          const dotColor = GROUP_DOT_COLORS[idx % GROUP_DOT_COLORS.length];
-
-          return `
-            <div class="rounded-2xl border border-theme overflow-hidden">
-              <div class="px-4 py-3 surface-alt border-b border-theme flex flex-wrap items-center justify-between gap-2">
-                <div class="flex flex-wrap items-center gap-2.5">
-                  <span class="w-3 h-3 rounded-full ${dotColor}"></span>
-                  <h3 data-section-group-title="${escapeHtml(grp.id)}" class="text-sm font-bold text-theme-primary">${escapeHtml(grp.name)}</h3>
-                  <span data-section-group-weight="${escapeHtml(grp.id)}" class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold accent-pill border">
-                    Weight: ${formatPercent(grp.weight, 1)}
-                  </span>
-                  <span data-section-subtotal="${escapeHtml(grp.id)}" class="text-xs font-mono text-theme-muted">
-                    ${st ? `${formatNumber(st.actualEarned)} / ${formatNumber(st.actualAvailable)} pts` : '0 / 0 pts'}
-                  </span>
-                </div>
-
-                <div class="flex items-center gap-2">
-                  <span data-section-pct="${escapeHtml(grp.id)}" class="px-2.5 py-0.5 rounded-lg font-mono text-xs font-bold ${getScorePillClasses(st ? st.actualPct : null)}">
-                    ${st && st.actualPct !== null ? formatPercent(st.actualPct, 1) : 'Ungraded'}
-                  </span>
-                  <button
-                    type="button"
-                    data-action="add-to-group"
-                    data-group-id="${escapeHtml(grp.id)}"
-                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white shadow-xs transition cursor-pointer"
-                  >
-                    <i class="fa-solid fa-plus"></i>
-                    <span data-section-add-btn-label="${escapeHtml(grp.id)}">Add to ${escapeHtml(grp.name)}</span>
-                  </button>
-                </div>
-              </div>
-
-              ${groupAssignments.length === 0 ? `
-                <div class="px-4 py-6 text-center text-xs text-theme-faint">
-                  No assignments in <strong data-section-empty-group-name="${escapeHtml(grp.id)}">${escapeHtml(grp.name)}</strong> yet. Click <strong data-section-empty-btn-label="${escapeHtml(grp.id)}">+ Add to ${escapeHtml(grp.name)}</strong> above.
-                </div>
-              ` : `
-                <div class="overflow-x-auto">
-                  <table class="w-full text-left border-collapse">
-                    <thead>
-                      <tr class="border-b border-theme-subtle text-[10px] font-bold uppercase tracking-wider text-theme-faint">
-                        <th class="py-2 pl-3">Assignment Name</th>
-                        <th class="py-2 px-2">Assignment Group</th>
-                        <th class="py-2 px-2 text-right">Points Earned</th>
-                        <th class="py-2 px-2 text-right">Available Pts</th>
-                        <th class="py-2 px-2 text-right">Actual %</th>
-                        <th class="py-2 px-2 text-right">What-If Override</th>
-                        <th class="py-2 px-2 text-right">Forecast %</th>
-                        <th class="py-2 pr-3 text-right">Delete</th>
-                      </tr>
-                    </thead>
-                    <tbody class="text-xs">
-                      ${groupAssignments.map(a => renderAssignmentRowHtml(cls, a, false)).join('')}
-                    </tbody>
-                  </table>
-                </div>
-              `}
-            </div>
-          `;
-        }).join('');
-      }
-
-      function refreshLiveGradebookMetrics() {
+      function updateCalculatedMetricsInDOM() {
         const cls = getActiveClass();
         if (!cls) return;
         const metrics = computeClassMetrics(cls);
         const sortedBuckets = getSortedBuckets(cls.buckets);
         const weightMismatch = Math.abs(metrics.totalConfiguredWeight - 100) > 0.05;
 
-        // Card 1: Current Actual Grade
+        // Card A: Current Actual Grade
         const badgeActualWeight = document.getElementById('badgeActualWeight');
         const displayActualPct = document.getElementById('displayActualPct');
         const displayActualPts = document.getElementById('displayActualPts');
@@ -1709,7 +1625,12 @@
 
         if (badgeActualWeight) badgeActualWeight.textContent = `${formatPercent(metrics.actualActiveWeight, 0)} weight graded`;
         if (displayActualPct) displayActualPct.textContent = metrics.actualPct !== null ? formatPercent(metrics.actualPct, 2) : '--%';
-        if (displayActualPts) displayActualPts.textContent = `Graded points: ${formatNumber(metrics.totalActualEarnedPts)} / ${formatNumber(metrics.totalActualAvailPts)}`;
+        if (displayActualPts) {
+          const gpaText = metrics.actualBucket.current && metrics.actualBucket.current.gpa !== null
+            ? ` • ${formatNumber(metrics.actualBucket.current.gpa, 1, 1)} GPA`
+            : '';
+          displayActualPts.textContent = `Graded points: ${formatNumber(metrics.totalActualEarnedPts)} / ${formatNumber(metrics.totalActualAvailPts)}${gpaText}`;
+        }
         if (badgeActualLetter) {
           const ltr = metrics.actualBucket.current ? metrics.actualBucket.current.letter : '--';
           badgeActualLetter.textContent = ltr;
@@ -1737,7 +1658,7 @@
           }
         }
 
-        // Card 2: Forecast Grade
+        // Card B: Forecast / What-If Grade
         const badgeForecastDelta = document.getElementById('badgeForecastDelta');
         const displayForecastPct = document.getElementById('displayForecastPct');
         const badgeForecastLetter = document.getElementById('badgeForecastLetter');
@@ -1770,7 +1691,7 @@
           }
         }
 
-        // Card 3: Target Grade Forecaster
+        // Card C: Target Grade Forecaster
         const boxTargetForecastResult = document.getElementById('boxTargetForecastResult');
         const displayRemainingWeight = document.getElementById('displayRemainingWeight');
         if (displayRemainingWeight) displayRemainingWeight.textContent = formatPercent(metrics.remainingUngradedWeight, 1);
@@ -1792,7 +1713,7 @@
               const neededAvgPct = (neededWeightedPts / remWeight) * 100;
 
               if (neededAvgPct <= 0) {
-                boxTargetForecastResult.innerHTML = `<div class="text-emerald-400 font-semibold"><i class="fa-solid fa-lock mr-1.5"></i><strong>${escapeHtml(activeTargetBucket.letter)}</strong> (&ge;${formatPercent(targetCutoff, 0)}) is already locked in even with 0% on the remaining ${formatPercent(remWeight, 1)} weight!</div>`;
+                boxTargetForecastResult.innerHTML = `<div class="text-emerald-400 font-semibold"><i class="fa-solid fa-lock mr-1.5"></i><strong>${escapeHtml(activeTargetBucket.letter)}</strong> (&ge;${formatPercent(targetCutoff, 0)}) is already clinched even with 0% on the remaining ${formatPercent(remWeight, 1)} weight!</div>`;
               } else if (neededAvgPct > 100) {
                 const maxPossible = ((metrics.lockedWeightedContribution + remWeight) / (metrics.totalConfiguredWeight || 100)) * 100;
                 boxTargetForecastResult.innerHTML = `<div class="text-rose-400 font-semibold"><i class="fa-solid fa-triangle-exclamation mr-1.5"></i>Requires <strong>${formatPercent(neededAvgPct, 2)}</strong> across remaining ${formatPercent(remWeight, 1)} weight (max without extra credit: <strong>${formatPercent(maxPossible, 2)}</strong>).</div>`;
@@ -1849,6 +1770,7 @@
             secPct.className = `px-2.5 py-0.5 rounded-lg font-mono text-xs font-bold ${getScorePillClasses(st.actualPct)}`;
           }
         });
+
         // Update Class Bucket Status Badges & Range Labels In-Place
         const activeActualId = metrics.actualBucket.current ? metrics.actualBucket.current.id : null;
         const activeForecastId = metrics.forecastBucket.current ? metrics.forecastBucket.current.id : null;
@@ -1874,55 +1796,559 @@
         });
 
         // Update active class tab badge in top strip
-        const activeTab = document.querySelector(`[data-action="select-class"][data-class-id="${cls.id}"] span:last-child`);
-        if (activeTab) {
+        const activeTabBadge = document.querySelector(`[data-action="select-class"][data-class-id="${cls.id}"] [data-tab-grade-badge]`);
+        if (activeTabBadge) {
           const ltr = metrics.actualBucket.current ? metrics.actualBucket.current.letter : '--';
           const pStr = metrics.actualPct !== null ? formatPercent(metrics.actualPct, 1) : '--%';
-          activeTab.textContent = `${ltr} (${pStr})`;
+          activeTabBadge.textContent = `${ltr} (${pStr})`;
         }
       }
 
-      function updateGroupNameInDOM(groupId, newName) {
-        const displayLabel = newName.trim() || 'Unnamed Group';
+      /*************************************************************************
+       * 8. GRADEBOOK VIEW POPULATION (STRUCTURAL RENDERS ONLY)
+       *************************************************************************/
+      function renderAssignmentRowHtml(cls, a) {
+        const avail = Math.max(0, Number(a.available) || 0);
+        const hasActual = isGradedValue(a.earned);
+        const hasWhatIf = isGradedValue(a.whatIfEarned);
 
-        document.querySelectorAll(`[data-section-group-title="${groupId}"]`).forEach(el => {
-          el.textContent = displayLabel;
-        });
+        const actualPct = hasActual && avail > 0 ? (Number(a.earned) / avail) * 100 : null;
+        const effectiveScore = hasWhatIf ? Number(a.whatIfEarned) : (hasActual ? Number(a.earned) : null);
+        const effectivePct = effectiveScore !== null && avail > 0 ? (effectiveScore / avail) * 100 : null;
+        const isHighlighted = a.id === highlightedAssignmentId;
 
-        document.querySelectorAll(`[data-section-add-btn-label="${groupId}"]`).forEach(el => {
-          el.textContent = `Add to ${displayLabel}`;
-        });
-
-        document.querySelectorAll(`[data-section-empty-group-name="${groupId}"]`).forEach(el => {
-          el.textContent = displayLabel;
-        });
-
-        document.querySelectorAll(`[data-section-empty-btn-label="${groupId}"]`).forEach(el => {
-          el.textContent = `+ Add to ${displayLabel}`;
-        });
-
-        document.querySelectorAll(`option[data-group-option-id="${groupId}"]`).forEach(opt => {
-          opt.textContent = displayLabel;
-        });
+        return `
+          <tr class="theme-row-hover transition border-b border-theme-subtle ${isHighlighted ? 'row-highlight-anim' : ''}" data-assign-id="${escapeHtml(a.id)}">
+            <td class="py-2.5 pl-3 pr-2">
+              <input
+                type="text"
+                value="${escapeHtml(a.name)}"
+                data-assign-id="${escapeHtml(a.id)}"
+                data-assign-field="name"
+                aria-label="Assignment Name"
+                class="w-full min-w-[170px] text-xs font-semibold theme-inline-input rounded-lg px-2 py-1"
+              />
+            </td>
+            <td class="py-2.5 px-2">
+              <select
+                data-assign-id="${escapeHtml(a.id)}"
+                data-assign-field="groupId"
+                aria-label="Assignment Group"
+                class="text-xs font-medium theme-select rounded-lg px-2 py-1"
+              >
+                ${cls.groups.map(g => `
+                  <option value="${escapeHtml(g.id)}" data-group-option-id="${escapeHtml(g.id)}" ${g.id === a.groupId ? 'selected' : ''}>
+                    ${escapeHtml(g.name)}
+                  </option>
+                `).join('')}
+              </select>
+            </td>
+            <td class="py-2.5 px-2 text-right">
+              <input
+                type="number"
+                step="any"
+                min="0"
+                placeholder="Ungraded"
+                value="${hasActual ? a.earned : ''}"
+                data-assign-id="${escapeHtml(a.id)}"
+                data-assign-field="earned"
+                aria-label="Points Earned"
+                class="w-24 text-right font-mono text-xs font-semibold theme-input rounded-lg px-2 py-1"
+              />
+            </td>
+            <td class="py-2.5 px-2 text-right">
+              <input
+                type="number"
+                step="any"
+                min="0.01"
+                value="${a.available}"
+                data-assign-id="${escapeHtml(a.id)}"
+                data-assign-field="possible"
+                aria-label="Total Available Points"
+                class="w-24 text-right font-mono text-xs font-semibold theme-input rounded-lg px-2 py-1"
+              />
+            </td>
+            <td class="py-2.5 px-2 text-right">
+              <span data-assign-pct-pill="${escapeHtml(a.id)}" class="inline-block px-2.5 py-0.5 rounded-md font-mono text-[11px] font-bold ${getScorePillClasses(actualPct)}">
+                ${actualPct !== null ? formatPercent(actualPct, 1) : 'Ungraded'}
+              </span>
+            </td>
+            <td class="py-2.5 px-2 text-right">
+              <div class="inline-flex items-center justify-end gap-1">
+                <input
+                  type="number"
+                  step="any"
+                  min="0"
+                  placeholder="What-If"
+                  value="${hasWhatIf ? a.whatIfEarned : ''}"
+                  data-assign-id="${escapeHtml(a.id)}"
+                  data-assign-field="whatIfEarned"
+                  aria-label="What-If Override Score"
+                  class="w-24 text-right font-mono text-xs theme-input rounded-lg px-2 py-1"
+                />
+                <button
+                  type="button"
+                  data-action="clear-row-whatif"
+                  data-assign-id="${escapeHtml(a.id)}"
+                  title="Clear What-If override"
+                  class="${hasWhatIf ? '' : 'hidden'} text-theme-faint hover:text-rose-400 p-1 cursor-pointer"
+                >
+                  <i class="fa-solid fa-xmark text-xs"></i>
+                </button>
+              </div>
+            </td>
+            <td class="py-2.5 px-2 text-right">
+              <span data-assign-forecast-pill="${escapeHtml(a.id)}" class="inline-block px-2 py-0.5 rounded-md font-mono text-[11px] font-semibold ${hasWhatIf ? 'accent-pill border' : 'text-theme-faint'}">
+                ${effectivePct !== null ? formatPercent(effectivePct, 1) : '--%'}
+              </span>
+            </td>
+            <td class="py-2.5 pr-3 pl-1 text-right">
+              <button
+                type="button"
+                data-action="delete-assignment"
+                data-assign-id="${escapeHtml(a.id)}"
+                title="Delete Assignment"
+                class="text-theme-faint hover:text-rose-400 p-1.5 rounded-lg transition cursor-pointer"
+              >
+                <i class="fa-regular fa-trash-can text-xs"></i>
+              </button>
+            </td>
+          </tr>
+        `;
       }
 
-      function bindGradebookEvents() {
+      function renderGradebookDOM() {
         const cls = getActiveClass();
         if (!cls) return;
 
-        // Class Tab Selection
-        document.querySelectorAll('[data-action="select-class"]').forEach(btn => {
-          btn.addEventListener('click', () => {
-            const cid = btn.getAttribute('data-class-id');
-            if (cid && cid !== state.activeClassId) {
-              state.activeClassId = cid;
-              saveState();
-              renderApp();
+        const metrics = computeClassMetrics(cls);
+        const sortedBuckets = getSortedBuckets(cls.buckets);
+
+        // 1. Class Tabs Strip
+        const tabsContainer = document.getElementById('classTabsContainer');
+        if (tabsContainer) {
+          tabsContainer.innerHTML = state.classes.map(c => {
+            const isActive = c.id === cls.id;
+            const m = computeClassMetrics(c);
+            const letter = m.actualBucket.current ? m.actualBucket.current.letter : '--';
+            const pctStr = m.actualPct !== null ? formatPercent(m.actualPct, 1) : '--%';
+
+            return `
+              <button
+                type="button"
+                data-action="select-class"
+                data-class-id="${escapeHtml(c.id)}"
+                class="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold border transition whitespace-nowrap cursor-pointer ${
+                  isActive
+                    ? 'bg-indigo-600 text-white border-indigo-500 shadow-sm shadow-indigo-500/25'
+                    : 'surface-card text-theme-secondary hover:text-theme-primary'
+                }"
+              >
+                <i class="fa-solid fa-book-open ${isActive ? 'text-indigo-200' : 'text-indigo-400'}"></i>
+                <span data-tab-code class="font-bold">${escapeHtml(c.code || 'Course')}</span>
+                <span data-tab-name class="hidden md:inline max-w-[140px] truncate opacity-85">${escapeHtml(c.name)}</span>
+                <span data-tab-grade-badge class="px-1.5 py-0.5 rounded-md font-mono text-[10px] ${
+                  isActive ? 'bg-black/25 text-white' : 'surface-pill text-theme-muted border'
+                }">${escapeHtml(letter)} (${pctStr})</span>
+              </button>
+            `;
+          }).join('');
+        }
+
+        // 2. Class Header Inputs
+        const inputCode = document.getElementById('inputClassCode');
+        const inputName = document.getElementById('inputClassName');
+        const inputTerm = document.getElementById('inputClassTerm');
+        if (inputCode && document.activeElement !== inputCode) inputCode.value = cls.code;
+        if (inputName && document.activeElement !== inputName) inputName.value = cls.name;
+        if (inputTerm && document.activeElement !== inputTerm) inputTerm.value = cls.term;
+
+        // 3. Target Grade Select Dropdown
+        const selectTargetGrade = document.getElementById('selectTargetGrade');
+        if (selectTargetGrade) {
+          const selectableTargetBuckets = sortedBuckets.filter(b => Number(b.min) > 0);
+          selectTargetGrade.innerHTML = selectableTargetBuckets.map(b => `
+            <option value="${escapeHtml(b.letter)}" ${b.letter === cls.targetLetter ? 'selected' : ''}>
+              ${escapeHtml(b.letter)} (&ge; ${formatPercent(b.min, 0)}${b.gpa !== null ? ` • ${formatNumber(b.gpa, 1, 1)} GPA` : ''})
+            </option>
+          `).join('');
+        }
+
+        // 4. Assignment Groups Table Body
+        const tbodyGroups = document.getElementById('tbodyAssignmentGroups');
+        if (tbodyGroups) {
+          tbodyGroups.innerHTML = cls.groups.map((grp, idx) => {
+            const st = metrics.groupMap[grp.id];
+            const dotColor = GROUP_DOT_COLORS[idx % GROUP_DOT_COLORS.length];
+            return `
+              <tr class="theme-row-hover transition border-b border-theme-subtle">
+                <td class="py-2.5 pl-2 pr-2">
+                  <div class="flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full shrink-0 ${dotColor}"></span>
+                    <input
+                      type="text"
+                      value="${escapeHtml(grp.name)}"
+                      data-group-id="${escapeHtml(grp.id)}"
+                      data-group-field="name"
+                      aria-label="Assignment Group Name"
+                      class="w-full text-xs font-semibold theme-inline-input rounded-lg px-2 py-1"
+                    />
+                  </div>
+                </td>
+                <td class="py-2.5 text-right">
+                  <div class="inline-flex items-center justify-end gap-1">
+                    <input
+                      type="number"
+                      step="any"
+                      min="0"
+                      max="100"
+                      value="${grp.weight}"
+                      data-group-id="${escapeHtml(grp.id)}"
+                      data-group-field="weight"
+                      aria-label="Assignment Group Weight"
+                      class="w-20 text-right font-mono text-xs font-semibold theme-input rounded-lg px-2 py-1"
+                    />
+                    <span class="text-xs text-theme-faint">%</span>
+                  </div>
+                </td>
+                <td class="py-2.5 text-right font-mono text-xs text-theme-muted" data-stat-group-pts="${escapeHtml(grp.id)}">
+                  ${st ? `${formatNumber(st.actualEarned)} / ${formatNumber(st.actualAvailable)}` : '0 / 0'}
+                </td>
+                <td class="py-2.5 text-right font-mono text-xs font-semibold text-theme-primary" data-stat-group-actual="${escapeHtml(grp.id)}">
+                  ${st && st.actualPct !== null ? formatPercent(st.actualPct, 1) : '--%'}
+                </td>
+                <td class="py-2.5 text-right font-mono text-xs font-semibold text-indigo-400" data-stat-group-forecast="${escapeHtml(grp.id)}">
+                  ${st && st.forecastPct !== null ? formatPercent(st.forecastPct, 1) : '--%'}
+                </td>
+                <td class="py-2.5 text-center">
+                  <button
+                    type="button"
+                    data-action="delete-group"
+                    data-group-id="${escapeHtml(grp.id)}"
+                    title="Delete Assignment Group"
+                    class="text-theme-faint hover:text-rose-400 p-1 rounded-lg transition cursor-pointer"
+                  >
+                    <i class="fa-regular fa-trash-can text-xs"></i>
+                  </button>
+                </td>
+              </tr>
+            `;
+          }).join('');
+        }
+
+        // 5. Class Grade Bucket Distribution Table Body
+        const tbodyBuckets = document.getElementById('tbodyClassBuckets');
+        if (tbodyBuckets) {
+          tbodyBuckets.innerHTML = sortedBuckets.map((b, idx) => {
+            const upperLabel = idx === 0 ? '100%' : `< ${formatPercent(sortedBuckets[idx - 1].min, 0)}`;
+            return `
+              <tr class="theme-row-hover transition border-b border-theme-subtle">
+                <td class="py-2 pl-2">
+                  <span class="inline-flex items-center justify-center w-10 h-6 rounded-md text-xs font-bold border ${getLetterBadgeClasses(b.letter)}">
+                    ${escapeHtml(b.letter)}
+                  </span>
+                </td>
+                <td class="py-2 text-right">
+                  <div class="inline-flex items-center justify-end gap-1">
+                    <span class="text-[11px] text-theme-faint">&ge;</span>
+                    <input
+                      type="number"
+                      step="any"
+                      min="0"
+                      max="100"
+                      value="${b.min}"
+                      data-bucket-cutoff="${escapeHtml(b.id)}"
+                      aria-label="Minimum cutoff for ${escapeHtml(b.letter)}"
+                      class="w-16 text-right font-mono text-xs font-semibold theme-input rounded-lg px-2 py-1"
+                    />
+                    <span class="text-[11px] text-theme-faint">%</span>
+                  </div>
+                </td>
+                <td class="py-2 text-center font-mono text-[11px] text-theme-muted" data-bucket-range="${escapeHtml(b.id)}">
+                  ${formatPercent(b.min, 0)} – ${upperLabel}
+                </td>
+                <td class="py-2 text-right pr-2" data-bucket-status="${escapeHtml(b.id)}">
+                  <span class="text-theme-faint">—</span>
+                </td>
+              </tr>
+            `;
+          }).join('');
+        }
+
+        // 6. Assignments Gradebook View Toggle Buttons
+        const btnGrouped = document.getElementById('btnViewGrouped');
+        const btnUnified = document.getElementById('btnViewUnified');
+        const countBadge = document.getElementById('badgeTotalAssignmentsCount');
+        if (countBadge) countBadge.textContent = String(cls.assignments.length);
+
+        if (btnGrouped && btnUnified) {
+          const isGrouped = state.gradebookViewMode === 'grouped';
+          btnGrouped.className = `px-3 py-1.5 rounded-lg transition cursor-pointer ${
+            isGrouped ? 'bg-indigo-600 text-white shadow-xs' : 'text-theme-muted hover:text-theme-primary'
+          }`;
+          btnUnified.className = `px-3 py-1.5 rounded-lg transition cursor-pointer ${
+            !isGrouped ? 'bg-indigo-600 text-white shadow-xs' : 'text-theme-muted hover:text-theme-primary'
+          }`;
+        }
+
+        // 7. Assignments Gradebook Body
+        const gbBody = document.getElementById('gradebookAssignmentsBody');
+        if (gbBody) {
+          if (state.gradebookViewMode === 'unified') {
+            const groupOrder = {};
+            cls.groups.forEach((g, idx) => { groupOrder[g.id] = idx; });
+
+            const sortedAssignments = [...cls.assignments].sort((a, b) => {
+              const idxA = groupOrder[a.groupId] ?? 999;
+              const idxB = groupOrder[b.groupId] ?? 999;
+              return idxA - idxB;
+            });
+
+            if (sortedAssignments.length === 0) {
+              gbBody.innerHTML = `<div class="text-center py-10 text-xs text-theme-faint">No assignments in this class yet. Click <strong>+ Add Assignment</strong> above to create an entry.</div>`;
+            } else {
+              gbBody.innerHTML = `
+                <div class="overflow-x-auto rounded-xl border border-theme">
+                  <table class="w-full text-left border-collapse">
+                    <thead>
+                      <tr class="border-b border-theme surface-alt text-[11px] font-bold uppercase tracking-wider text-theme-faint">
+                        <th class="py-2.5 pl-3">Assignment Name</th>
+                        <th class="py-2.5 px-2">Assignment Group</th>
+                        <th class="py-2.5 px-2 text-right">Points Earned</th>
+                        <th class="py-2.5 px-2 text-right">Available Pts</th>
+                        <th class="py-2.5 px-2 text-right">Actual %</th>
+                        <th class="py-2.5 px-2 text-right">What-If Override</th>
+                        <th class="py-2.5 px-2 text-right">Forecast %</th>
+                        <th class="py-2.5 pr-3 text-right">Delete</th>
+                      </tr>
+                    </thead>
+                    <tbody class="text-xs">
+                      ${sortedAssignments.map(a => renderAssignmentRowHtml(cls, a)).join('')}
+                    </tbody>
+                  </table>
+                </div>
+              `;
             }
-          });
+          } else {
+            gbBody.innerHTML = cls.groups.map((grp, idx) => {
+              const groupAssignments = cls.assignments.filter(a => a.groupId === grp.id);
+              const st = metrics.groupMap[grp.id];
+              const dotColor = GROUP_DOT_COLORS[idx % GROUP_DOT_COLORS.length];
+
+              return `
+                <div class="rounded-2xl border border-theme overflow-hidden">
+                  <div class="px-4 py-3 surface-alt border-b border-theme flex flex-wrap items-center justify-between gap-2">
+                    <div class="flex flex-wrap items-center gap-2.5">
+                      <span class="w-3 h-3 rounded-full ${dotColor}"></span>
+                      <h3 data-section-group-title="${escapeHtml(grp.id)}" class="text-sm font-bold text-theme-primary">${escapeHtml(grp.name)}</h3>
+                      <span data-section-group-weight="${escapeHtml(grp.id)}" class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold accent-pill border">
+                        Weight: ${formatPercent(grp.weight, 1)}
+                      </span>
+                      <span data-section-subtotal="${escapeHtml(grp.id)}" class="text-xs font-mono text-theme-muted">
+                        ${st ? `${formatNumber(st.actualEarned)} / ${formatNumber(st.actualAvailable)} pts` : '0 / 0 pts'}
+                      </span>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                      <span data-section-pct="${escapeHtml(grp.id)}" class="px-2.5 py-0.5 rounded-lg font-mono text-xs font-bold ${getScorePillClasses(st ? st.actualPct : null)}">
+                        ${st && st.actualPct !== null ? formatPercent(st.actualPct, 1) : 'Ungraded'}
+                      </span>
+                      <button
+                        type="button"
+                        data-action="add-to-group"
+                        data-group-id="${escapeHtml(grp.id)}"
+                        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white shadow-xs transition cursor-pointer"
+                      >
+                        <i class="fa-solid fa-plus"></i>
+                        <span data-section-add-btn-label="${escapeHtml(grp.id)}">Add to ${escapeHtml(grp.name)}</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  ${groupAssignments.length === 0 ? `
+                    <div class="px-4 py-6 text-center text-xs text-theme-faint">
+                      No assignments in <strong data-section-empty-group-name="${escapeHtml(grp.id)}">${escapeHtml(grp.name)}</strong> yet. Click <strong data-section-empty-btn-label="${escapeHtml(grp.id)}">+ Add to ${escapeHtml(grp.name)}</strong> above.
+                    </div>
+                  ` : `
+                    <div class="overflow-x-auto">
+                      <table class="w-full text-left border-collapse">
+                        <thead>
+                          <tr class="border-b border-theme-subtle text-[10px] font-bold uppercase tracking-wider text-theme-faint">
+                            <th class="py-2 pl-3">Assignment Name</th>
+                            <th class="py-2 px-2">Assignment Group</th>
+                            <th class="py-2 px-2 text-right">Points Earned</th>
+                            <th class="py-2 px-2 text-right">Available Pts</th>
+                            <th class="py-2 px-2 text-right">Actual %</th>
+                            <th class="py-2 px-2 text-right">What-If Override</th>
+                            <th class="py-2 px-2 text-right">Forecast %</th>
+                            <th class="py-2 pr-3 text-right">Delete</th>
+                          </tr>
+                        </thead>
+                        <tbody class="text-xs">
+                          ${groupAssignments.map(a => renderAssignmentRowHtml(cls, a)).join('')}
+                        </tbody>
+                      </table>
+                    </div>
+                  `}
+                </div>
+              `;
+            }).join('');
+          }
+        }
+
+        updateCalculatedMetricsInDOM();
+      }
+
+      /*************************************************************************
+       * 9. PROFILE & SETTINGS VIEW POPULATION
+       *************************************************************************/
+      function renderProfileDOM() {
+        const p = state.profile;
+        const defs = state.defaultGradeDefinitions;
+
+        const avatarCircle = document.getElementById('profileAvatarCircle');
+        const classesBadge = document.getElementById('profileClassesCountBadge');
+        if (avatarCircle) avatarCircle.textContent = getInitials(p.displayName);
+        if (classesBadge) classesBadge.textContent = `${state.classes.length} Active ${state.classes.length === 1 ? 'Class' : 'Classes'}`;
+
+        const inName = document.getElementById('profileDisplayName');
+        const inEmail = document.getElementById('profileEmail');
+        const inInst = document.getElementById('profileInstitution');
+        const inId = document.getElementById('profileStudentId');
+        const inStand = document.getElementById('profileStanding');
+
+        if (inName && document.activeElement !== inName) inName.value = p.displayName;
+        if (inEmail && document.activeElement !== inEmail) inEmail.value = p.email;
+        if (inInst && document.activeElement !== inInst) inInst.value = p.institution;
+        if (inId && document.activeElement !== inId) inId.value = p.studentId;
+        if (inStand && document.activeElement !== inStand) inStand.value = p.standing || 'Undergraduate';
+
+        // Theme Buttons Active State
+        document.querySelectorAll('[data-action="set-theme"]').forEach(btn => {
+          const val = btn.getAttribute('data-theme-value');
+          const isSelected = val === state.theme;
+          btn.className = `flex-1 inline-flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-bold transition cursor-pointer ${
+            isSelected
+              ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/25 ring-2 ring-indigo-400/40'
+              : 'theme-btn-secondary'
+          }`;
+        });
+        const activeThemeLabel = document.getElementById('activeThemeLabel');
+        if (activeThemeLabel) activeThemeLabel.textContent = state.theme;
+
+        // Locale Cascade State
+        const selectLocale = document.getElementById('selectLocaleCascade');
+        if (selectLocale) selectLocale.value = state.locale;
+
+        const langRoot = (state.locale || 'en-US').split('-')[0];
+        const cascadeLabel = document.getElementById('localeCascadeChainLabel');
+        const sampleNum = document.getElementById('localeSampleNumber');
+        if (cascadeLabel) cascadeLabel.textContent = `${state.locale} → ${langRoot} → en-US (fallback)`;
+        if (sampleNum) sampleNum.textContent = formatPercent(94.75, 2);
+
+        // Default Grade Definitions Table
+        const tbodyDefs = document.getElementById('tbodyDefaultGradeDefinitions');
+        if (tbodyDefs) {
+          tbodyDefs.innerHTML = defs.map(d => `
+            <tr class="theme-row-hover transition border-b border-theme-subtle">
+              <td class="py-2.5 pl-3">
+                <span class="inline-flex items-center justify-center w-10 h-7 rounded-lg text-xs font-bold border ${getLetterBadgeClasses(d.letter)}">
+                  ${escapeHtml(d.letter)}
+                </span>
+              </td>
+              <td class="py-2.5 text-right">
+                <div class="inline-flex items-center justify-end gap-1">
+                  <span class="text-xs text-theme-faint">&ge;</span>
+                  <input
+                    type="number"
+                    step="any"
+                    min="0"
+                    max="100"
+                    value="${d.min}"
+                    data-default-grade-id="${escapeHtml(d.id)}"
+                    aria-label="Default cutoff for ${escapeHtml(d.letter)}"
+                    class="w-20 text-right font-mono text-xs font-bold theme-input rounded-lg px-2.5 py-1.5"
+                  />
+                  <span class="text-xs text-theme-faint">%</span>
+                </div>
+              </td>
+              <td class="py-2.5 text-center font-mono text-xs font-semibold text-theme-secondary">
+                ${d.gpa !== null && d.gpa !== undefined ? formatNumber(d.gpa, 1, 1) : '—'}
+              </td>
+              <td class="py-2.5 pl-4 text-xs text-theme-muted">
+                ${escapeHtml(d.description)}
+              </td>
+            </tr>
+          `).join('');
+        }
+      }
+
+      /*************************************************************************
+       * 10. MAIN RENDER ORCHESTRATOR
+       *************************************************************************/
+      function renderApp(preserveScroll = true) {
+        const prevScrollY = window.scrollY;
+        try {
+          applyTheme(state.theme);
+          applyLocale(state.locale);
+          renderHeaderNavigation();
+
+          const gbPanel = document.getElementById('viewGradebook');
+          const profPanel = document.getElementById('viewProfile');
+          if (!gbPanel || !profPanel) return;
+
+          if (state.activeView === 'profile') {
+            gbPanel.classList.add('hidden');
+            profPanel.classList.remove('hidden');
+            renderProfileDOM();
+          } else {
+            state.activeView = 'gradebook';
+            profPanel.classList.add('hidden');
+            gbPanel.classList.remove('hidden');
+            renderGradebookDOM();
+          }
+        } catch (err) {
+          console.error('Render error recovered:', err);
+        }
+
+        if (preserveScroll) {
+          window.scrollTo({ top: prevScrollY, behavior: 'instant' });
+        }
+      }
+
+      /*************************************************************************
+       * 11. STATIC EVENT DELEGATION (BOUND ONCE AT STARTUP)
+       *************************************************************************/
+      function initEventListeners() {
+        // 1. Header Brand Reload & View Switcher Buttons
+        document.getElementById('btnBrandReload')?.addEventListener('click', (e) => {
+          e.preventDefault();
+          window.location.reload();
         });
 
-        // Add Class
+        document.getElementById('navBtnGradebook')?.addEventListener('click', (e) => {
+          e.preventDefault();
+          switchAppView('gradebook');
+        });
+
+        document.getElementById('navBtnProfile')?.addEventListener('click', (e) => {
+          e.preventDefault();
+          switchAppView('profile');
+        });
+
+        // 2. Class Tabs Selection
+        document.getElementById('classTabsContainer')?.addEventListener('click', (e) => {
+          const btn = e.target.closest('[data-action="select-class"]');
+          if (!btn) return;
+          const cid = btn.getAttribute('data-class-id');
+          if (cid && cid !== state.activeClassId) {
+            state.activeClassId = cid;
+            saveState();
+            renderApp(false);
+          }
+        });
+
+        // 3. Add / Duplicate / Delete Class
         document.getElementById('btnAddClass')?.addEventListener('click', () => {
           const newId = uid('class');
           const g1 = uid('grp');
@@ -1932,9 +2358,9 @@
 
           state.classes.push({
             id: newId,
-            code: `COURSE ${100 + num}`,
-            name: `General Course ${num}`,
-            term: 'Term 1',
+            code: `Course ${100 + num}`,
+            name: `Academic Course ${num}`,
+            term: 'Fall Semester',
             targetLetter: 'A',
             groups: [
               { id: g1, name: 'Assignments', weight: 30 },
@@ -1943,7 +2369,7 @@
             ],
             buckets: cloneGradeScale(state.defaultGradeDefinitions),
             assignments: [
-              { id: uid('asg'), name: 'Assignment 1', groupId: g1, earned: 45, available: 50, whatIfEarned: null },
+              { id: uid('asg'), name: 'Homework 1', groupId: g1, earned: 45, available: 50, whatIfEarned: null },
               { id: uid('asg'), name: 'Midterm Exam', groupId: g2, earned: null, available: 100, whatIfEarned: null },
               { id: uid('asg'), name: 'Final Exam', groupId: g3, earned: null, available: 150, whatIfEarned: null }
             ]
@@ -1955,8 +2381,9 @@
           showToast('Created new class gradebook', 'success');
         });
 
-        // Duplicate Class
         document.getElementById('btnDuplicateClass')?.addEventListener('click', () => {
+          const cls = getActiveClass();
+          if (!cls) return;
           const copy = JSON.parse(JSON.stringify(cls));
           copy.id = uid('class');
           copy.code = `${cls.code} (Copy)`;
@@ -1967,8 +2394,9 @@
           showToast(`Duplicated "${cls.code}"`, 'success');
         });
 
-        // Delete Class
         document.getElementById('btnDeleteClass')?.addEventListener('click', () => {
+          const cls = getActiveClass();
+          if (!cls) return;
           if (state.classes.length <= 1) {
             showToast('At least one class gradebook must remain active.', 'warning');
             return;
@@ -1986,43 +2414,54 @@
           );
         });
 
-        // Editable Class Header Inputs
+        // 4. Editable Class Header Inputs (In-place update)
         document.getElementById('inputClassCode')?.addEventListener('input', (e) => {
+          const cls = getActiveClass();
+          if (!cls) return;
           cls.code = e.target.value;
           saveState();
-          const tabCode = document.querySelector(`[data-action="select-class"][data-class-id="${cls.id}"] span.font-bold`);
-          if (tabCode) tabCode.textContent = cls.code || 'COURSE';
+          const tabCode = document.querySelector(`[data-action="select-class"][data-class-id="${cls.id}"] [data-tab-code]`);
+          if (tabCode) tabCode.textContent = cls.code || 'Course';
         });
 
         document.getElementById('inputClassName')?.addEventListener('input', (e) => {
+          const cls = getActiveClass();
+          if (!cls) return;
           cls.name = e.target.value;
           saveState();
-          const tabName = document.querySelector(`[data-action="select-class"][data-class-id="${cls.id}"] span.truncate`);
+          const tabName = document.querySelector(`[data-action="select-class"][data-class-id="${cls.id}"] [data-tab-name]`);
           if (tabName) tabName.textContent = cls.name;
         });
 
         document.getElementById('inputClassTerm')?.addEventListener('input', (e) => {
+          const cls = getActiveClass();
+          if (!cls) return;
           cls.term = e.target.value;
           saveState();
         });
 
-        // Clear What-Ifs
+        // 5. Clear What-Ifs & Target Grade Selector
         document.getElementById('btnClearWhatIfs')?.addEventListener('click', () => {
+          const cls = getActiveClass();
+          if (!cls) return;
           cls.assignments.forEach(a => { a.whatIfEarned = null; });
           saveState();
           renderApp();
           showToast('Cleared all What-If overrides', 'info');
         });
 
-        // Target Grade Selector
         document.getElementById('selectTargetGrade')?.addEventListener('change', (e) => {
+          const cls = getActiveClass();
+          if (!cls) return;
           cls.targetLetter = e.target.value;
           saveState();
-          refreshLiveGradebookMetrics();
+          updateCalculatedMetricsInDOM();
         });
 
-        // Assignment Groups Table (In-place updates without losing focus, caret, or scroll)
+        // 6. Assignment Groups Table (In-place updates on input; never loses focus/caret/scroll)
         document.getElementById('tbodyAssignmentGroups')?.addEventListener('input', (e) => {
+          const cls = getActiveClass();
+          if (!cls) return;
           const target = e.target;
           const gid = target.getAttribute('data-group-id');
           const field = target.getAttribute('data-group-field');
@@ -2038,11 +2477,13 @@
           } else if (field === 'weight') {
             grp.weight = Math.max(0, parseFloat(target.value) || 0);
             saveState();
-            refreshLiveGradebookMetrics();
+            updateCalculatedMetricsInDOM();
           }
         });
 
         document.getElementById('tbodyAssignmentGroups')?.addEventListener('click', (e) => {
+          const cls = getActiveClass();
+          if (!cls) return;
           const btn = e.target.closest('[data-action="delete-group"]');
           if (!btn) return;
           const gid = btn.getAttribute('data-group-id');
@@ -2052,6 +2493,7 @@
           }
           const grp = cls.groups.find(g => g.id === gid);
           const fallback = cls.groups.find(g => g.id !== gid);
+          if (!grp || !fallback) return;
           const count = cls.assignments.filter(a => a.groupId === gid).length;
 
           openConfirmModal(
@@ -2071,8 +2513,9 @@
           );
         });
 
-        // Add Group
         document.getElementById('btnAddGroup')?.addEventListener('click', () => {
+          const cls = getActiveClass();
+          if (!cls) return;
           const currentSum = cls.groups.reduce((acc, g) => acc + (Number(g.weight) || 0), 0);
           const suggested = currentSum < 100 ? Number((100 - currentSum).toFixed(1)) : 10;
           cls.groups.push({
@@ -2085,8 +2528,9 @@
           showToast('Added new assignment group', 'success');
         });
 
-        // Normalize Weights to 100%
         document.getElementById('btnNormalizeWeights')?.addEventListener('click', () => {
+          const cls = getActiveClass();
+          if (!cls) return;
           const total = cls.groups.reduce((acc, g) => acc + (Number(g.weight) || 0), 0);
           if (total <= 0) {
             const equal = Number((100 / cls.groups.length).toFixed(2));
@@ -2105,48 +2549,51 @@
           showToast('Normalized assignment group weights to 100%', 'success');
         });
 
-        // Class Grade Buckets Table
+        // 7. Class Grade Buckets Table (In-place updates on input)
         document.getElementById('tbodyClassBuckets')?.addEventListener('input', (e) => {
+          const cls = getActiveClass();
+          if (!cls) return;
           const input = e.target;
-          const bid = input.getAttribute('data-bucket-id');
-          if (!bid) return;
-          const bucket = cls.buckets.find(b => b.id === bid);
-        // Class Grade Buckets Table (In-place updates without losing focus or scroll)
-        document.getElementById('tbodyClassBuckets')?.addEventListener('input', (e) => {
-          const input = e.target;
-          const bid = input.getAttribute('data-bucket-id');
+          const bid = input.getAttribute('data-bucket-cutoff');
           if (!bid) return;
           const bucket = cls.buckets.find(b => b.id === bid);
           if (!bucket) return;
 
           bucket.min = Math.max(0, Math.min(100, parseFloat(input.value) || 0));
           saveState();
-          refreshLiveGradebookMetrics();
+          updateCalculatedMetricsInDOM();
         });
 
         document.getElementById('btnResetClassBuckets')?.addEventListener('click', () => {
+          const cls = getActiveClass();
+          if (!cls) return;
           cls.buckets = cloneGradeScale(state.defaultGradeDefinitions);
           saveState();
           renderApp();
-          showToast('Reset class buckets to saved default scale', 'success');
+          showToast('Synced class buckets with Profile Default Scale', 'success');
         });
 
-        // Gradebook View Toggle
-        document.querySelectorAll('[data-action="set-gb-view"]').forEach(btn => {
-          btn.addEventListener('click', () => {
-            const mode = btn.getAttribute('data-mode');
-            if (mode && mode !== state.gradebookViewMode) {
-              state.gradebookViewMode = mode;
-              saveState();
-              renderApp();
-            }
-          });
+        // 8. Gradebook View Mode Toggle & Global Add Assignment
+        document.getElementById('btnViewGrouped')?.addEventListener('click', () => {
+          if (state.gradebookViewMode !== 'grouped') {
+            state.gradebookViewMode = 'grouped';
+            saveState();
+            renderApp();
+          }
         });
 
-        // Global Add Assignment
+        document.getElementById('btnViewUnified')?.addEventListener('click', () => {
+          if (state.gradebookViewMode !== 'unified') {
+            state.gradebookViewMode = 'unified';
+            saveState();
+            renderApp();
+          }
+        });
+
         document.getElementById('btnAddAssignmentGlobal')?.addEventListener('click', () => {
+          const cls = getActiveClass();
+          if (!cls || !cls.groups[0]) return;
           const firstGroup = cls.groups[0];
-          if (!firstGroup) return;
           const newId = uid('asg');
           cls.assignments.push({
             id: newId,
@@ -2163,10 +2610,12 @@
           showToast(`Added assignment to ${firstGroup.name}`, 'success');
         });
 
-        // Delegated Events inside Gradebook Assignments Body
+        // 9. Assignments Gradebook Body Delegation (In-place updates on input)
         const gbBody = document.getElementById('gradebookAssignmentsBody');
 
         gbBody?.addEventListener('input', (e) => {
+          const cls = getActiveClass();
+          if (!cls) return;
           const input = e.target;
           const aid = input.getAttribute('data-assign-id');
           const field = input.getAttribute('data-assign-field');
@@ -2180,18 +2629,44 @@
           } else if (field === 'earned') {
             const raw = input.value.trim();
             assign.earned = raw === '' ? null : parseFloat(raw);
-          } else if (field === 'available') {
+          } else if (field === 'possible') {
             assign.available = Math.max(0.01, parseFloat(input.value) || 0.01);
           } else if (field === 'whatIfEarned') {
             const raw = input.value.trim();
             assign.whatIfEarned = raw === '' ? null : parseFloat(raw);
           }
 
+          const avail = Math.max(0, Number(assign.available) || 0);
+          const hasActual = isGradedValue(assign.earned);
+          const hasWhatIf = isGradedValue(assign.whatIfEarned);
+          const actualPct = hasActual && avail > 0 ? (Number(assign.earned) / avail) * 100 : null;
+          const effectiveScore = hasWhatIf ? Number(assign.whatIfEarned) : (hasActual ? Number(assign.earned) : null);
+          const effectivePct = effectiveScore !== null && avail > 0 ? (effectiveScore / avail) * 100 : null;
+
+          const pctPill = document.querySelector(`[data-assign-pct-pill="${aid}"]`);
+          if (pctPill) {
+            pctPill.textContent = actualPct !== null ? formatPercent(actualPct, 1) : 'Ungraded';
+            pctPill.className = `inline-block px-2.5 py-0.5 rounded-md font-mono text-[11px] font-bold ${getScorePillClasses(actualPct)}`;
+          }
+
+          const forecastPill = document.querySelector(`[data-assign-forecast-pill="${aid}"]`);
+          if (forecastPill) {
+            forecastPill.textContent = effectivePct !== null ? formatPercent(effectivePct, 1) : '--%';
+            forecastPill.className = `inline-block px-2 py-0.5 rounded-md font-mono text-[11px] font-semibold ${hasWhatIf ? 'accent-pill border' : 'text-theme-faint'}`;
+          }
+
+          const clearBtn = document.querySelector(`button[data-action="clear-row-whatif"][data-assign-id="${aid}"]`);
+          if (clearBtn) {
+            clearBtn.classList.toggle('hidden', !hasWhatIf);
+          }
+
           saveState();
-          refreshLiveGradebookMetrics();
+          updateCalculatedMetricsInDOM();
         });
 
         gbBody?.addEventListener('change', (e) => {
+          const cls = getActiveClass();
+          if (!cls) return;
           const select = e.target;
           if (select.getAttribute('data-assign-field') !== 'groupId') return;
           const aid = select.getAttribute('data-assign-id');
@@ -2211,6 +2686,8 @@
         });
 
         gbBody?.addEventListener('click', (e) => {
+          const cls = getActiveClass();
+          if (!cls) return;
           const btn = e.target.closest('button[data-action]');
           if (!btn) return;
           const action = btn.getAttribute('data-action');
@@ -2249,354 +2726,8 @@
             renderApp();
           }
         });
-      }
 
-      /*************************************************************************
-       * 8. PROFILE & SETTINGS VIEW RENDERER
-       *************************************************************************/
-      function renderProfileView(root) {
-        const p = state.profile;
-        const defs = state.defaultGradeDefinitions;
-
-        const themeOptions = [
-          { id: 'black', label: 'Black (OLED)', icon: 'fa-moon' },
-          { id: 'midnight', label: 'Midnight', icon: 'fa-cloud-moon' },
-          { id: 'light', label: 'Light', icon: 'fa-sun' }
-        ];
-
-        const themeButtonsHtml = themeOptions.map(opt => {
-          const isSelected = state.theme === opt.id;
-          return `
-            <button
-              type="button"
-              data-action="set-theme"
-              data-theme-value="${opt.id}"
-              class="flex-1 inline-flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-bold transition cursor-pointer ${
-                isSelected
-                  ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/25 ring-2 ring-indigo-400/40'
-                  : 'theme-btn-secondary'
-              }"
-            >
-              <i class="fa-solid ${opt.icon}"></i>
-              <span>${escapeHtml(opt.label)}</span>
-            </button>
-          `;
-        }).join('');
-
-        const gradeDefsRowsHtml = defs.map(d => `
-          <tr class="theme-row-hover transition border-b border-theme-subtle">
-            <td class="py-2.5 pl-3">
-              <span class="inline-flex items-center justify-center w-10 h-7 rounded-lg text-xs font-bold border ${getLetterBadgeClasses(d.letter)}">
-                ${escapeHtml(d.letter)}
-              </span>
-            </td>
-            <td class="py-2.5 text-right">
-              <div class="inline-flex items-center justify-end gap-1">
-                <span class="text-xs text-theme-faint">&ge;</span>
-                <input
-                  type="number"
-                  step="any"
-                  min="0"
-                  max="100"
-                  value="${d.min}"
-                  data-default-grade-id="${escapeHtml(d.id)}"
-                  aria-label="Default cutoff for ${escapeHtml(d.letter)}"
-                  class="w-20 text-right font-mono text-xs font-bold theme-input rounded-lg px-2.5 py-1.5"
-                />
-                <span class="text-xs text-theme-faint">%</span>
-              </div>
-            </td>
-            <td class="py-2.5 text-center font-mono text-xs font-semibold text-theme-secondary">
-              ${d.gpa !== null && d.gpa !== undefined ? formatNumber(d.gpa, 1, 1) : '—'}
-            </td>
-            <td class="py-2.5 pl-4 text-xs text-theme-muted">
-              ${escapeHtml(d.description)}
-            </td>
-          </tr>
-        `).join('');
-
-        root.innerHTML = `
-          <div class="max-w-5xl mx-auto space-y-6">
-            <!-- 1. Student Profile Card -->
-            <section class="surface-card rounded-2xl border p-6 space-y-5">
-              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-theme pb-4">
-                <div class="flex items-center gap-4">
-                  <div id="profileAvatarCircle" class="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 via-indigo-600 to-violet-700 flex items-center justify-center text-white text-lg font-extrabold shadow-md">
-                    ${escapeHtml(getInitials(p.displayName))}
-                  </div>
-                  <div>
-                    <h2 class="text-lg font-extrabold text-theme-primary">Student Profile</h2>
-                    <p class="text-xs text-theme-muted">Personalize your academic profile metadata. Saved automatically to local browser storage.</p>
-                  </div>
-                </div>
-                <span class="px-3 py-1 rounded-full text-xs font-mono surface-pill border text-theme-muted self-start sm:self-center">
-                  ${state.classes.length} Active ${state.classes.length === 1 ? 'Class' : 'Classes'}
-                </span>
-              </div>
-
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label for="profileDisplayName" class="block text-xs font-semibold text-theme-secondary mb-1.5">Display Name</label>
-                  <input
-                    id="profileDisplayName"
-                    type="text"
-                    value="${escapeHtml(p.displayName)}"
-                    placeholder="e.g., Student Name"
-                    class="w-full text-xs font-semibold theme-input rounded-xl px-3.5 py-2.5"
-                  />
-                </div>
-                <div>
-                  <label for="profileEmail" class="block text-xs font-semibold text-theme-secondary mb-1.5">Academic Email</label>
-                  <input
-                    id="profileEmail"
-                    type="email"
-                    value="${escapeHtml(p.email)}"
-                    placeholder="student@university.edu"
-                    class="w-full text-xs font-semibold theme-input rounded-xl px-3.5 py-2.5"
-                  />
-                </div>
-                <div>
-                  <label for="profileInstitution" class="block text-xs font-semibold text-theme-secondary mb-1.5">Institution</label>
-                  <input
-                    id="profileInstitution"
-                    type="text"
-                    value="${escapeHtml(p.institution)}"
-                    placeholder="University Name"
-                    class="w-full text-xs font-semibold theme-input rounded-xl px-3.5 py-2.5"
-                  />
-                </div>
-                <div>
-                  <label for="profileStudentId" class="block text-xs font-semibold text-theme-secondary mb-1.5">Student ID</label>
-                  <input
-                    id="profileStudentId"
-                    type="text"
-                    value="${escapeHtml(p.studentId)}"
-                    placeholder="ID-00000000"
-                    class="w-full text-xs font-mono font-semibold theme-input rounded-xl px-3.5 py-2.5"
-                  />
-                </div>
-              </div>
-            </section>
-
-            <!-- 2. Appearance Theme & Language/Locale Cascade Row -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <!-- Appearance Theme Switcher -->
-              <section class="surface-card rounded-2xl border p-6 flex flex-col justify-between space-y-4">
-                <div>
-                  <h3 class="text-sm font-bold text-theme-primary flex items-center gap-2 mb-1">
-                    <i class="fa-solid fa-palette text-indigo-400"></i>
-                    <span>Appearance Theme</span>
-                  </h3>
-                  <p class="text-xs text-theme-muted mb-5">Choose your preferred surface palette across all gradebooks.</p>
-
-                  <div class="flex items-center gap-2">
-                    ${themeButtonsHtml}
-                  </div>
-                </div>
-                <div class="pt-3 border-t border-theme-subtle text-[11px] text-theme-faint">
-                  Active theme: <span class="font-mono font-semibold text-indigo-400">${escapeHtml(state.theme)}</span>
-                </div>
-              </section>
-
-              <!-- Language & Locale Cascade Selector -->
-              <section class="surface-card rounded-2xl border p-6 flex flex-col justify-between space-y-4">
-                <div>
-                  <h3 class="text-sm font-bold text-theme-primary flex items-center gap-2 mb-1">
-                    <i class="fa-solid fa-globe text-indigo-400"></i>
-                    <span>Language &amp; Locale Cascade</span>
-                  </h3>
-                  <p class="text-xs text-theme-muted mb-4">
-                    Updates <code class="font-mono text-[11px]">lang</code>, <code class="font-mono text-[11px]">data-locale</code>, <code class="font-mono text-[11px]">--locale</code>, and regional <code class="font-mono text-[11px]">Intl.NumberFormat</code> number formatting.
-                  </p>
-
-                  <label for="selectLocaleCascade" class="block text-xs font-semibold text-theme-secondary mb-1.5">Regional Locale</label>
-                  <select id="selectLocaleCascade" class="w-full text-xs font-semibold theme-select rounded-xl px-3.5 py-2.5">
-                    ${SUPPORTED_LOCALES.map(loc => `
-                      <option value="${escapeHtml(loc.code)}" ${state.locale === loc.code ? 'selected' : ''}>
-                        ${escapeHtml(loc.label)}
-                      </option>
-                    `).join('')}
-                  </select>
-                </div>
-
-                <div class="pt-3 border-t border-theme-subtle flex items-center justify-between text-[11px] text-theme-faint">
-                  <span>Sample formatted score: <strong class="font-mono text-theme-primary">${formatPercent(94.75, 2)}</strong></span>
-                  <span class="font-mono text-indigo-400">data-locale="${escapeHtml(state.locale)}"</span>
-                </div>
-              </section>
-            </div>
-
-            <!-- 3. Custom Grade Definitions Editor (UC Berkeley Default Scale) -->
-            <section class="surface-card rounded-2xl border overflow-hidden">
-              <div class="px-6 py-4 border-b border-theme surface-alt flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-                <div>
-                  <h3 class="text-base font-bold text-theme-primary flex items-center gap-2">
-                    <i class="fa-solid fa-award text-indigo-400"></i>
-                    <span>Custom Grade Definitions (Default Scale)</span>
-                  </h3>
-                  <p class="text-xs text-theme-muted mt-0.5">
-                    Default thresholds follow UC Berkeley Registrar Grade Definitions (<code class="font-mono">A+</code> through <code class="font-mono">F</code>). Edit minimum cutoffs below.
-                  </p>
-                </div>
-
-                <div class="flex flex-wrap items-center gap-2 shrink-0">
-                  <button
-                    id="btnSaveDefaultDefinitions"
-                    type="button"
-                    class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white shadow-xs transition cursor-pointer"
-                  >
-                    <i class="fa-solid fa-floppy-disk"></i>
-                    <span>Save Default Definitions</span>
-                  </button>
-                  <button
-                    id="btnApplyDefaultsToAllClasses"
-                    type="button"
-                    class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white shadow-xs transition cursor-pointer"
-                  >
-                    <i class="fa-solid fa-arrows-rotate"></i>
-                    <span>Apply to All Classes</span>
-                  </button>
-                  <button
-                    id="btnResetUcbDefaults"
-                    type="button"
-                    class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold theme-btn-secondary cursor-pointer"
-                  >
-                    <i class="fa-solid fa-rotate-left text-indigo-400"></i>
-                    <span>Reset to UC Berkeley Defaults</span>
-                  </button>
-                </div>
-              </div>
-
-              <div class="p-4 sm:p-6 overflow-x-auto">
-                <table class="w-full text-left border-collapse">
-                  <thead>
-                    <tr class="border-b border-theme text-[11px] font-bold uppercase tracking-wider text-theme-faint">
-                      <th class="pb-3 pl-3 w-24">Letter Grade</th>
-                      <th class="pb-3 text-right w-36">Min Cutoff (&ge; %)</th>
-                      <th class="pb-3 text-center w-28">Grade Points</th>
-                      <th class="pb-3 pl-4">Registrar Grade Definition</th>
-                    </tr>
-                  </thead>
-                  <tbody id="tbodyDefaultGradeDefinitions" class="text-xs">
-                    ${gradeDefsRowsHtml}
-                  </tbody>
-                </table>
-              </div>
-            </section>
-
-            <!-- 4. Authorization UI Placeholder Card (Zero Auth Logic) -->
-            <section class="surface-card rounded-2xl border p-6 space-y-5">
-              <div class="flex flex-wrap items-center justify-between gap-3 border-b border-theme pb-4">
-                <div>
-                  <div class="flex flex-wrap items-center gap-2">
-                    <h3 class="text-sm font-bold text-theme-primary flex items-center gap-2">
-                      <i class="fa-solid fa-shield-halved text-indigo-400"></i>
-                      <span>Account &amp; Cloud Sync Authorization</span>
-                    </h3>
-                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30">
-                      UI Preview Only — Auth Logic Not Yet Implemented
-                    </span>
-                  </div>
-                  <p class="text-xs text-theme-muted mt-1">Sign in, register, or link institutional SSO to synchronize gradebooks across devices in a future release.</p>
-                </div>
-              </div>
-
-              <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end opacity-80">
-                <div class="md:col-span-4 space-y-1.5">
-                  <label for="authPreviewEmail" class="block text-xs font-semibold text-theme-secondary">Academic Email</label>
-                  <input
-                    id="authPreviewEmail"
-                    type="email"
-                    disabled
-                    placeholder="student@university.edu"
-                    class="w-full text-xs theme-input rounded-xl px-3.5 py-2.5 cursor-not-allowed"
-                  />
-                </div>
-                <div class="md:col-span-4 space-y-1.5">
-                  <label for="authPreviewPassword" class="block text-xs font-semibold text-theme-secondary">Password</label>
-                  <input
-                    id="authPreviewPassword"
-                    type="password"
-                    disabled
-                    placeholder="••••••••••••"
-                    class="w-full text-xs theme-input rounded-xl px-3.5 py-2.5 cursor-not-allowed"
-                  />
-                </div>
-                <div class="md:col-span-4 flex items-center gap-2">
-                  <button type="button" disabled class="flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-semibold bg-indigo-600/60 text-white/80 cursor-not-allowed">
-                    <i class="fa-solid fa-right-to-bracket"></i>
-                    <span>Sign In</span>
-                  </button>
-                  <button type="button" disabled class="flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-semibold theme-btn-secondary opacity-70 cursor-not-allowed">
-                    <i class="fa-solid fa-user-plus"></i>
-                    <span>Register</span>
-                  </button>
-                </div>
-              </div>
-
-              <div class="flex flex-wrap items-center gap-2.5 pt-2 border-t border-theme-subtle opacity-80">
-                <button type="button" disabled class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold theme-btn-secondary cursor-not-allowed">
-                  <i class="fa-solid fa-building-columns text-indigo-400"></i>
-                  <span>Continue with University SSO</span>
-                </button>
-                <button type="button" disabled class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold theme-btn-secondary cursor-not-allowed">
-                  <i class="fa-brands fa-google text-indigo-400"></i>
-                  <span>Continue with Google</span>
-                </button>
-                <button type="button" disabled class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold theme-btn-secondary cursor-not-allowed">
-                  <i class="fa-brands fa-github"></i>
-                  <span>Continue with GitHub</span>
-                </button>
-              </div>
-            </section>
-
-            <!-- 5. Data & Backup Controls -->
-            <section class="surface-card rounded-2xl border p-6 space-y-4">
-              <div>
-                <h3 class="text-sm font-bold text-theme-primary flex items-center gap-2 mb-1">
-                  <i class="fa-solid fa-database text-indigo-400"></i>
-                  <span>Data &amp; Backup Controls</span>
-                </h3>
-                <p class="text-xs text-theme-muted">Export your classes and custom grade definitions as JSON, import a previous backup, or reset to the default sample courses.</p>
-              </div>
-
-              <div class="flex flex-wrap items-center gap-3 pt-1">
-                <button
-                  id="btnExportJson"
-                  type="button"
-                  class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold theme-btn-secondary cursor-pointer"
-                >
-                  <i class="fa-solid fa-download text-indigo-400"></i>
-                  <span>Export JSON</span>
-                </button>
-
-                <label
-                  for="inputImportJson"
-                  class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold theme-btn-secondary cursor-pointer"
-                >
-                  <i class="fa-solid fa-upload text-indigo-400"></i>
-                  <span>Import JSON</span>
-                  <input id="inputImportJson" type="file" accept=".json,application/json" class="hidden" />
-                </label>
-
-                <button
-                  id="btnResetDemoData"
-                  type="button"
-                  class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 transition cursor-pointer"
-                >
-                  <i class="fa-solid fa-rotate-left"></i>
-                  <span>Reset Demo Data</span>
-                </button>
-              </div>
-            </section>
-          </div>
-        `;
-
-        bindProfileEvents();
-      }
-
-      function bindProfileEvents() {
-        // Student Profile Inputs
+        // 10. Profile & Settings View Listeners
         document.getElementById('profileDisplayName')?.addEventListener('input', (e) => {
           state.profile.displayName = e.target.value;
           saveState();
@@ -2622,18 +2753,21 @@
           saveState();
         });
 
-        // Theme Switcher
-        document.querySelectorAll('[data-action="set-theme"]').forEach(btn => {
-          btn.addEventListener('click', () => {
-            const themeVal = btn.getAttribute('data-theme-value');
-            applyTheme(themeVal);
-            saveState();
-            renderApp();
-            showToast(`Switched theme to ${themeVal}`, 'info');
-          });
+        document.getElementById('profileStanding')?.addEventListener('input', (e) => {
+          state.profile.standing = e.target.value;
+          saveState();
         });
 
-        // Locale Cascade Selector
+        document.getElementById('themeButtonsContainer')?.addEventListener('click', (e) => {
+          const btn = e.target.closest('[data-action="set-theme"]');
+          if (!btn) return;
+          const themeVal = btn.getAttribute('data-theme-value');
+          applyTheme(themeVal);
+          saveState();
+          renderApp();
+          showToast(`Switched theme to ${themeVal}`, 'info');
+        });
+
         document.getElementById('selectLocaleCascade')?.addEventListener('change', (e) => {
           applyLocale(e.target.value);
           saveState();
@@ -2641,7 +2775,6 @@
           showToast(`Locale cascade set to ${state.locale}`, 'info');
         });
 
-        // Custom Grade Definitions Cutoffs
         document.getElementById('tbodyDefaultGradeDefinitions')?.addEventListener('input', (e) => {
           const input = e.target;
           const id = input.getAttribute('data-default-grade-id');
@@ -2672,7 +2805,6 @@
           showToast('Reset to UC Berkeley Registrar defaults', 'success');
         });
 
-        // Export JSON
         document.getElementById('btnExportJson')?.addEventListener('click', () => {
           const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
           const url = URL.createObjectURL(blob);
@@ -2686,7 +2818,6 @@
           showToast('Downloaded gradecraft-data.json', 'success');
         });
 
-        // Import JSON
         document.getElementById('inputImportJson')?.addEventListener('change', (e) => {
           const file = e.target.files && e.target.files[0];
           if (!file) return;
@@ -2698,16 +2829,11 @@
                 showToast('Invalid JSON backup: missing classes list.', 'warning');
                 return;
               }
-              if (!['black', 'midnight', 'light'].includes(parsed.theme)) parsed.theme = state.theme;
-              if (!parsed.locale) parsed.locale = state.locale;
-              if (!parsed.profile) parsed.profile = state.profile;
-              if (!Array.isArray(parsed.defaultGradeDefinitions) || parsed.defaultGradeDefinitions.length === 0) {
-                parsed.defaultGradeDefinitions = cloneGradeScale(UC_BERKELEY_GRADE_DEFINITIONS);
-              }
-              state = parsed;
+              state = sanitizeState(parsed);
+              state.activeView = 'profile';
               saveState();
               renderApp();
-              showToast('Imported JSON data successfully', 'success');
+              showToast('Imported JSON backup successfully', 'success');
             } catch {
               showToast('Failed to parse JSON file.', 'warning');
             }
@@ -2716,14 +2842,14 @@
           e.target.value = '';
         });
 
-        // Reset Demo Data
         document.getElementById('btnResetDemoData')?.addEventListener('click', () => {
           openConfirmModal(
-            'Reset Demo Data?',
-            'This will restore the default sample courses (CS 101 and DATA 100), generic profile defaults, and UC Berkeley grade definitions.',
+            'Reset All Data to Defaults?',
+            'This will restore the default sample courses (Course 101 and Course 102), generic profile defaults, and UC Berkeley Registrar grade definitions.',
             () => {
               const keepTheme = state.theme;
               const keepLocale = state.locale;
+              LEGACY_KEYS.forEach(k => localStorage.removeItem(k));
               state = createDefaultState();
               state.theme = keepTheme;
               state.locale = keepLocale;
@@ -2734,55 +2860,8 @@
             }
           );
         });
-      }
 
-      /*************************************************************************
-       * 9. MAIN RENDER ORCHESTRATOR & GLOBAL LISTENERS
-       *************************************************************************/
-      function renderApp(preserveScroll = true) {
-        const prevScrollY = window.scrollY;
-        applyTheme(state.theme);
-        applyLocale(state.locale);
-        renderHeaderNavigation();
-
-        const root = document.getElementById('mainWorkspace');
-        if (!root) return;
-
-        if (state.activeView === 'profile') {
-          renderProfileView(root);
-        } else {
-          renderGradebookView(root);
-        }
-
-        if (preserveScroll) {
-          window.scrollTo({ top: prevScrollY, behavior: 'instant' });
-        }
-      }
-
-      function initGlobalListeners() {
-        // Brand Reload Button
-        document.getElementById('btnBrandReload')?.addEventListener('click', () => {
-          window.location.reload();
-        });
-
-        // Top Navigation Pills
-        document.getElementById('navGradebookBtn')?.addEventListener('click', () => {
-          if (state.activeView !== 'gradebook') {
-            state.activeView = 'gradebook';
-            saveState();
-            renderApp();
-          }
-        });
-
-        document.getElementById('navProfileBtn')?.addEventListener('click', () => {
-          if (state.activeView !== 'profile') {
-            state.activeView = 'profile';
-            saveState();
-            renderApp();
-          }
-        });
-
-        // Modal Buttons
+        // 11. Confirmation Modal Buttons
         document.getElementById('confirmModalCancelBtn')?.addEventListener('click', closeConfirmModal);
         document.getElementById('confirmModalAcceptBtn')?.addEventListener('click', () => {
           if (typeof pendingModalConfirm === 'function') {
@@ -2792,10 +2871,15 @@
         });
       }
 
-      window.addEventListener('DOMContentLoaded', () => {
-        initGlobalListeners();
-        renderApp();
-      });
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => {
+          initEventListeners();
+          renderApp(false);
+        });
+      } else {
+        initEventListeners();
+        renderApp(false);
+      }
     })();
   </script>
 </body>
