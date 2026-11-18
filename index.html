@@ -338,7 +338,7 @@
       <!-- 2. Editable Class Header Card -->
       <section class="surface-card rounded-2xl border p-4 sm:p-5">
         <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
-          <div class="md:col-span-3">
+          <div class="md:col-span-2">
             <label for="inputClassCode" class="block text-[10px] font-bold uppercase tracking-wider text-theme-faint mb-1">Course Code</label>
             <input
               id="inputClassCode"
@@ -348,7 +348,7 @@
               class="w-full text-sm font-bold font-mono theme-input rounded-xl px-3 py-2"
             />
           </div>
-          <div class="md:col-span-6">
+          <div class="md:col-span-5">
             <label for="inputClassName" class="block text-[10px] font-bold uppercase tracking-wider text-theme-faint mb-1">Course Title</label>
             <input
               id="inputClassName"
@@ -369,6 +369,21 @@
               class="w-full text-sm font-semibold theme-input rounded-xl px-3 py-2"
             />
             <datalist id="existingTermsDatalist"></datalist>
+          </div>
+          <div class="md:col-span-2">
+            <label for="inputClassUnits" class="block text-[10px] font-bold uppercase tracking-wider text-theme-faint mb-1">Units</label>
+            <input
+              id="inputClassUnits"
+              type="number"
+              inputmode="decimal"
+              min="0"
+              max="20"
+              step="0.5"
+              value="4"
+              placeholder="e.g., 4"
+              title="Credit units for this course. Used to weight it in Term and Overall GPA (UC Berkeley method)."
+              class="w-full text-sm font-bold font-mono theme-input rounded-xl px-3 py-2"
+            />
           </div>
         </div>
       </section>
@@ -951,7 +966,7 @@
               </div>
               <div>
                 <h2 class="text-lg font-extrabold text-theme-primary">GPA Planner</h2>
-                <p class="text-xs text-theme-muted">Pick a grade for each class to see your term and overall GPA. Choices are saved separately and never change your Gradebook.</p>
+                <p class="text-xs text-theme-muted">Pick a grade for each class to see your term and overall GPA. GPA is unit-weighted (UC Berkeley method): total grade points &divide; total graded units. Choices are saved separately and never change your Gradebook.</p>
               </div>
             </div>
             <button
@@ -1001,13 +1016,20 @@
           <div class="border-b border-theme pb-4 flex flex-wrap items-baseline justify-between gap-2">
             <div>
               <h1 class="text-lg font-extrabold tracking-tight text-theme-primary font-mono">GradeCraft — Changelog</h1>
-              <p class="text-xs text-theme-muted mt-1">Chronological record of releases and commits (<code class="font-mono">v1_1</code> &rarr; <code class="font-mono">v1_15_3</code>).</p>
+              <p class="text-xs text-theme-muted mt-1">Chronological record of releases and commits (<code class="font-mono">v1_1</code> &rarr; <code class="font-mono">v1_16</code>).</p>
             </div>
-            <span class="text-[11px] font-mono text-indigo-400 px-2.5 py-0.5 rounded-full accent-pill border">Latest: v1_15_3</span>
+            <span class="text-[11px] font-mono text-indigo-400 px-2.5 py-0.5 rounded-full accent-pill border">Latest: v1_16</span>
           </div>
 
           <!-- Simple, clean text-based changelog list (Newest to Oldest & Plain-Text Block) -->
           <div class="space-y-4 font-mono text-xs leading-relaxed text-theme-secondary">
+            <div class="p-3.5 rounded-xl surface-alt border border-theme-subtle">
+              <div class="font-bold text-indigo-400">v1_16</div>
+              <p class="mt-1 text-theme-primary font-sans text-xs leading-relaxed">
+                Added a per-class <code class="font-mono">Units</code> field (default 4) to the Gradebook course details, shown read-only on the GPA Planner. Term and Overall GPA are now unit-weighted using the UC Berkeley method (total grade points &divide; total graded units; ungraded and 0-unit classes are excluded), on both the Gradebook term tabs and the GPA Planner.
+              </p>
+            </div>
+
             <div class="p-3.5 rounded-xl surface-alt border border-theme-subtle">
               <div class="font-bold text-indigo-400">v1_15_3</div>
               <p class="mt-1 text-theme-primary font-sans text-xs leading-relaxed">
@@ -1109,7 +1131,7 @@
 
           <!-- Raw Plain-Text Log Block for quick copy/reference -->
           <div class="pt-4 border-t border-theme space-y-2">
-            <div class="text-[11px] font-bold uppercase tracking-wider text-theme-faint font-mono">Raw Plain-Text Changelog (v1_1 &rarr; v1_15_3)</div>
+            <div class="text-[11px] font-bold uppercase tracking-wider text-theme-faint font-mono">Raw Plain-Text Changelog (v1_1 &rarr; v1_16)</div>
             <pre id="rawChangelogPre" class="p-4 rounded-xl surface-alt border border-theme text-xs font-mono text-theme-secondary whitespace-pre-wrap overflow-x-auto select-all leading-relaxed">v1_1  - Initial release of GradeCraft Class Grade Calculator &amp; Forecaster: multi-class tabs, assignment group weights, grade bucket distribution, grouped &amp; sorted assignment entries, percentage &amp; letter grade calculation, What-If score overrides, Target Grade Forecaster, and localStorage persistence with JSON import/export.
 v1_2  - Added high-contrast True Black OLED theme as the default appearance alongside Midnight and Light themes.
 v1_3  - Created separate Profile &amp; Settings page containing the 3-way theme switcher, language &amp; locale cascade selector, authentication UI placeholder skeleton, and JSON backup management; resolved null-reference event listener binding issues.
@@ -1122,8 +1144,9 @@ v1_9  - Added Academic Term tab bar (Fall 2026, Spring 2026, All Terms, + New Te
 v1_10 - Added drag-and-drop reordering for Assignment Groups via left slider icon handles and expanded the Class Grade Bucket Distribution card to stretch and fill 100% of its dedicated vertical and horizontal space.
 v1_11 - Added footer "Changelog" link leading to a dedicated text-based Changelog page (v1_1 through v1_11).
 v1_12 - Set the Gradebook dashboard as the main landing page (/GradeCraft/), separated Profile &amp; Settings (#/profile / profile.html) and Changelog (#/changelog / changelog.html) into dedicated subpages with URL routing, and updated the top-left GradeCraft graduation cap brand button to navigate directly to the main landing page (https://themaximmus.github.io/GradeCraft/).
-v1_15_3 - Removed redundant "+" and "←" symbols from the New Term, Add Class and Back to Gradebook button labels (the icons already convey the action).
 v1_15_2 - Added a dedicated GPA Planner page (#/gpa) with a header navigation button: classes are listed by academic term with course code, title, and a grade drop-down, followed by a Term GPA per term and an Overall GPA. Planner grades are saved as a separate localStorage record and never modify the Gradebook.</pre>
+v1_15_3 - Removed redundant "+" and "←" symbols from the New Term, Add Class and Back to Gradebook button labels (the icons already convey the action).
+v1_16 - Added a per-class Units field (default 4) to the Gradebook course details, shown read-only on the GPA Planner. Term and Overall GPA are now unit-weighted using the UC Berkeley method (total grade points / total graded units; ungraded and 0-unit classes are excluded), on both the Gradebook term tabs and the GPA Planner.
           </div>
         </section>
       </div>
@@ -1248,6 +1271,7 @@ v1_15_2 - Added a dedicated GPA Planner page (#/gpa) with a header navigation bu
             code: 'CS 61A',
             name: 'Structure & Interpretation of Computer Programs',
             term: 'Fall 2026',
+            units: 4,
             targetLetter: 'A',
             groups: [
               { id: 'grp_61a_hw',   name: 'Homework & Labs', weight: 15 },
@@ -1272,6 +1296,7 @@ v1_15_2 - Added a dedicated GPA Planner page (#/gpa) with a header navigation bu
             code: 'DATA C8',
             name: 'Foundations of Data Science',
             term: 'Fall 2026',
+            units: 4,
             targetLetter: 'A',
             groups: [
               { id: 'grp_c8_lab',  name: 'Labs', weight: 10 },
@@ -1294,6 +1319,7 @@ v1_15_2 - Added a dedicated GPA Planner page (#/gpa) with a header navigation bu
             code: 'MATH 54',
             name: 'Linear Algebra & Differential Equations',
             term: 'Spring 2026',
+            units: 4,
             targetLetter: 'A',
             groups: [
               { id: 'grp_m54_hw',  name: 'Homework', weight: 15 },
@@ -1332,6 +1358,15 @@ v1_15_2 - Added a dedicated GPA Planner page (#/gpa) with a header navigation bu
           defaultGradeDefinitions: cloneGradeScale(defaultScale),
           classes: createExampleCourses(defaultScale)
         };
+      }
+
+      const DEFAULT_CLASS_UNITS = 4;
+
+      function normalizeUnits(value, fallback = DEFAULT_CLASS_UNITS) {
+        if (value === null || value === undefined || value === '') return fallback;
+        const n = Number(value);
+        if (!Number.isFinite(n) || n < 0) return fallback;
+        return Math.min(20, Math.round(n * 100) / 100);
       }
 
       function sanitizeClassObject(c, idx, defaultDefs) {
@@ -1383,6 +1418,7 @@ v1_15_2 - Added a dedicated GPA Planner page (#/gpa) with a header navigation bu
           code: courseCode || `COURSE ${101 + idx}`,
           name: courseName || `Academic Course ${idx + 1}`,
           term: normalizeTermName(c?.term ?? 'Fall 2026'),
+          units: normalizeUnits(c?.units),
           targetLetter: String(c?.targetLetter || c?.targetGrade || 'A'),
           groups: safeGroups,
           buckets: cloneGradeScale(rawBuckets),
@@ -1534,17 +1570,31 @@ v1_15_2 - Added a dedicated GPA Planner page (#/gpa) with a header navigation bu
         return (state.defaultGradeDefinitions || []).find(d => d.letter === letter) || null;
       }
 
+      // UC Berkeley method: sum(grade points x units) / sum(units of graded classes).
       function computePlannerSummary(classesList) {
-        let sum = 0;
+        let gradePoints = 0;
         let graded = 0;
+        let gradedUnits = 0;
+        let totalUnits = 0;
         classesList.forEach(c => {
+          const units = normalizeUnits(c.units);
+          totalUnits += units;
           const def = getPlannerGradeDef(c.id);
           if (def && def.gpa !== null && def.gpa !== undefined) {
-            sum += Number(def.gpa);
             graded++;
+            if (units > 0) {
+              gradePoints += Number(def.gpa) * units;
+              gradedUnits += units;
+            }
           }
         });
-        return { total: classesList.length, graded, avg: graded > 0 ? sum / graded : null };
+        return {
+          total: classesList.length,
+          graded,
+          totalUnits,
+          gradedUnits,
+          avg: gradedUnits > 0 ? gradePoints / gradedUnits : null
+        };
       }
 
       // Determine active subpage from URL path, query string, or hash so main page is always Gradebook
@@ -1871,20 +1921,34 @@ v1_15_2 - Added a dedicated GPA Planner page (#/gpa) with a header navigation bu
         };
       }
 
+      // UC Berkeley GPA: total grade points (course grade points x units) / total graded units.
+      // Classes without a grade yet, or with 0 units, don't count toward the GPA.
       function computeTermSummary(classesList) {
-        let gpaSum = 0;
-        let gradedClassesCount = 0;
+        let gradePoints = 0;
+        let gradedUnits = 0;
+        let totalUnits = 0;
         classesList.forEach(c => {
+          const units = normalizeUnits(c.units);
+          totalUnits += units;
           const m = computeClassMetrics(c);
-          if (m.actualPct !== null && m.actualBucket.current && m.actualBucket.current.gpa !== null && m.actualBucket.current.gpa !== undefined) {
-            gpaSum += Number(m.actualBucket.current.gpa);
-            gradedClassesCount++;
+          if (units > 0 && m.actualPct !== null && m.actualBucket.current && m.actualBucket.current.gpa !== null && m.actualBucket.current.gpa !== undefined) {
+            gradePoints += Number(m.actualBucket.current.gpa) * units;
+            gradedUnits += units;
           }
         });
         return {
           count: classesList.length,
-          avgGpa: gradedClassesCount > 0 ? (gpaSum / gradedClassesCount) : null
+          totalUnits,
+          gradedUnits,
+          avgGpa: gradedUnits > 0 ? (gradePoints / gradedUnits) : null
         };
+      }
+
+      function formatTermBadgeText(summary) {
+        const classWord = summary.count === 1 ? 'class' : 'classes';
+        const unitWord = summary.totalUnits === 1 ? 'unit' : 'units';
+        const gpaText = summary.avgGpa !== null ? `${formatNumber(summary.avgGpa, 2, 2)} GPA` : '-- GPA';
+        return `${summary.count} ${classWord} • ${formatNumber(summary.totalUnits, 0, 1)} ${unitWord} • ${gpaText}`;
       }
 
       function renderHeaderNavigation() {
@@ -1920,6 +1984,7 @@ v1_15_2 - Added a dedicated GPA Planner page (#/gpa) with a header navigation bu
               <tr class="theme-row-hover transition border-b border-theme-subtle">
                 <td class="py-2.5 pl-4 pr-2 font-mono font-bold text-xs text-theme-primary whitespace-nowrap">${escapeHtml(c.code)}</td>
                 <td class="py-2.5 px-2 text-xs text-theme-secondary">${escapeHtml(c.name)}</td>
+                <td class="py-2.5 px-2 text-right font-mono text-xs font-semibold text-theme-secondary">${formatNumber(normalizeUnits(c.units), 0, 1)}</td>
                 <td class="py-2.5 px-2 text-right">
                   <select
                     data-gpa-class-id="${escapeHtml(c.id)}"
@@ -1958,6 +2023,7 @@ v1_15_2 - Added a dedicated GPA Planner page (#/gpa) with a header navigation bu
                     <tr class="border-b border-theme text-[11px] font-bold uppercase tracking-wider text-theme-faint">
                       <th class="py-2.5 pl-4 pr-2">Course</th>
                       <th class="py-2.5 px-2">Title</th>
+                      <th class="py-2.5 px-2 text-right">Units</th>
                       <th class="py-2.5 px-2 text-right">Grade</th>
                       <th class="py-2.5 pr-4 pl-2 text-right">Grade Points</th>
                     </tr>
@@ -1967,8 +2033,9 @@ v1_15_2 - Added a dedicated GPA Planner page (#/gpa) with a header navigation bu
                     <tr class="border-t-2 border-theme font-bold text-xs">
                       <td colspan="2" class="py-3 pl-4 text-theme-secondary">
                         ${escapeHtml(termName)} Term GPA
-                        <span class="ml-2 font-normal text-theme-muted">(${summary.graded} of ${summary.total} graded)</span>
+                        <span class="ml-2 font-normal text-theme-muted">(${summary.graded} of ${summary.total} graded &bull; ${formatNumber(summary.gradedUnits, 0, 1)} of ${formatNumber(summary.totalUnits, 0, 1)} units)</span>
                       </td>
+                      <td class="py-3 px-2 text-right font-mono text-theme-secondary">${formatNumber(summary.totalUnits, 0, 1)}</td>
                       <td></td>
                       <td class="py-3 pr-4 text-right font-mono text-sm text-indigo-400">${fmtGpa(summary.avg)}</td>
                     </tr>
@@ -1988,7 +2055,7 @@ v1_15_2 - Added a dedicated GPA Planner page (#/gpa) with a header navigation bu
                 Overall Summary
               </div>
               <div class="text-xs text-indigo-200/80 mt-1">
-                Across all terms &bull; ${overall.graded} of ${overall.total} ${overall.total === 1 ? 'class' : 'classes'} graded
+                Across all terms &bull; ${overall.graded} of ${overall.total} ${overall.total === 1 ? 'class' : 'classes'} graded &bull; ${formatNumber(overall.gradedUnits, 0, 1)} of ${formatNumber(overall.totalUnits, 0, 1)} units
               </div>
             </div>
             <div class="text-right">
@@ -2336,14 +2403,14 @@ v1_15_2 - Added a dedicated GPA Planner page (#/gpa) with a header navigation bu
         const allSummary = computeTermSummary(state.classes);
         const allBadge = document.querySelector(`[data-term-gpa-badge="ALL"]`);
         if (allBadge) {
-          allBadge.textContent = `${allSummary.count} ${allSummary.count === 1 ? 'class' : 'classes'} • ${allSummary.avgGpa !== null ? `${formatNumber(allSummary.avgGpa, 2, 2)} GPA` : '-- GPA'}`;
+          allBadge.textContent = formatTermBadgeText(allSummary);
         }
         getUniqueTerms().forEach(termName => {
           const termClasses = state.classes.filter(c => normalizeTermName(c.term) === termName);
           const summary = computeTermSummary(termClasses);
           document.querySelectorAll('[data-term-gpa-badge]').forEach(badge => {
             if (badge.getAttribute('data-term-gpa-badge') === termName) {
-              badge.textContent = `${summary.count} ${summary.count === 1 ? 'class' : 'classes'} • ${summary.avgGpa !== null ? `${formatNumber(summary.avgGpa, 2, 2)} GPA` : '-- GPA'}`;
+              badge.textContent = formatTermBadgeText(summary);
             }
           });
         });
@@ -2491,7 +2558,7 @@ v1_15_2 - Added a dedicated GPA Planner page (#/gpa) with a header navigation bu
               <span class="font-bold">All Terms</span>
               <span data-term-gpa-badge="ALL" class="px-1.5 py-0.5 rounded-md font-mono text-[10px] ${
                 isAllActive ? 'bg-black/25 text-white' : 'surface-pill text-theme-muted border'
-              }">${allSummary.count} ${allSummary.count === 1 ? 'class' : 'classes'} • ${allSummary.avgGpa !== null ? `${formatNumber(allSummary.avgGpa, 2, 2)} GPA` : '-- GPA'}</span>
+              }">${formatTermBadgeText(allSummary)}</span>
             </button>
           `;
 
@@ -2515,7 +2582,7 @@ v1_15_2 - Added a dedicated GPA Planner page (#/gpa) with a header navigation bu
                 <span class="font-bold">${escapeHtml(termName)}</span>
                 <span data-term-gpa-badge="${escapeHtml(termName)}" class="px-1.5 py-0.5 rounded-md font-mono text-[10px] ${
                   isTermActive ? 'bg-black/25 text-white' : 'surface-pill text-theme-muted border'
-                }">${summary.count} ${summary.count === 1 ? 'class' : 'classes'} • ${summary.avgGpa !== null ? `${formatNumber(summary.avgGpa, 2, 2)} GPA` : '-- GPA'}</span>
+                }">${formatTermBadgeText(summary)}</span>
               </button>
             `;
           }).join('');
@@ -2567,6 +2634,8 @@ v1_15_2 - Added a dedicated GPA Planner page (#/gpa) with a header navigation bu
         const codeIn = document.getElementById('inputClassCode');
         const nameIn = document.getElementById('inputClassName');
         const termIn = document.getElementById('inputClassTerm');
+        const unitsIn = document.getElementById('inputClassUnits');
+        if (unitsIn && document.activeElement !== unitsIn) unitsIn.value = normalizeUnits(cls.units);
         if (codeIn && document.activeElement !== codeIn) codeIn.value = cls.code || '';
         if (nameIn && document.activeElement !== nameIn) nameIn.value = cls.name || '';
         if (termIn && document.activeElement !== termIn) termIn.value = cls.term || '';
@@ -3133,6 +3202,7 @@ v1_15_2 - Added a dedicated GPA Planner page (#/gpa) with a header navigation bu
               code: `COURSE ${100 + num}`,
               name: `New Course (${newTermName})`,
               term: newTermName,
+              units: DEFAULT_CLASS_UNITS,
               targetLetter: 'A',
               groups: [
                 { id: g1, name: 'Projects & Homework', weight: 30 },
@@ -3187,6 +3257,7 @@ v1_15_2 - Added a dedicated GPA Planner page (#/gpa) with a header navigation bu
               code: `COURSE ${100 + num}`,
               name: `Academic Course ${num}`,
               term: inheritedTerm,
+              units: DEFAULT_CLASS_UNITS,
               targetLetter: 'A',
               groups: [
                 { id: g1, name: 'Assignments', weight: 30 },
@@ -3570,6 +3641,18 @@ v1_15_2 - Added a dedicated GPA Planner page (#/gpa) with a header navigation bu
             return;
           }
 
+          if (target.id === 'inputClassUnits') {
+            const cls = getActiveClass();
+            if (!cls) return;
+            const raw = target.value.trim();
+            const parsed = Number(raw);
+            if (raw === '' || !Number.isFinite(parsed) || parsed < 0) return;
+            cls.units = normalizeUnits(parsed);
+            saveState();
+            updateCalculatedMetricsInDOM();
+            return;
+          }
+
           const gid = target.getAttribute('data-group-id');
           const gField = target.getAttribute('data-group-field');
           if (gid && gField) {
@@ -3688,6 +3771,18 @@ v1_15_2 - Added a dedicated GPA Planner page (#/gpa) with a header navigation bu
         document.addEventListener('change', (e) => {
           const target = e.target;
           if (!target) return;
+
+          if (target.id === 'inputClassUnits') {
+            const cls = getActiveClass();
+            if (!cls) return;
+            const raw = target.value.trim();
+            const parsed = Number(raw);
+            if (raw !== '' && Number.isFinite(parsed) && parsed >= 0) cls.units = normalizeUnits(parsed);
+            target.value = normalizeUnits(cls.units);
+            saveState();
+            updateCalculatedMetricsInDOM();
+            return;
+          }
 
           const gpaClassId = target.getAttribute ? target.getAttribute('data-gpa-class-id') : null;
           if (gpaClassId) {
