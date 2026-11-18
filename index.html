@@ -249,6 +249,14 @@
             <span id="headerAvatarInitials" class="w-5 h-5 rounded-full bg-indigo-600 text-white flex items-center justify-center text-[10px] font-bold">SN</span>
             <span>Profile &amp; Settings</span>
           </a>
+          <a
+            id="navBtnGpa"
+            href="#/gpa"
+            class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold text-theme-muted hover:text-theme-primary transition cursor-pointer no-underline"
+          >
+            <i class="fa-solid fa-calculator"></i>
+            <span>GPA Planner</span>
+          </a>
         </nav>
       </div>
     </div>
@@ -932,6 +940,37 @@
       </div>
     </div>
 
+    <!-- VIEW 4: GPA PLANNER VIEW -->
+    <div id="viewGpa" class="hidden space-y-6">
+      <div class="max-w-5xl mx-auto space-y-6">
+        <section class="surface-card rounded-2xl border p-6">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div class="flex items-center gap-4">
+              <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 via-indigo-600 to-violet-700 flex items-center justify-center text-white text-xl shadow-md">
+                <i class="fa-solid fa-calculator"></i>
+              </div>
+              <div>
+                <h2 class="text-lg font-extrabold text-theme-primary">GPA Planner</h2>
+                <p class="text-xs text-theme-muted">Pick a grade for each class to see your term and overall GPA. Choices are saved separately and never change your Gradebook.</p>
+              </div>
+            </div>
+            <button
+              id="btnClearGpaGrades"
+              type="button"
+              class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold theme-btn-secondary cursor-pointer self-start sm:self-center"
+            >
+              <i class="fa-solid fa-rotate-left text-indigo-400"></i>
+              <span>Clear All Grades</span>
+            </button>
+          </div>
+        </section>
+
+        <div id="gpaTermsContainer" class="space-y-6"></div>
+
+        <section id="gpaOverallContainer"></section>
+      </div>
+    </div>
+
     <!-- VIEW 3: SIMPLE TEXT-BASED CHANGELOG SUBPAGE -->
     <div id="viewChangelog" class="hidden space-y-6">
       <div class="max-w-4xl mx-auto space-y-5">
@@ -962,13 +1001,20 @@
           <div class="border-b border-theme pb-4 flex flex-wrap items-baseline justify-between gap-2">
             <div>
               <h1 class="text-lg font-extrabold tracking-tight text-theme-primary font-mono">GradeCraft — Changelog</h1>
-              <p class="text-xs text-theme-muted mt-1">Chronological record of releases and commits (<code class="font-mono">v1_1</code> &rarr; <code class="font-mono">v1_12</code>).</p>
+              <p class="text-xs text-theme-muted mt-1">Chronological record of releases and commits (<code class="font-mono">v1_1</code> &rarr; <code class="font-mono">v1_13</code>).</p>
             </div>
-            <span class="text-[11px] font-mono text-indigo-400 px-2.5 py-0.5 rounded-full accent-pill border">Latest: v1_12</span>
+            <span class="text-[11px] font-mono text-indigo-400 px-2.5 py-0.5 rounded-full accent-pill border">Latest: v1_13</span>
           </div>
 
           <!-- Simple, clean text-based changelog list (Newest to Oldest & Plain-Text Block) -->
           <div class="space-y-4 font-mono text-xs leading-relaxed text-theme-secondary">
+            <div class="p-3.5 rounded-xl surface-alt border border-theme-subtle">
+              <div class="font-bold text-indigo-400">v1_13</div>
+              <p class="mt-1 text-theme-primary font-sans text-xs leading-relaxed">
+                Added a dedicated GPA Planner page (<code class="font-mono">#/gpa</code>) with a header navigation button: classes are listed by academic term with course code, title, and a grade drop-down, followed by a Term GPA per term and an Overall GPA. Planner grades are saved as a separate <code class="font-mono">localStorage</code> record and never modify the Gradebook.
+              </p>
+            </div>
+
             <div class="p-3.5 rounded-xl surface-alt border border-theme-subtle">
               <div class="font-bold text-indigo-400">v1_12</div>
               <p class="mt-1 text-theme-primary font-sans text-xs leading-relaxed">
@@ -1056,7 +1102,7 @@
 
           <!-- Raw Plain-Text Log Block for quick copy/reference -->
           <div class="pt-4 border-t border-theme space-y-2">
-            <div class="text-[11px] font-bold uppercase tracking-wider text-theme-faint font-mono">Raw Plain-Text Changelog (v1_1 &rarr; v1_12)</div>
+            <div class="text-[11px] font-bold uppercase tracking-wider text-theme-faint font-mono">Raw Plain-Text Changelog (v1_1 &rarr; v1_13)</div>
             <pre id="rawChangelogPre" class="p-4 rounded-xl surface-alt border border-theme text-xs font-mono text-theme-secondary whitespace-pre-wrap overflow-x-auto select-all leading-relaxed">v1_1  - Initial release of GradeCraft Class Grade Calculator &amp; Forecaster: multi-class tabs, assignment group weights, grade bucket distribution, grouped &amp; sorted assignment entries, percentage &amp; letter grade calculation, What-If score overrides, Target Grade Forecaster, and localStorage persistence with JSON import/export.
 v1_2  - Added high-contrast True Black OLED theme as the default appearance alongside Midnight and Light themes.
 v1_3  - Created separate Profile &amp; Settings page containing the 3-way theme switcher, language &amp; locale cascade selector, authentication UI placeholder skeleton, and JSON backup management; resolved null-reference event listener binding issues.
@@ -1068,7 +1114,8 @@ v1_8  - Organized archived index.html versions into a local ignored folder via .
 v1_9  - Added Academic Term tab bar (Fall 2026, Spring 2026, All Terms, + New Term) with Term GPA calculation, unified document-level event delegation, preserved saved localStorage course data alongside CS 61A, DATA C8, and MATH 54 templates, and removed the "Academic Standing" field from Profile &amp; Settings.
 v1_10 - Added drag-and-drop reordering for Assignment Groups via left slider icon handles and expanded the Class Grade Bucket Distribution card to stretch and fill 100% of its dedicated vertical and horizontal space.
 v1_11 - Added footer "Changelog" link leading to a dedicated text-based Changelog page (v1_1 through v1_11).
-v1_12 - Set the Gradebook dashboard as the main landing page (/GradeCraft/), separated Profile &amp; Settings (#/profile / profile.html) and Changelog (#/changelog / changelog.html) into dedicated subpages with URL routing, and updated the top-left GradeCraft graduation cap brand button to navigate directly to the main landing page (https://themaximmus.github.io/GradeCraft/).</pre>
+v1_12 - Set the Gradebook dashboard as the main landing page (/GradeCraft/), separated Profile &amp; Settings (#/profile / profile.html) and Changelog (#/changelog / changelog.html) into dedicated subpages with URL routing, and updated the top-left GradeCraft graduation cap brand button to navigate directly to the main landing page (https://themaximmus.github.io/GradeCraft/).
+v1_13 - Added a dedicated GPA Planner page (#/gpa) with a header navigation button: classes are listed by academic term with course code, title, and a grade drop-down, followed by a Term GPA per term and an Overall GPA. Planner grades are saved as a separate localStorage record and never modify the Gradebook.</pre>
           </div>
         </section>
       </div>
@@ -1424,6 +1471,74 @@ v1_12 - Set the Gradebook dashboard as the main landing page (/GradeCraft/), sep
       let highlightedAssignmentId = null;
       let draggedGroupId = null;
 
+      // GPA Planner: stored as its own record, fully separate from the Gradebook state
+      const GPA_STORAGE_KEY = 'gradecraft_gpa_planner_v1';
+
+      function loadGpaPlan() {
+        const grades = {};
+        try {
+          const raw = localStorage.getItem(GPA_STORAGE_KEY);
+          const parsed = raw ? JSON.parse(raw) : null;
+          if (parsed && parsed.grades && typeof parsed.grades === 'object') {
+            Object.keys(parsed.grades).forEach(k => {
+              const v = parsed.grades[k];
+              if (typeof v === 'string' && v) grades[k] = v;
+            });
+          }
+        } catch {
+          // Ignore malformed record
+        }
+        return { grades };
+      }
+
+      let gpaPlan = loadGpaPlan();
+
+      function saveGpaPlan() {
+        try {
+          localStorage.setItem(GPA_STORAGE_KEY, JSON.stringify(gpaPlan));
+        } catch (err) {
+          console.error('Failed to save GPA planner:', err);
+        }
+      }
+
+      function termSortValue(termName) {
+        const text = String(termName || '').toLowerCase();
+        const yearMatch = text.match(/\d{4}/);
+        const seasons = ['winter', 'spring', 'summer', 'fall'];
+        let seasonIdx = seasons.findIndex(s => text.includes(s));
+        if (text.includes('autumn')) seasonIdx = 3;
+        return [
+          yearMatch ? Number(yearMatch[0]) : Infinity,
+          seasonIdx === -1 ? 99 : seasonIdx
+        ];
+      }
+
+      function getTermsChronological() {
+        return getUniqueTerms()
+          .map((t, i) => ({ t, i, v: termSortValue(t) }))
+          .sort((a, b) => (a.v[0] === b.v[0] ? 0 : (a.v[0] < b.v[0] ? -1 : 1)) || (a.v[1] - b.v[1]) || (a.i - b.i))
+          .map(x => x.t);
+      }
+
+      function getPlannerGradeDef(classId) {
+        const letter = gpaPlan.grades[classId];
+        if (!letter) return null;
+        return (state.defaultGradeDefinitions || []).find(d => d.letter === letter) || null;
+      }
+
+      function computePlannerSummary(classesList) {
+        let sum = 0;
+        let graded = 0;
+        classesList.forEach(c => {
+          const def = getPlannerGradeDef(c.id);
+          if (def && def.gpa !== null && def.gpa !== undefined) {
+            sum += Number(def.gpa);
+            graded++;
+          }
+        });
+        return { total: classesList.length, graded, avg: graded > 0 ? sum / graded : null };
+      }
+
       // Determine active subpage from URL path, query string, or hash so main page is always Gradebook
       function resolveViewFromLocation() {
         const path = (window.location.pathname || '').toLowerCase();
@@ -1449,6 +1564,10 @@ v1_12 - Set the Gradebook dashboard as the main landing page (/GradeCraft/), sep
           hash === '#changelog'
         ) {
           return 'changelog';
+        }
+
+        if (pageParam === 'gpa' || hash === '#/gpa' || hash === '#gpa') {
+          return 'gpa';
         }
 
         return 'gradebook';
@@ -1763,19 +1882,113 @@ v1_12 - Set the Gradebook dashboard as the main landing page (/GradeCraft/), sep
       function renderHeaderNavigation() {
         const gbBtn = document.getElementById('navBtnGradebook');
         const profBtn = document.getElementById('navBtnProfile');
+        const gpaBtn = document.getElementById('navBtnGpa');
         const initialsEl = document.getElementById('headerAvatarInitials');
         if (initialsEl) initialsEl.textContent = getInitials(state.profile?.displayName);
 
-        const isGradebook = state.activeView === 'gradebook';
-        const isProfile = state.activeView === 'profile';
-        if (gbBtn && profBtn) {
-          gbBtn.className = isGradebook
-            ? 'inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold bg-indigo-600 text-white shadow-sm shadow-indigo-500/25 transition cursor-pointer no-underline'
-            : 'inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold text-theme-muted hover:text-theme-primary transition cursor-pointer no-underline';
-          profBtn.className = isProfile
-            ? 'inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold bg-indigo-600 text-white shadow-sm shadow-indigo-500/25 transition cursor-pointer no-underline'
-            : 'inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold text-theme-muted hover:text-theme-primary transition cursor-pointer no-underline';
-        }
+        const activeCls = 'inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold bg-indigo-600 text-white shadow-sm shadow-indigo-500/25 transition cursor-pointer no-underline';
+        const idleCls = 'inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold text-theme-muted hover:text-theme-primary transition cursor-pointer no-underline';
+        if (gbBtn) gbBtn.className = state.activeView === 'gradebook' ? activeCls : idleCls;
+        if (profBtn) profBtn.className = state.activeView === 'profile' ? activeCls : idleCls;
+        if (gpaBtn) gpaBtn.className = state.activeView === 'gpa' ? activeCls : idleCls;
+      }
+
+      function renderGpaDOM() {
+        const termsEl = document.getElementById('gpaTermsContainer');
+        const overallEl = document.getElementById('gpaOverallContainer');
+        if (!termsEl || !overallEl) return;
+
+        const scale = getSortedBuckets(state.defaultGradeDefinitions);
+        const fmtGpa = (v) => (v === null ? '--' : formatNumber(v, 2, 2));
+
+        termsEl.innerHTML = getTermsChronological().map(termName => {
+          const termClasses = state.classes.filter(c => normalizeTermName(c.term) === termName);
+          const summary = computePlannerSummary(termClasses);
+
+          const rows = termClasses.map(c => {
+            const def = getPlannerGradeDef(c.id);
+            const selected = def ? def.letter : '';
+            return `
+              <tr class="theme-row-hover transition border-b border-theme-subtle">
+                <td class="py-2.5 pl-4 pr-2 font-mono font-bold text-xs text-theme-primary whitespace-nowrap">${escapeHtml(c.code)}</td>
+                <td class="py-2.5 px-2 text-xs text-theme-secondary">${escapeHtml(c.name)}</td>
+                <td class="py-2.5 px-2 text-right">
+                  <select
+                    data-gpa-class-id="${escapeHtml(c.id)}"
+                    aria-label="Grade for ${escapeHtml(c.code)}"
+                    class="text-xs font-semibold theme-select rounded-lg px-2 py-1.5 min-w-[130px]"
+                  >
+                    <option value="" ${selected === '' ? 'selected' : ''}>Select grade</option>
+                    ${scale.map(b => `
+                      <option value="${escapeHtml(b.letter)}" ${b.letter === selected ? 'selected' : ''}>
+                        ${escapeHtml(b.letter)} (${formatNumber(b.gpa, 1, 1)})
+                      </option>
+                    `).join('')}
+                  </select>
+                </td>
+                <td class="py-2.5 pr-4 pl-2 text-right font-mono text-xs font-semibold ${def ? 'text-theme-primary' : 'text-theme-faint'}">
+                  ${def ? formatNumber(def.gpa, 1, 1) : '--'}
+                </td>
+              </tr>
+            `;
+          }).join('');
+
+          return `
+            <section class="surface-card rounded-2xl border overflow-hidden">
+              <div class="px-5 py-4 border-b border-theme surface-alt flex flex-wrap items-center justify-between gap-2">
+                <h3 class="text-sm font-bold text-theme-primary flex items-center gap-2">
+                  <i class="fa-regular fa-calendar text-indigo-400"></i>
+                  <span>${escapeHtml(termName)}</span>
+                </h3>
+                <span class="px-2.5 py-0.5 rounded-full text-[11px] font-mono surface-pill border text-theme-muted">
+                  ${termClasses.length} ${termClasses.length === 1 ? 'class' : 'classes'}
+                </span>
+              </div>
+              <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                  <thead>
+                    <tr class="border-b border-theme text-[11px] font-bold uppercase tracking-wider text-theme-faint">
+                      <th class="py-2.5 pl-4 pr-2">Course</th>
+                      <th class="py-2.5 px-2">Title</th>
+                      <th class="py-2.5 px-2 text-right">Grade</th>
+                      <th class="py-2.5 pr-4 pl-2 text-right">Grade Points</th>
+                    </tr>
+                  </thead>
+                  <tbody>${rows}</tbody>
+                  <tfoot>
+                    <tr class="border-t-2 border-theme font-bold text-xs">
+                      <td colspan="2" class="py-3 pl-4 text-theme-secondary">
+                        ${escapeHtml(termName)} Term GPA
+                        <span class="ml-2 font-normal text-theme-muted">(${summary.graded} of ${summary.total} graded)</span>
+                      </td>
+                      <td></td>
+                      <td class="py-3 pr-4 text-right font-mono text-sm text-indigo-400">${fmtGpa(summary.avg)}</td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            </section>
+          `;
+        }).join('');
+
+        const overall = computePlannerSummary(state.classes);
+        overallEl.innerHTML = `
+          <div class="bg-gradient-to-br from-[#0c0d18] via-[#11152c] to-[#1b173b] text-white rounded-2xl border border-indigo-500/35 p-5 shadow-lg flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <div class="text-xs font-bold uppercase tracking-wider text-indigo-300 flex items-center gap-1.5">
+                <i class="fa-solid fa-chart-line text-amber-400"></i>
+                Overall Summary
+              </div>
+              <div class="text-xs text-indigo-200/80 mt-1">
+                Across all terms &bull; ${overall.graded} of ${overall.total} ${overall.total === 1 ? 'class' : 'classes'} graded
+              </div>
+            </div>
+            <div class="text-right">
+              <div class="text-4xl sm:text-5xl font-extrabold tracking-tight font-mono text-white">${fmtGpa(overall.avg)}</div>
+              <div class="text-[11px] text-indigo-300 mt-1">Overall GPA</div>
+            </div>
+          </div>
+        `;
       }
 
       function switchAppView(viewName, updateUrl = true) {
@@ -1794,6 +2007,18 @@ v1_12 - Set the Gradebook dashboard as the main landing page (/GradeCraft/), sep
             } catch {}
           }
           document.title = 'GradeCraft — Profile & Settings';
+        } else if (viewName === 'gpa') {
+          state.activeView = 'gpa';
+          if (updateUrl) {
+            if (isStandaloneSubpage) {
+              window.location.href = getMainLandingPageUrl() + '#/gpa';
+              return;
+            }
+            try {
+              window.history.pushState({ view: 'gpa' }, 'GradeCraft — GPA Planner', '#/gpa');
+            } catch {}
+          }
+          document.title = 'GradeCraft — GPA Planner';
         } else if (viewName === 'changelog') {
           state.activeView = 'changelog';
           if (updateUrl) {
@@ -2730,21 +2955,31 @@ v1_12 - Set the Gradebook dashboard as the main landing page (/GradeCraft/), sep
           const gbPanel = document.getElementById('viewGradebook');
           const profPanel = document.getElementById('viewProfile');
           const logPanel = document.getElementById('viewChangelog');
+          const gpaPanel = document.getElementById('viewGpa');
           if (!gbPanel || !profPanel) return;
 
           if (state.activeView === 'profile') {
             gbPanel.classList.add('hidden');
             if (logPanel) logPanel.classList.add('hidden');
+            if (gpaPanel) gpaPanel.classList.add('hidden');
             profPanel.classList.remove('hidden');
             renderProfileDOM();
+          } else if (state.activeView === 'gpa' && gpaPanel) {
+            gbPanel.classList.add('hidden');
+            profPanel.classList.add('hidden');
+            if (logPanel) logPanel.classList.add('hidden');
+            gpaPanel.classList.remove('hidden');
+            renderGpaDOM();
           } else if (state.activeView === 'changelog' && logPanel) {
             gbPanel.classList.add('hidden');
             profPanel.classList.add('hidden');
+            if (gpaPanel) gpaPanel.classList.add('hidden');
             logPanel.classList.remove('hidden');
           } else {
             state.activeView = 'gradebook';
             profPanel.classList.add('hidden');
             if (logPanel) logPanel.classList.add('hidden');
+            if (gpaPanel) gpaPanel.classList.add('hidden');
             gbPanel.classList.remove('hidden');
             renderGradebookDOM();
           }
@@ -2803,6 +3038,27 @@ v1_12 - Set the Gradebook dashboard as the main landing page (/GradeCraft/), sep
             e.preventDefault();
             switchAppView('profile', true);
             window.scrollTo({ top: 0, behavior: 'smooth' });
+            return;
+          }
+
+          if (target.closest('#navBtnGpa')) {
+            e.preventDefault();
+            switchAppView('gpa', true);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            return;
+          }
+
+          if (target.closest('#btnClearGpaGrades')) {
+            openConfirmModal(
+              'Clear All Planner Grades?',
+              'This removes every grade you picked on the GPA Planner page. Your Gradebook is not affected.',
+              () => {
+                gpaPlan = { grades: {} };
+                saveGpaPlan();
+                renderApp();
+                showToast('Cleared GPA Planner grades', 'info');
+              }
+            );
             return;
           }
 
@@ -3424,6 +3680,20 @@ v1_12 - Set the Gradebook dashboard as the main landing page (/GradeCraft/), sep
         document.addEventListener('change', (e) => {
           const target = e.target;
           if (!target) return;
+
+          const gpaClassId = target.getAttribute ? target.getAttribute('data-gpa-class-id') : null;
+          if (gpaClassId) {
+            if (target.value) {
+              gpaPlan.grades[gpaClassId] = target.value;
+            } else {
+              delete gpaPlan.grades[gpaClassId];
+            }
+            saveGpaPlan();
+            renderGpaDOM();
+            const again = document.querySelector(`select[data-gpa-class-id="${gpaClassId}"]`);
+            if (again) again.focus();
+            return;
+          }
 
           if (target.id === 'inputClassTerm') {
             const cls = getActiveClass();
