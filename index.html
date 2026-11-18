@@ -242,20 +242,20 @@
             <span>Gradebook</span>
           </a>
           <a
-            id="navBtnProfile"
-            href="#/profile"
-            class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold text-theme-muted hover:text-theme-primary transition cursor-pointer no-underline"
-          >
-            <span id="headerAvatarInitials" class="w-5 h-5 rounded-full bg-indigo-600 text-white flex items-center justify-center text-[10px] font-bold">SN</span>
-            <span>Profile &amp; Settings</span>
-          </a>
-          <a
             id="navBtnGpa"
             href="#/gpa"
             class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold text-theme-muted hover:text-theme-primary transition cursor-pointer no-underline"
           >
             <i class="fa-solid fa-calculator"></i>
             <span>GPA Planner</span>
+          </a>
+          <a
+            id="navBtnProfile"
+            href="#/profile"
+            class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold text-theme-muted hover:text-theme-primary transition cursor-pointer no-underline"
+          >
+            <span id="headerAvatarInitials" class="w-5 h-5 rounded-full bg-indigo-600 text-white flex items-center justify-center text-[10px] font-bold">SN</span>
+            <span>Profile &amp; Settings</span>
           </a>
         </nav>
       </div>
@@ -286,7 +286,7 @@
               title="Create a new Academic Term with a starter class"
             >
               <i class="fa-solid fa-calendar-plus text-indigo-400"></i>
-              <span>+ New Term</span>
+              <span>New Term</span>
             </button>
           </div>
         </div>
@@ -302,7 +302,7 @@
             class="shrink-0 inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold theme-btn-secondary cursor-pointer"
           >
             <i class="fa-solid fa-plus text-indigo-400"></i>
-            <span>+ Add Class</span>
+            <span>Add Class</span>
           </button>
         </div>
 
@@ -589,7 +589,7 @@
               <div class="col-span-3 text-right">Min Cutoff</div>
             </div>
 
-            <div id="tbodyClassBuckets" class="flex-1 flex flex-col justify-between divide-y border-theme-subtle text-xs"></div>
+            <div id="tbodyClassBuckets" class="flex-1 flex flex-col justify-between gap-1 pt-1.5 text-xs"></div>
           </div>
 
           <!-- Anchored Footer Status Bar -->
@@ -981,7 +981,7 @@
             class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold theme-btn-secondary cursor-pointer no-underline"
           >
             <i class="fa-solid fa-arrow-left text-indigo-400"></i>
-            <span>&larr; Back to Gradebook</span>
+            <span>Back to Gradebook</span>
           </a>
 
           <div class="flex items-center gap-2">
@@ -1001,15 +1001,22 @@
           <div class="border-b border-theme pb-4 flex flex-wrap items-baseline justify-between gap-2">
             <div>
               <h1 class="text-lg font-extrabold tracking-tight text-theme-primary font-mono">GradeCraft — Changelog</h1>
-              <p class="text-xs text-theme-muted mt-1">Chronological record of releases and commits (<code class="font-mono">v1_1</code> &rarr; <code class="font-mono">v1_13</code>).</p>
+              <p class="text-xs text-theme-muted mt-1">Chronological record of releases and commits (<code class="font-mono">v1_1</code> &rarr; <code class="font-mono">v1_15_3</code>).</p>
             </div>
-            <span class="text-[11px] font-mono text-indigo-400 px-2.5 py-0.5 rounded-full accent-pill border">Latest: v1_13</span>
+            <span class="text-[11px] font-mono text-indigo-400 px-2.5 py-0.5 rounded-full accent-pill border">Latest: v1_15_3</span>
           </div>
 
           <!-- Simple, clean text-based changelog list (Newest to Oldest & Plain-Text Block) -->
           <div class="space-y-4 font-mono text-xs leading-relaxed text-theme-secondary">
             <div class="p-3.5 rounded-xl surface-alt border border-theme-subtle">
-              <div class="font-bold text-indigo-400">v1_13</div>
+              <div class="font-bold text-indigo-400">v1_15_3</div>
+              <p class="mt-1 text-theme-primary font-sans text-xs leading-relaxed">
+                Removed redundant "+" and "&larr;" symbols from the New Term, Add Class and Back to Gradebook button labels (the icons already convey the action).
+              </p>
+            </div>
+
+            <div class="p-3.5 rounded-xl surface-alt border border-theme-subtle">
+              <div class="font-bold text-indigo-400">v1_15_2</div>
               <p class="mt-1 text-theme-primary font-sans text-xs leading-relaxed">
                 Added a dedicated GPA Planner page (<code class="font-mono">#/gpa</code>) with a header navigation button: classes are listed by academic term with course code, title, and a grade drop-down, followed by a Term GPA per term and an Overall GPA. Planner grades are saved as a separate <code class="font-mono">localStorage</code> record and never modify the Gradebook.
               </p>
@@ -1039,7 +1046,7 @@
             <div class="p-3.5 rounded-xl surface-alt border border-theme-subtle">
               <div class="font-bold text-indigo-400">v1_9</div>
               <p class="mt-1 text-theme-primary font-sans text-xs leading-relaxed">
-                Added Academic Term tab bar (<code class="font-mono">Fall 2026</code>, <code class="font-mono">Spring 2026</code>, <code class="font-mono">All Terms</code>, <code class="font-mono">+ New Term</code>) with Term GPA calculation, unified <code class="font-mono">document</code>-level event delegation, preserved saved <code class="font-mono">localStorage</code> course data alongside <code class="font-mono">CS 61A</code>, <code class="font-mono">DATA C8</code>, and <code class="font-mono">MATH 54</code> templates, and removed the "Academic Standing" field from Profile &amp; Settings.
+                Added Academic Term tab bar (<code class="font-mono">Fall 2026</code>, <code class="font-mono">Spring 2026</code>, <code class="font-mono">All Terms</code>, <code class="font-mono">New Term</code>) with Term GPA calculation, unified <code class="font-mono">document</code>-level event delegation, preserved saved <code class="font-mono">localStorage</code> course data alongside <code class="font-mono">CS 61A</code>, <code class="font-mono">DATA C8</code>, and <code class="font-mono">MATH 54</code> templates, and removed the "Academic Standing" field from Profile &amp; Settings.
               </p>
             </div>
 
@@ -1102,7 +1109,7 @@
 
           <!-- Raw Plain-Text Log Block for quick copy/reference -->
           <div class="pt-4 border-t border-theme space-y-2">
-            <div class="text-[11px] font-bold uppercase tracking-wider text-theme-faint font-mono">Raw Plain-Text Changelog (v1_1 &rarr; v1_13)</div>
+            <div class="text-[11px] font-bold uppercase tracking-wider text-theme-faint font-mono">Raw Plain-Text Changelog (v1_1 &rarr; v1_15_3)</div>
             <pre id="rawChangelogPre" class="p-4 rounded-xl surface-alt border border-theme text-xs font-mono text-theme-secondary whitespace-pre-wrap overflow-x-auto select-all leading-relaxed">v1_1  - Initial release of GradeCraft Class Grade Calculator &amp; Forecaster: multi-class tabs, assignment group weights, grade bucket distribution, grouped &amp; sorted assignment entries, percentage &amp; letter grade calculation, What-If score overrides, Target Grade Forecaster, and localStorage persistence with JSON import/export.
 v1_2  - Added high-contrast True Black OLED theme as the default appearance alongside Midnight and Light themes.
 v1_3  - Created separate Profile &amp; Settings page containing the 3-way theme switcher, language &amp; locale cascade selector, authentication UI placeholder skeleton, and JSON backup management; resolved null-reference event listener binding issues.
@@ -1115,7 +1122,8 @@ v1_9  - Added Academic Term tab bar (Fall 2026, Spring 2026, All Terms, + New Te
 v1_10 - Added drag-and-drop reordering for Assignment Groups via left slider icon handles and expanded the Class Grade Bucket Distribution card to stretch and fill 100% of its dedicated vertical and horizontal space.
 v1_11 - Added footer "Changelog" link leading to a dedicated text-based Changelog page (v1_1 through v1_11).
 v1_12 - Set the Gradebook dashboard as the main landing page (/GradeCraft/), separated Profile &amp; Settings (#/profile / profile.html) and Changelog (#/changelog / changelog.html) into dedicated subpages with URL routing, and updated the top-left GradeCraft graduation cap brand button to navigate directly to the main landing page (https://themaximmus.github.io/GradeCraft/).
-v1_13 - Added a dedicated GPA Planner page (#/gpa) with a header navigation button: classes are listed by academic term with course code, title, and a grade drop-down, followed by a Term GPA per term and an Overall GPA. Planner grades are saved as a separate localStorage record and never modify the Gradebook.</pre>
+v1_15_3 - Removed redundant "+" and "←" symbols from the New Term, Add Class and Back to Gradebook button labels (the icons already convey the action).
+v1_15_2 - Added a dedicated GPA Planner page (#/gpa) with a header navigation button: classes are listed by academic term with course code, title, and a grade drop-down, followed by a Term GPA per term and an Overall GPA. Planner grades are saved as a separate localStorage record and never modify the Gradebook.</pre>
           </div>
         </section>
       </div>
@@ -2681,7 +2689,7 @@ v1_13 - Added a dedicated GPA Planner page (#/gpa) with a header navigation butt
             return `
               <div
                 data-bucket-row="${escapeHtml(b.id)}"
-                class="flex-1 grid grid-cols-12 items-center gap-2 px-2 py-1 min-h-[31px] rounded-lg theme-row-hover transition"
+                class="flex-none grid grid-cols-12 items-center gap-2 px-2 py-2 my-0.5 min-h-[44px] rounded-lg theme-row-hover transition"
               >
                 <div class="col-span-3 flex items-center gap-2 min-w-0">
                   <span class="inline-flex items-center justify-center w-8 h-6 rounded-lg text-xs font-bold border shrink-0 ${getLetterBadgeClasses(b.letter)}">
@@ -2693,11 +2701,11 @@ v1_13 - Added a dedicated GPA Planner page (#/gpa) with a header navigation butt
                 </div>
 
                 <div class="col-span-6 flex flex-col justify-center gap-1 pr-2">
-                  <div class="flex items-center justify-between gap-1.5">
-                    <span data-bucket-range="${escapeHtml(b.id)}" class="font-mono text-[11px] text-theme-secondary">
+                  <div class="flex flex-wrap items-center justify-between gap-x-1.5 gap-y-1">
+                    <span data-bucket-range="${escapeHtml(b.id)}" class="font-mono text-[11px] text-theme-secondary whitespace-nowrap">
                       ${formatPercent(b.min, 0)} – ${upperLabel}
                     </span>
-                    <span data-bucket-status="${escapeHtml(b.id)}" class="shrink-0"></span>
+                    <span data-bucket-status="${escapeHtml(b.id)}" class="shrink-0 whitespace-nowrap"></span>
                   </div>
                   <div class="w-full h-1.5 rounded-full surface-pill overflow-hidden border border-theme-subtle">
                     <div
