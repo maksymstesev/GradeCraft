@@ -713,8 +713,8 @@
               <input
                 id="profileMajor"
                 type="text"
-                value="Computer Science"
-                placeholder="Computer Science"
+                value=""
+                placeholder="Major / Program"
                 class="w-full text-xs font-semibold theme-input rounded-xl px-3.5 py-2.5"
               />
             </div>
@@ -1272,7 +1272,7 @@ v1_12 - Set the Gradebook dashboard as the main landing page (/GradeCraft/), sep
             displayName: 'Student Name',
             email: 'student@university.edu',
             institution: 'University Campus',
-            major: 'Computer Science'
+            major: ''
           },
           defaultGradeDefinitions: cloneGradeScale(defaultScale),
           classes: createExampleCourses(defaultScale)
@@ -1354,7 +1354,7 @@ v1_12 - Set the Gradebook dashboard as the main landing page (/GradeCraft/), sep
             displayName: String(rawState.profile?.displayName || 'Student Name'),
             email: String(rawState.profile?.email || 'student@university.edu'),
             institution: String(rawState.profile?.institution || 'University Campus'),
-            major: String(rawState.profile?.major || 'Computer Science')
+            major: String(rawState.profile?.major || 'Major / Program')
           },
           defaultGradeDefinitions: defaultDefs,
           classes: []
