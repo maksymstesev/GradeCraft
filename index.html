@@ -1028,13 +1028,23 @@
           <div class="border-b border-theme pb-4 flex flex-wrap items-baseline justify-between gap-2">
             <div>
               <h1 class="text-lg font-extrabold tracking-tight text-theme-primary font-mono">GradeCraft — Changelog</h1>
-              <p class="text-xs text-theme-muted mt-1">Chronological record of releases and commits (<code class="font-mono">v1_1</code> &rarr; <code class="font-mono">v1_16_3</code>).</p>
+              <p class="text-xs text-theme-muted mt-1">Chronological record of releases and commits (<code class="font-mono">v1_1</code> &rarr; <code class="font-mono">v1_16_4</code>).</p>
             </div>
-            <span class="text-[11px] font-mono text-indigo-400 px-2.5 py-0.5 rounded-full accent-pill border">Latest: v1_16_3</span>
+            <span class="text-[11px] font-mono text-indigo-400 px-2.5 py-0.5 rounded-full accent-pill border">Latest: v1_16_4</span>
           </div>
 
           <!-- Simple, clean text-based changelog list (Newest to Oldest & Plain-Text Block) -->
           <div class="space-y-4 font-mono text-xs leading-relaxed text-theme-secondary">
+            <div class="p-3.5 rounded-xl surface-alt border border-theme-subtle">
+              <div class="flex items-center justify-between gap-3">
+                <span class="font-bold text-indigo-400">v1_16_4</span>
+                <span class="text-[11px] font-mono text-theme-faint">11/20/2026</span>
+              </div>
+              <p class="mt-1 text-theme-primary font-sans text-xs leading-relaxed">
+                Fixed duplicate classes (such as CS 61A and DATA C8) appearing on open or after JSON import: saved data is now the only source once it exists, so older storage keys no longer re-add classes, and classes with the same ID or the same code, term and title are merged on load and import. Default examples are now CS 61A and DATA C8 only (MATH 54 removed), and the Restore Demo Courses message lists the examples it checks.
+              </p>
+            </div>
+
             <div class="p-3.5 rounded-xl surface-alt border border-theme-subtle">
               <div class="flex items-center justify-between gap-3">
                 <span class="font-bold text-indigo-400">v1_16_3</span>
@@ -1219,7 +1229,7 @@
           <!-- Raw Plain-Text Log Block for quick copy/reference -->
           <details id="rawChangelogDetails" class="pt-4 border-t border-theme">
             <summary class="raw-changelog-summary flex items-center justify-between gap-2 cursor-pointer select-none">
-              <span class="text-[11px] font-bold uppercase tracking-wider text-theme-faint font-mono">Raw Plain-Text Changelog (v1_1 &rarr; v1_16_3)</span>
+              <span class="text-[11px] font-bold uppercase tracking-wider text-theme-faint font-mono">Raw Plain-Text Changelog (v1_1 &rarr; v1_16_4)</span>
               <i class="fa-solid fa-chevron-down raw-changelog-chevron text-[11px] text-theme-faint transition-transform"></i>
             </summary>
             <pre id="rawChangelogPre" class="mt-2 p-4 rounded-xl surface-alt border border-theme text-xs font-mono text-theme-secondary whitespace-pre-wrap overflow-x-auto select-all leading-relaxed">v1_1 (11/16/2026) - Initial release of GradeCraft Class Grade Calculator &amp; Forecaster: multi-class tabs, assignment group weights, grade bucket distribution, grouped &amp; sorted assignment entries, percentage &amp; letter grade calculation, What-If score overrides, Target Grade Forecaster, and localStorage persistence with JSON import/export.
@@ -1239,7 +1249,8 @@ v1_15_3 (11/17/2026) - Removed redundant "+" and "←" symbols from the New Term
 v1_16 (11/17/2026) - Added per-class Units (0–20 in 0.5-unit steps, defaulting to 4 for new, duplicated, imported, and existing classes) and updated Term and Overall GPAs to be unit-weighted (excluding ungraded and 0-unit classes). Gradebook term tabs and All Terms now show total units alongside weighted GPA, and the GPA Planner includes a read-only Units column, weighted summaries, and a method note.
 v1_16_1 (11/17/2026) - Added a per-class P/NP checkbox next to Units that excludes P/NP courses from Term and Overall GPA while still counting their units toward total units, updated the GPA Planner with P/NP tags, P/NP grade dropdowns, and excluded P/NP counts in summary footers, pinned the + New Term button to the far right over a single horizontally scrolling term chip row with right-edge clearance padding, and widened Course Title by reducing Academic Term to half width.
 v1_16_2 (11/18/2026) - Removed hardcoded values from the Profile & Settings inputs (Display Name, Academic Email, Institution, and Major / Program now show placeholders only, and legacy filler values saved by older versions are cleared on load), added a release date to every changelog entry and raw log line, fixed the raw log so every entry renders inside its block, and made the Raw Plain-Text Changelog a collapsible dropdown.
-v1_16_3 (11/18/2026) - Set the release date for v1_1 through v1_12 to 11/16/2026 and switched all changelog dates (cards and raw log) to the mm/dd/yyyy format.</pre>
+v1_16_3 (11/18/2026) - Set the release date for v1_1 through v1_12 to 11/16/2026 and switched all changelog dates (cards and raw log) to the mm/dd/yyyy format.
+v1_16_4 (11/20/2026) - Fixed duplicate classes (such as CS 61A and DATA C8) appearing on open or after JSON import: saved data is now the only source once it exists, so older storage keys no longer re-add classes, and classes with the same ID or the same code, term and title are merged on load and import. Default examples are now CS 61A and DATA C8 only (MATH 54 removed), and the Restore Demo Courses message lists the examples it checks.</pre>
           </details>
         </section>
       </div>
@@ -1406,29 +1417,6 @@ v1_16_3 (11/18/2026) - Set the release date for v1_1 through v1_12 to 11/16/2026
               { id: 'asg_c8_4', name: 'Midterm Exam', groupId: 'grp_c8_mt', earned: 44, available: 50, whatIfEarned: null },
               { id: 'asg_c8_5', name: 'Final Exam', groupId: 'grp_c8_fin', earned: null, available: 100, whatIfEarned: 90 }
             ]
-          },
-          {
-            id: 'class_math54',
-            code: 'MATH 54',
-            name: 'Linear Algebra & Differential Equations',
-            term: 'Spring 2026',
-            units: 4,
-            targetLetter: 'A',
-            groups: [
-              { id: 'grp_m54_hw',  name: 'Homework', weight: 15 },
-              { id: 'grp_m54_qz',  name: 'Quizzes', weight: 15 },
-              { id: 'grp_m54_mt1', name: 'Midterm 1', weight: 20 },
-              { id: 'grp_m54_mt2', name: 'Midterm 2', weight: 20 },
-              { id: 'grp_m54_fin', name: 'Final Exam', weight: 30 }
-            ],
-            buckets: cloneGradeScale(scale),
-            assignments: [
-              { id: 'asg_m54_1', name: 'Homework Set 1-5', groupId: 'grp_m54_hw', earned: 50, available: 50, whatIfEarned: null },
-              { id: 'asg_m54_2', name: 'Quizzes 1-4', groupId: 'grp_m54_qz', earned: 38, available: 40, whatIfEarned: null },
-              { id: 'asg_m54_3', name: 'Midterm 1', groupId: 'grp_m54_mt1', earned: 46, available: 50, whatIfEarned: null },
-              { id: 'asg_m54_4', name: 'Midterm 2', groupId: 'grp_m54_mt2', earned: 44, available: 50, whatIfEarned: null },
-              { id: 'asg_m54_5', name: 'Final Exam', groupId: 'grp_m54_fin', earned: 91, available: 100, whatIfEarned: null }
-            ]
           }
         ];
       }
@@ -1526,6 +1514,30 @@ v1_16_3 (11/18/2026) - Set the release date for v1_1 through v1_12 to 11/16/2026
         return str.trim() === legacyFiller ? '' : str;
       }
 
+      // Two classes are duplicates when they share an ID, or the same code, term and title
+      // (case and extra spaces ignored). Keeps the first occurrence.
+      function classDedupeKeys(c) {
+        const norm = v => String(v ?? '').trim().replace(/\s+/g, ' ').toUpperCase();
+        return {
+          id: `ID::${norm(c.id)}`,
+          content: `CONTENT::${norm(c.code)}::${norm(normalizeTermName(c.term))}::${norm(c.name)}`
+        };
+      }
+
+      function dedupeClasses(classes) {
+        const seenIds = new Set();
+        const seenContent = new Set();
+        const out = [];
+        classes.forEach(c => {
+          const keys = classDedupeKeys(c);
+          if (seenIds.has(keys.id) || seenContent.has(keys.content)) return;
+          seenIds.add(keys.id);
+          seenContent.add(keys.content);
+          out.push(c);
+        });
+        return out;
+      }
+
       function sanitizeState(rawState) {
         const fallback = createDefaultState();
         if (!rawState || typeof rawState !== 'object') return fallback;
@@ -1552,8 +1564,12 @@ v1_16_3 (11/18/2026) - Set the release date for v1_1 through v1_12 to 11/16/2026
         };
 
         if (Array.isArray(rawState.classes) && rawState.classes.length > 0) {
-          clean.classes = rawState.classes.map((c, idx) => sanitizeClassObject(c, idx, defaultDefs));
+          clean.classes = dedupeClasses(rawState.classes.map((c, idx) => sanitizeClassObject(c, idx, defaultDefs)));
         } else {
+          clean.classes = createExampleCourses(defaultDefs);
+        }
+
+        if (clean.classes.length === 0) {
           clean.classes = createExampleCourses(defaultDefs);
         }
 
@@ -1572,31 +1588,29 @@ v1_16_3 (11/18/2026) - Set the release date for v1_1 through v1_12 to 11/16/2026
 
       function loadState() {
         try {
-          // Inspect all current and legacy keys and merge any unique user classes so data is never lost
+          // Once the current key holds a saved state it is the only source of truth. Legacy keys are
+          // read only for a first-time migration, so classes deleted or imported later don't reappear.
+          const parseSafe = (key) => {
+            try {
+              const parsed = JSON.parse(localStorage.getItem(key) || 'null');
+              return parsed && typeof parsed === 'object' ? parsed : null;
+            } catch {
+              return null;
+            }
+          };
+          const currentParsed = parseSafe(STORAGE_KEY);
+          const keysToRead = currentParsed ? [STORAGE_KEY] : ALL_STORAGE_KEYS;
+
           let baseParsed = null;
           const discoveredClasses = [];
-          const seenClassKeys = new Set();
-
-          for (const key of ALL_STORAGE_KEYS) {
-            const raw = localStorage.getItem(key);
-            if (!raw) continue;
-            try {
-              const parsed = JSON.parse(raw);
-              if (parsed && typeof parsed === 'object') {
-                if (!baseParsed) baseParsed = parsed;
-                if (Array.isArray(parsed.classes)) {
-                  parsed.classes.forEach((c, idx) => {
-                    const cleanCls = sanitizeClassObject(c, idx, UC_BERKELEY_GRADE_DEFINITIONS);
-                    const sig = `${cleanCls.id}::${cleanCls.code.toUpperCase()}`;
-                    if (!seenClassKeys.has(sig)) {
-                      seenClassKeys.add(sig);
-                      discoveredClasses.push(cleanCls);
-                    }
-                  });
-                }
-              }
-            } catch {
-              // Ignore malformed key
+          for (const key of keysToRead) {
+            const parsed = key === STORAGE_KEY ? currentParsed : parseSafe(key);
+            if (!parsed) continue;
+            if (!baseParsed) baseParsed = parsed;
+            if (Array.isArray(parsed.classes)) {
+              parsed.classes.forEach((c, idx) => {
+                discoveredClasses.push(sanitizeClassObject(c, idx, UC_BERKELEY_GRADE_DEFINITIONS));
+              });
             }
           }
 
@@ -3137,7 +3151,8 @@ v1_16_3 (11/18/2026) - Set the release date for v1_1 through v1_12 to 11/16/2026
           renderApp(true);
           showToast(`Restored ${addedCount} default example ${addedCount === 1 ? 'course' : 'courses'}`, 'success');
         } else {
-          showToast('All 3 default example courses (CS 61A, DATA C8, MATH 54) are already present.', 'info');
+          const exampleCodes = defaults.map(d => d.code).join(', ');
+          showToast(`All ${defaults.length} default example courses (${exampleCodes}) are already present.`, 'info');
         }
       }
 
