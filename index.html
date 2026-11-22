@@ -273,6 +273,12 @@
       background: var(--scroll-thumb-hover);
     }
 
+    .chart-label {
+      fill: var(--text-faint);
+      font-size: 10px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
     .row-highlight-anim {
       animation: pulseHighlight 1.15s ease-out;
     }
@@ -711,7 +717,21 @@
         </div>
       </section>
 
-      <!-- 5. Upcoming (next 14 days + overdue), ranked by weight at stake -->
+      <!-- 5. Charts & Trends (class-scoped) -->
+      <section class="surface-card rounded-2xl border overflow-hidden">
+        <div class="px-5 py-4 border-b border-theme surface-alt">
+          <h2 class="text-base font-bold text-theme-primary flex items-center gap-2">
+            <i class="fa-solid fa-chart-area text-indigo-400"></i>
+            <span>Charts &amp; Trends</span>
+          </h2>
+          <p class="text-xs text-theme-muted mt-0.5">
+            Where points went in this class, and how the weighted grade moved as dated scores arrived.
+          </p>
+        </div>
+        <div id="classChartsBody" class="p-4 sm:p-5 grid grid-cols-1 xl:grid-cols-2 gap-5"></div>
+      </section>
+
+      <!-- 6. Upcoming (next 14 days + overdue), ranked by weight at stake -->
       <section class="surface-card rounded-2xl border overflow-hidden">
         <div class="px-5 py-4 border-b border-theme surface-alt flex flex-wrap items-center justify-between gap-3">
           <div>
@@ -735,7 +755,7 @@
         <div id="upcomingPanelBody" class="p-4 sm:p-5"></div>
       </section>
 
-      <!-- 6. Assignments Gradebook -->
+      <!-- 7. Assignments Gradebook -->
       <section class="surface-card rounded-2xl border overflow-hidden">
         <div
           class="px-5 py-4 border-b border-theme surface-alt flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -1070,6 +1090,8 @@
 
         <section id="gpaPriorContainer" class="space-y-4"></section>
 
+        <section id="gpaChartsContainer" class="space-y-4"></section>
+
         <div id="gpaTermsContainer" class="space-y-6"></div>
 
         <section id="gpaOverallContainer" class="space-y-4"></section>
@@ -1101,14 +1123,24 @@
             <div>
               <h1 class="text-lg font-extrabold tracking-tight text-theme-primary font-mono">GradeCraft — Changelog</h1>
               <p class="text-xs text-theme-muted mt-1">Chronological record of releases and commits (<code
-                  class="font-mono">v1_1</code> &rarr; <code class="font-mono">v1_20</code>).</p>
+                  class="font-mono">v1_1</code> &rarr; <code class="font-mono">v1_21</code>).</p>
             </div>
             <span class="text-[11px] font-mono text-indigo-400 px-2.5 py-0.5 rounded-full accent-pill border">Latest:
-              v1_20</span>
+              v1_21</span>
           </div>
 
           <!-- Simple, clean text-based changelog list (Newest to Oldest & Plain-Text Block) -->
           <div class="space-y-4 font-mono text-xs leading-relaxed text-theme-secondary">
+            <div class="p-3.5 rounded-xl surface-alt border border-theme-subtle">
+              <div class="flex items-center justify-between gap-3">
+                <span class="font-bold text-indigo-400">v1_21</span>
+                <span class="text-[11px] font-mono text-theme-faint">11/22/2026</span>
+              </div>
+              <p class="mt-1 text-theme-primary font-sans text-xs leading-relaxed">
+                Added Charts &amp; Trends: per-class stacked bars for points earned / lost / still to come, a grade-over-time line from dated scores, and a Term GPA trend chart on the GPA Planner. Each chart includes a text summary and data-table fallback, with SVG colors drawn from theme CSS variables.
+              </p>
+            </div>
+
             <div class="p-3.5 rounded-xl surface-alt border border-theme-subtle">
               <div class="flex items-center justify-between gap-3">
                 <span class="font-bold text-indigo-400">v1_20</span>
@@ -1390,7 +1422,7 @@
           <details id="rawChangelogDetails" class="pt-4 border-t border-theme">
             <summary class="raw-changelog-summary flex items-center justify-between gap-2 cursor-pointer select-none">
               <span class="text-[11px] font-bold uppercase tracking-wider text-theme-faint font-mono">Raw Plain-Text
-                Changelog (v1_1 &rarr; v1_20)</span>
+                Changelog (v1_1 &rarr; v1_21)</span>
               <i
                 class="fa-solid fa-chevron-down raw-changelog-chevron text-[11px] text-theme-faint transition-transform"></i>
             </summary>
@@ -1417,7 +1449,8 @@ v1_16_4 (11/20/2026) - Fixed duplicate classes (such as CS 61A and DATA C8) appe
 v1_17 (11/21/2026) - Implemented Quality Foundation: extracted calculation and storage logic into standalone modules (src/calc.js, src/storage.js, src/constants.js), added 74 automated Vitest unit tests covering GPA math, unit weighting, and migration, added Playwright E2E and axe accessibility tests, configured GitHub Actions CI workflow, and added accessibility improvements (polite toast announcements, keyboard group reordering, and prefers-reduced-motion support).
 v1_18 (11/21/2026) - Added grading policy rules per assignment group (drop lowest N, best N of M, late penalty, score replacement, extra credit) via computeGroupResult, Policies menu UI, active-rule badges, and Target Forecaster approximate notes; legacy saves migrate empty policies on load.
 v1_19 (11/21/2026) - Extended the GPA Planner with Prior Credit, Cumulative GPA, and a Goal Calculator (needed average on future units, unreachable/already-met handling, formula note); prior/goal persist in the planner record only.
-v1_20 (11/22/2026) - Added assignment due dates, Upcoming panel (14-day + overdue, ranked by weight at stake), unified sort by due date, and .ics calendar export with stable UIDs.</pre>
+v1_20 (11/22/2026) - Added assignment due dates, Upcoming panel (14-day + overdue, ranked by weight at stake), unified sort by due date, and .ics calendar export with stable UIDs.
+v1_21 (11/22/2026) - Added Charts & Trends: group points breakdown, grade-over-time line, and Term GPA trend with text summaries and table fallbacks.</pre>
           </details>
         </section>
       </div>
@@ -2295,6 +2328,128 @@ v1_20 (11/22/2026) - Added assignment due dates, Upcoming panel (14-day + overdu
         return lines.map(foldIcsLine).join('\r\n') + '\r\n';
       }
 
+      // ─── Charts and trends (data builders) ───────────────────────────────
+
+      /**
+       * Per-group points: earned, lost (on graded work), and still to come.
+       * Extra credit adds to earned only. Does not apply drop/best-of (points view).
+       */
+      function buildGroupPointsBreakdown(cls) {
+        return (cls?.groups || []).map(g => {
+          const asgs = (cls.assignments || []).filter(a => a.groupId === g.id);
+          let earned = 0;
+          let lost = 0;
+          let remaining = 0;
+          let gradedAvailable = 0;
+
+          asgs.forEach(a => {
+            const avail = Math.max(0, Number(a.available) || 0);
+            if (a.extraCredit === true) {
+              if (isGradedValue(a.earned)) earned += Math.max(0, Number(a.earned));
+              return;
+            }
+            if (avail <= 0) return;
+            if (isGradedValue(a.earned)) {
+              const e = Math.max(0, Number(a.earned));
+              earned += e;
+              gradedAvailable += avail;
+              lost += Math.max(0, avail - e);
+            } else {
+              remaining += avail;
+            }
+          });
+
+          const total = gradedAvailable + remaining;
+          return {
+            id: g.id,
+            name: g.name || 'Group',
+            weight: Math.max(0, Number(g.weight) || 0),
+            earned,
+            lost,
+            remaining,
+            gradedAvailable,
+            total
+          };
+        });
+      }
+
+      function summarizeGroupPointsBreakdown(rows) {
+        const list = Array.isArray(rows) ? rows : [];
+        const earned = list.reduce((s, r) => s + (Number(r.earned) || 0), 0);
+        const lost = list.reduce((s, r) => s + (Number(r.lost) || 0), 0);
+        const remaining = list.reduce((s, r) => s + (Number(r.remaining) || 0), 0);
+        return { earned, lost, remaining, total: earned + lost + remaining };
+      }
+
+      /**
+       * Term GPA points for the planner chart.
+       * @param {Array} classesList
+       * @param {Array} gradeDefinitions
+       * @param {Object} plannerGrades
+       * @param {string[]} [termsOrdered]
+       */
+      function buildTermGpaSeries(classesList, gradeDefinitions, plannerGrades, termsOrdered) {
+        const classes = classesList || [];
+        const terms = Array.isArray(termsOrdered) && termsOrdered.length > 0
+          ? termsOrdered
+          : [...new Set(classes.map(c => normalizeTermName(c.term)))];
+
+        return terms.map(term => {
+          const termClasses = classes.filter(c => normalizeTermName(c.term) === term);
+          const summary = computePlannerSummary(termClasses, gradeDefinitions, plannerGrades);
+          return {
+            term,
+            avg: summary.avg,
+            gradedUnits: summary.gradedUnits,
+            graded: summary.graded,
+            total: summary.total,
+            pnpCount: summary.pnpCount
+          };
+        });
+      }
+
+      /**
+       * Running weighted class % after each scored assignment that has a due date.
+       * Chronological by due; at each step only that assignment and earlier dated scores count.
+       */
+      function buildGradeOverTimeSeries(cls) {
+        const assignments = cls?.assignments || [];
+        const datedScored = assignments
+          .filter(a => isGradedValue(a.earned) && normalizeDueDate(a.due))
+          .slice()
+          .sort((a, b) => {
+            const da = normalizeDueDate(a.due);
+            const db = normalizeDueDate(b.due);
+            if (da !== db) return da < db ? -1 : 1;
+            return String(a.id).localeCompare(String(b.id));
+          });
+
+        const points = [];
+        datedScored.forEach((current, idx) => {
+          const included = new Set(datedScored.slice(0, idx + 1).map(a => a.id));
+          const snapshot = {
+            ...cls,
+            groups: (cls.groups || []).map(g => ({ ...g })),
+            buckets: cls.buckets,
+            assignments: assignments.map(a => {
+              if (included.has(a.id)) return { ...a, whatIfEarned: null };
+              return { ...a, earned: null, whatIfEarned: null };
+            })
+          };
+          const metrics = computeClassMetrics(snapshot);
+          points.push({
+            assignmentId: current.id,
+            name: current.name || 'Assignment',
+            due: normalizeDueDate(current.due),
+            pct: metrics.actualPct,
+            letter: metrics.actualBucket?.current?.letter || null
+          });
+        });
+
+        return points;
+      }
+
+
       function termSortValue(termName) {
         const text = String(termName || '').toLowerCase();
         const yearMatch = text.match(/\d{4}/);
@@ -2314,14 +2469,18 @@ v1_20 (11/22/2026) - Added assignment due dates, Upcoming panel (14-day + overdu
           .map(x => x.t);
       }
 
-      function getPlannerGradeDef(classId) {
-        const letter = gpaPlan.grades[classId];
+      function getPlannerGradeDef(classId, plannerGrades, gradeDefinitions) {
+        const grades = plannerGrades || gpaPlan.grades;
+        const letter = grades[classId];
         if (!letter) return null;
-        return (state.defaultGradeDefinitions || []).find(d => d.letter === letter) || null;
+        const defs = gradeDefinitions || state.defaultGradeDefinitions || [];
+        return defs.find(d => d.letter === letter) || null;
       }
 
       // UC Berkeley method: sum(grade points x units) / sum(units of graded classes).
-      function computePlannerSummary(classesList) {
+      function computePlannerSummary(classesList, gradeDefinitions, plannerGrades) {
+        const grades = plannerGrades || gpaPlan.grades;
+        const defs = gradeDefinitions || state.defaultGradeDefinitions;
         let gradePoints = 0;
         let graded = 0;
         let gradedUnits = 0;
@@ -2335,7 +2494,7 @@ v1_20 (11/22/2026) - Added assignment due dates, Upcoming panel (14-day + overdu
           if (c.pnp) { pnpCount++; return; }
           gradable++;
           gpaUnits += units;
-          const def = getPlannerGradeDef(c.id);
+          const def = getPlannerGradeDef(c.id, grades, defs);
           if (def && def.gpa !== null && def.gpa !== undefined) {
             graded++;
             if (units > 0) {
@@ -3122,6 +3281,7 @@ v1_20 (11/22/2026) - Added assignment due dates, Upcoming panel (14-day + overdu
         if (!termsEl || !overallEl) return;
 
         gpaPlan = sanitizeGpaPlan(gpaPlan);
+        renderGpaCharts();
         const scale = getSortedBuckets(state.defaultGradeDefinitions);
         const fmtGpa = (v) => (v === null || v === undefined ? '--' : formatNumber(v, 2, 2));
         const prior = normalizePriorCredit(gpaPlan.prior);
@@ -3664,6 +3824,225 @@ v1_20 (11/22/2026) - Added assignment due dates, Upcoming panel (14-day + overdu
         });
       }
 
+      function chartEscape(text) {
+        return escapeHtml(String(text ?? ''));
+      }
+
+      function renderStackedGroupBarsSvg(rows) {
+        const width = 560;
+        const rowH = 28;
+        const labelW = 120;
+        const barW = width - labelW - 16;
+        const height = Math.max(80, rows.length * rowH + 8);
+        const bars = rows.map((r, i) => {
+          const y = 8 + i * rowH;
+          const denom = Math.max(r.total, 0.0001);
+          const eW = (r.earned / denom) * barW;
+          const lW = (r.lost / denom) * barW;
+          const remW = (r.remaining / denom) * barW;
+          return `
+            <text x="0" y="${y + 14}" class="chart-label">${chartEscape(r.name)}</text>
+            <g transform="translate(${labelW}, ${y})">
+              <rect width="${barW}" height="16" rx="4" fill="var(--bg-pill)"></rect>
+              <rect width="${Math.max(0, eW)}" height="16" rx="3" fill="#34d399"></rect>
+              <rect x="${Math.max(0, eW)}" width="${Math.max(0, lW)}" height="16" fill="#fb7185"></rect>
+              <rect x="${Math.max(0, eW + lW)}" width="${Math.max(0, remW)}" height="16" rx="3" fill="var(--text-faint)" opacity="0.45"></rect>
+            </g>
+          `;
+        }).join('');
+        return `<svg viewBox="0 0 ${width} ${height}" class="w-full h-auto" role="img" aria-label="Points earned, lost, and remaining by assignment group">${bars}</svg>`;
+      }
+
+      function renderLineChartSvg(points, options = {}) {
+        const values = points.map(p => Number(p.y)).filter(v => Number.isFinite(v));
+        if (values.length === 0) return '';
+        const width = 560;
+        const height = 180;
+        const pad = { t: 16, r: 16, b: 36, l: 40 };
+        const plotW = width - pad.l - pad.r;
+        const plotH = height - pad.t - pad.b;
+        const minY = options.minY != null ? options.minY : Math.min(...values, 0);
+        const maxY = options.maxY != null ? options.maxY : Math.max(...values, 1);
+        const span = Math.max(maxY - minY, 0.0001);
+        const coords = points.map((p, i) => {
+          const x = pad.l + (points.length === 1 ? plotW / 2 : (i / (points.length - 1)) * plotW);
+          const y = pad.t + plotH - ((Number(p.y) - minY) / span) * plotH;
+          return { ...p, x, y };
+        });
+        const path = coords.map((c, i) => `${i === 0 ? 'M' : 'L'}${c.x.toFixed(1)},${c.y.toFixed(1)}`).join(' ');
+        const dots = coords.map(c => `<circle cx="${c.x.toFixed(1)}" cy="${c.y.toFixed(1)}" r="3.5" fill="var(--accent-primary)"></circle>`).join('');
+        const xLabels = coords.map((c, i) => {
+          if (points.length > 8 && i !== 0 && i !== points.length - 1 && i % 2 === 1) return '';
+          return `<text x="${c.x.toFixed(1)}" y="${height - 10}" text-anchor="middle" class="chart-label">${chartEscape(c.label || '')}</text>`;
+        }).join('');
+        const yTicks = [minY, (minY + maxY) / 2, maxY].map(v => {
+          const y = pad.t + plotH - ((v - minY) / span) * plotH;
+          return `<text x="${pad.l - 6}" y="${y + 3}" text-anchor="end" class="chart-label">${formatNumber(v, 0, 1)}</text>
+            <line x1="${pad.l}" y1="${y}" x2="${width - pad.r}" y2="${y}" stroke="var(--border-subtle)" stroke-width="1"></line>`;
+        }).join('');
+        return `<svg viewBox="0 0 ${width} ${height}" class="w-full h-auto" role="img" aria-label="${chartEscape(options.ariaLabel || 'Trend chart')}">
+          ${yTicks}
+          <path d="${path}" fill="none" stroke="var(--accent-primary)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path>
+          ${dots}
+          ${xLabels}
+        </svg>`;
+      }
+
+      function renderBarChartSvg(points, options = {}) {
+        const values = points.map(p => Number(p.y)).filter(v => Number.isFinite(v));
+        const width = 560;
+        const height = 180;
+        const pad = { t: 16, r: 16, b: 40, l: 40 };
+        const plotW = width - pad.l - pad.r;
+        const plotH = height - pad.t - pad.b;
+        const maxY = options.maxY != null ? options.maxY : Math.max(...values, 4);
+        const minY = options.minY != null ? options.minY : 0;
+        const span = Math.max(maxY - minY, 0.0001);
+        const gap = 8;
+        const barW = points.length ? Math.max(12, (plotW - gap * (points.length - 1)) / points.length) : 12;
+        const bars = points.map((p, i) => {
+          const val = Number.isFinite(Number(p.y)) ? Number(p.y) : null;
+          const x = pad.l + i * (barW + gap);
+          if (val === null) {
+            return `<text x="${x + barW / 2}" y="${pad.t + plotH / 2}" text-anchor="middle" class="chart-label">--</text>
+              <text x="${x + barW / 2}" y="${height - 12}" text-anchor="middle" class="chart-label">${chartEscape(p.label || '')}</text>`;
+          }
+          const h = ((val - minY) / span) * plotH;
+          const y = pad.t + plotH - h;
+          return `<rect x="${x}" y="${y}" width="${barW}" height="${Math.max(h, 1)}" rx="4" fill="var(--accent-primary)" opacity="0.85"></rect>
+            <text x="${x + barW / 2}" y="${height - 12}" text-anchor="middle" class="chart-label">${chartEscape(p.label || '')}</text>`;
+        }).join('');
+        return `<svg viewBox="0 0 ${width} ${height}" class="w-full h-auto" role="img" aria-label="${chartEscape(options.ariaLabel || 'Bar chart')}">${bars}</svg>`;
+      }
+
+      function renderClassCharts(cls) {
+        const body = document.getElementById('classChartsBody');
+        if (!body || !cls) return;
+
+        const breakdown = buildGroupPointsBreakdown(cls);
+        const totals = summarizeGroupPointsBreakdown(breakdown);
+        const overTime = buildGradeOverTimeSeries(cls);
+
+        const breakdownSummary = totals.total <= 0
+          ? 'No points configured yet.'
+          : `Earned ${formatNumber(totals.earned, 0, 1)}, lost ${formatNumber(totals.lost, 0, 1)}, still to come ${formatNumber(totals.remaining, 0, 1)} across assignment groups.`;
+
+        const overTimeSummary = overTime.length === 0
+          ? 'Add due dates to scored assignments to plot the running weighted grade.'
+          : `After ${overTime.length} dated score${overTime.length === 1 ? '' : 's'}, the running grade is ${overTime[overTime.length - 1].pct === null ? '--' : formatPercent(overTime[overTime.length - 1].pct, 1)}${overTime[overTime.length - 1].letter ? ` (${overTime[overTime.length - 1].letter})` : ''}.`;
+
+        const breakdownTable = `
+          <table class="w-full text-left text-[11px] mt-3 border-collapse">
+            <thead><tr class="text-theme-faint uppercase tracking-wider border-b border-theme-subtle">
+              <th class="py-1.5">Group</th><th class="py-1.5 text-right">Earned</th><th class="py-1.5 text-right">Lost</th><th class="py-1.5 text-right">Remaining</th>
+            </tr></thead>
+            <tbody>
+              ${breakdown.map(r => `
+                <tr class="border-b border-theme-subtle">
+                  <td class="py-1.5 text-theme-secondary">${chartEscape(r.name)}</td>
+                  <td class="py-1.5 text-right font-mono text-emerald-400">${formatNumber(r.earned, 0, 1)}</td>
+                  <td class="py-1.5 text-right font-mono text-rose-400">${formatNumber(r.lost, 0, 1)}</td>
+                  <td class="py-1.5 text-right font-mono text-theme-muted">${formatNumber(r.remaining, 0, 1)}</td>
+                </tr>`).join('')}
+            </tbody>
+          </table>`;
+
+        const overTimeTable = overTime.length === 0 ? '' : `
+          <table class="w-full text-left text-[11px] mt-3 border-collapse">
+            <thead><tr class="text-theme-faint uppercase tracking-wider border-b border-theme-subtle">
+              <th class="py-1.5">Due</th><th class="py-1.5">Assignment</th><th class="py-1.5 text-right">Running %</th>
+            </tr></thead>
+            <tbody>
+              ${overTime.map(p => `
+                <tr class="border-b border-theme-subtle">
+                  <td class="py-1.5 font-mono text-theme-muted">${chartEscape(formatDueDateDisplay(p.due, state.locale) || p.due)}</td>
+                  <td class="py-1.5 text-theme-secondary">${chartEscape(p.name)}</td>
+                  <td class="py-1.5 text-right font-mono text-theme-primary">${p.pct === null ? '--' : formatPercent(p.pct, 1)}</td>
+                </tr>`).join('')}
+            </tbody>
+          </table>`;
+
+        const linePoints = overTime
+          .filter(p => p.pct !== null)
+          .map(p => ({
+            y: p.pct,
+            label: formatDueDateDisplay(p.due, state.locale).replace(/,.*/, '') || p.due.slice(5)
+          }));
+
+        body.innerHTML = `
+          <div class="rounded-xl border border-theme surface-alt p-4">
+            <h3 class="text-sm font-bold text-theme-primary">Where points went</h3>
+            <p class="text-xs text-theme-muted mt-1">${chartEscape(breakdownSummary)}</p>
+            <div class="mt-3 flex flex-wrap gap-3 text-[11px] text-theme-muted">
+              <span class="inline-flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm bg-emerald-400"></span>Earned</span>
+              <span class="inline-flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm bg-rose-400"></span>Lost</span>
+              <span class="inline-flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm bg-zinc-500"></span>Still to come</span>
+            </div>
+            <div class="mt-3">${totals.total > 0 ? renderStackedGroupBarsSvg(breakdown) : '<p class="text-xs text-theme-faint py-6 text-center">No group points to chart yet.</p>'}</div>
+            ${breakdownTable}
+          </div>
+          <div class="rounded-xl border border-theme surface-alt p-4">
+            <h3 class="text-sm font-bold text-theme-primary">Grade over time</h3>
+            <p class="text-xs text-theme-muted mt-1">${chartEscape(overTimeSummary)}</p>
+            <div class="mt-3">${linePoints.length ? renderLineChartSvg(linePoints, { minY: 0, maxY: 100, ariaLabel: 'Running weighted grade over time' }) : '<p class="text-xs text-theme-faint py-6 text-center">No dated scores yet.</p>'}</div>
+            ${overTimeTable}
+          </div>
+        `;
+      }
+
+      function renderGpaCharts() {
+        const el = document.getElementById('gpaChartsContainer');
+        if (!el) return;
+        const series = buildTermGpaSeries(
+          state.classes,
+          state.defaultGradeDefinitions,
+          gpaPlan.grades,
+          getTermsChronological()
+        );
+        const withGpa = series.filter(s => s.avg !== null);
+        const summary = withGpa.length === 0
+          ? 'Pick grades on term classes to see your GPA trend.'
+          : withGpa.length === 1
+            ? `${withGpa[0].term} GPA is ${formatNumber(withGpa[0].avg, 2, 2)}.`
+            : `From ${withGpa[0].term} (${formatNumber(withGpa[0].avg, 2, 2)}) to ${withGpa[withGpa.length - 1].term} (${formatNumber(withGpa[withGpa.length - 1].avg, 2, 2)}).`;
+
+        const table = `
+          <table class="w-full text-left text-[11px] mt-3 border-collapse">
+            <thead><tr class="text-theme-faint uppercase tracking-wider border-b border-theme-subtle">
+              <th class="py-1.5">Term</th><th class="py-1.5 text-right">GPA</th><th class="py-1.5 text-right">Graded units</th>
+            </tr></thead>
+            <tbody>
+              ${series.map(s => `
+                <tr class="border-b border-theme-subtle">
+                  <td class="py-1.5 text-theme-secondary">${chartEscape(s.term)}</td>
+                  <td class="py-1.5 text-right font-mono text-theme-primary">${s.avg === null ? '--' : formatNumber(s.avg, 2, 2)}</td>
+                  <td class="py-1.5 text-right font-mono text-theme-muted">${formatNumber(s.gradedUnits, 0, 1)}</td>
+                </tr>`).join('')}
+            </tbody>
+          </table>`;
+
+        const barPoints = series.map(s => ({
+          y: s.avg,
+          label: String(s.term).replace(/(\d{4})/, (_, y) => y.slice(2))
+        }));
+
+        el.innerHTML = `
+          <section class="surface-card rounded-2xl border overflow-hidden">
+            <div class="px-5 py-4 border-b border-theme surface-alt">
+              <h3 class="text-sm font-bold text-theme-primary flex items-center gap-2">
+                <i class="fa-solid fa-chart-column text-indigo-400"></i>
+                <span>Term GPA Trend</span>
+              </h3>
+              <p class="text-xs text-theme-muted mt-1">${chartEscape(summary)}</p>
+            </div>
+            <div class="p-5">
+              ${withGpa.length ? renderBarChartSvg(barPoints, { minY: 0, maxY: 4, ariaLabel: 'Term GPA trend' }) : '<p class="text-xs text-theme-faint text-center py-8">No graded terms yet.</p>'}
+              ${table}
+            </div>
+          </section>
+        `;
+      }
+
       function renderUpcomingPanel() {
         const body = document.getElementById('upcomingPanelBody');
         const badge = document.getElementById('badgeUpcomingCount');
@@ -4192,6 +4571,7 @@ v1_20 (11/22/2026) - Added assignment due dates, Upcoming panel (14-day + overdu
         }
 
         renderUpcomingPanel();
+        renderClassCharts(cls);
 
         const assignmentTableHead = `
           <th class="py-2.5 pl-3">Assignment Name</th>
@@ -5205,6 +5585,7 @@ v1_20 (11/22/2026) - Added assignment due dates, Upcoming panel (14-day + overdu
               assign.due = normalizeDueDate(target.value);
               saveState();
               renderUpcomingPanel();
+              renderClassCharts(cls);
               return;
             }
 
@@ -5232,7 +5613,10 @@ v1_20 (11/22/2026) - Added assignment due dates, Upcoming panel (14-day + overdu
 
             saveState();
             updateCalculatedMetricsInDOM();
-            if (aField === 'earned' || aField === 'possible') renderUpcomingPanel();
+            if (aField === 'earned' || aField === 'possible') {
+              renderUpcomingPanel();
+              renderClassCharts(cls);
+            }
             return;
           }
 
@@ -5363,6 +5747,7 @@ v1_20 (11/22/2026) - Added assignment due dates, Upcoming panel (14-day + overdu
             target.value = assign.due;
             saveState();
             renderUpcomingPanel();
+            renderClassCharts(cls);
             if (state.gradebookViewMode === 'unified' && state.gradebookSortMode === 'due') {
               renderApp();
             }

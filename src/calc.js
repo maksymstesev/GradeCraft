@@ -842,3 +842,124 @@ export function buildIcsCalendar(events, options = {}) {
   lines.push('END:VCALENDAR');
   return lines.map(foldIcsLine).join('\r\n') + '\r\n';
 }
+
+// ─── Charts and trends (data builders) ───────────────────────────────
+
+/**
+ * Per-group points: earned, lost (on graded work), and still to come.
+ * Extra credit adds to earned only. Does not apply drop/best-of (points view).
+ */
+export function buildGroupPointsBreakdown(cls) {
+  return (cls?.groups || []).map(g => {
+    const asgs = (cls.assignments || []).filter(a => a.groupId === g.id);
+    let earned = 0;
+    let lost = 0;
+    let remaining = 0;
+    let gradedAvailable = 0;
+
+    asgs.forEach(a => {
+      const avail = Math.max(0, Number(a.available) || 0);
+      if (a.extraCredit === true) {
+        if (isGradedValue(a.earned)) earned += Math.max(0, Number(a.earned));
+        return;
+      }
+      if (avail <= 0) return;
+      if (isGradedValue(a.earned)) {
+        const e = Math.max(0, Number(a.earned));
+        earned += e;
+        gradedAvailable += avail;
+        lost += Math.max(0, avail - e);
+      } else {
+        remaining += avail;
+      }
+    });
+
+    const total = gradedAvailable + remaining;
+    return {
+      id: g.id,
+      name: g.name || 'Group',
+      weight: Math.max(0, Number(g.weight) || 0),
+      earned,
+      lost,
+      remaining,
+      gradedAvailable,
+      total
+    };
+  });
+}
+
+export function summarizeGroupPointsBreakdown(rows) {
+  const list = Array.isArray(rows) ? rows : [];
+  const earned = list.reduce((s, r) => s + (Number(r.earned) || 0), 0);
+  const lost = list.reduce((s, r) => s + (Number(r.lost) || 0), 0);
+  const remaining = list.reduce((s, r) => s + (Number(r.remaining) || 0), 0);
+  return { earned, lost, remaining, total: earned + lost + remaining };
+}
+
+/**
+ * Term GPA points for the planner chart.
+ * @param {Array} classesList
+ * @param {Array} gradeDefinitions
+ * @param {Object} plannerGrades
+ * @param {string[]} [termsOrdered]
+ */
+export function buildTermGpaSeries(classesList, gradeDefinitions, plannerGrades, termsOrdered) {
+  const classes = classesList || [];
+  const terms = Array.isArray(termsOrdered) && termsOrdered.length > 0
+    ? termsOrdered
+    : [...new Set(classes.map(c => normalizeTermName(c.term)))];
+
+  return terms.map(term => {
+    const termClasses = classes.filter(c => normalizeTermName(c.term) === term);
+    const summary = computePlannerSummary(termClasses, gradeDefinitions, plannerGrades);
+    return {
+      term,
+      avg: summary.avg,
+      gradedUnits: summary.gradedUnits,
+      graded: summary.graded,
+      total: summary.total,
+      pnpCount: summary.pnpCount
+    };
+  });
+}
+
+/**
+ * Running weighted class % after each scored assignment that has a due date.
+ * Chronological by due; at each step only that assignment and earlier dated scores count.
+ */
+export function buildGradeOverTimeSeries(cls) {
+  const assignments = cls?.assignments || [];
+  const datedScored = assignments
+    .filter(a => isGradedValue(a.earned) && normalizeDueDate(a.due))
+    .slice()
+    .sort((a, b) => {
+      const da = normalizeDueDate(a.due);
+      const db = normalizeDueDate(b.due);
+      if (da !== db) return da < db ? -1 : 1;
+      return String(a.id).localeCompare(String(b.id));
+    });
+
+  const points = [];
+  datedScored.forEach((current, idx) => {
+    const included = new Set(datedScored.slice(0, idx + 1).map(a => a.id));
+    const snapshot = {
+      ...cls,
+      groups: (cls.groups || []).map(g => ({ ...g })),
+      buckets: cls.buckets,
+      assignments: assignments.map(a => {
+        if (included.has(a.id)) return { ...a, whatIfEarned: null };
+        return { ...a, earned: null, whatIfEarned: null };
+      })
+    };
+    const metrics = computeClassMetrics(snapshot);
+    points.push({
+      assignmentId: current.id,
+      name: current.name || 'Assignment',
+      due: normalizeDueDate(current.due),
+      pct: metrics.actualPct,
+      letter: metrics.actualBucket?.current?.letter || null
+    });
+  });
+
+  return points;
+}
