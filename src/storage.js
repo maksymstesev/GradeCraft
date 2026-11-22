@@ -139,6 +139,7 @@ export function createDefaultState() {
       major: ''
     },
     defaultGradeDefinitions: cloneGradeScale(defaultScale),
+    activePresetId: 'uc_berkeley',
     classes: stamped,
     classTombstones: [],
     settingsUpdatedAt: new Date().toISOString()
@@ -248,6 +249,9 @@ export function sanitizeState(rawState) {
       major: String(rawState.profile?.major || '')
     },
     defaultGradeDefinitions: defaultDefs,
+    activePresetId: typeof rawState.activePresetId === 'string' && rawState.activePresetId
+      ? rawState.activePresetId
+      : 'uc_berkeley',
     classes: [],
     classTombstones: [],
     settingsUpdatedAt: settingsUpdatedAt || new Date().toISOString()

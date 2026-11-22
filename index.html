@@ -403,6 +403,8 @@
   <script src="./src/lzstring-browser.js"></script>
   <!-- Optional Firebase web config (null until you paste a Spark project config) -->
   <script src="./src/firebase-config.browser.js"></script>
+  <!-- Institution presets (UC undergraduate campuses) -->
+  <script src="./src/presets-browser.js"></script>
 </head>
 
 <body class="min-h-screen flex flex-col selection:bg-indigo-500/30 selection:text-indigo-200">
@@ -1032,38 +1034,67 @@
           </section>
         </div>
 
-        <!-- 3. Custom Grade Definitions Editor (UC Berkeley Registrar Default Scale) -->
+        <!-- 3. Institution presets + Custom Grade Definitions Editor -->
         <section class="surface-card rounded-2xl border overflow-hidden">
-          <div
-            class="px-6 py-4 border-b border-theme surface-alt flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-            <div>
-              <h3 class="text-base font-bold text-theme-primary flex items-center gap-2">
-                <i class="fa-solid fa-award text-indigo-400"></i>
-                <span>Custom Grade Definitions (UC Berkeley Default Scale)</span>
-              </h3>
-              <p class="text-xs text-theme-muted mt-0.5">
-                Default thresholds follow official UC Berkeley Registrar Grade Definitions (<code
-                  class="font-mono">A+</code> through <code class="font-mono">F</code>).
-              </p>
+          <div class="px-6 py-4 border-b border-theme surface-alt space-y-4">
+            <div class="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
+              <div>
+                <h3 class="text-base font-bold text-theme-primary flex items-center gap-2">
+                  <i class="fa-solid fa-award text-indigo-400"></i>
+                  <span>Institution Preset &amp; Grade Definitions</span>
+                </h3>
+                <p class="text-xs text-theme-muted mt-0.5">
+                  Pick a UC campus preset for grade points, P/NP notes, and semester vs quarter units. Edit cutoffs below
+                  for anything the preset does not cover. UC Berkeley stays the GradeCraft default.
+                </p>
+              </div>
+              <div class="flex flex-wrap items-center gap-2 shrink-0">
+                <button id="btnSaveDefaultDefinitions" type="button"
+                  class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white shadow-xs transition cursor-pointer">
+                  <i class="fa-solid fa-floppy-disk"></i>
+                  <span>Save Default Definitions</span>
+                </button>
+                <button id="btnApplyDefaultsToAllClasses" type="button"
+                  class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white shadow-xs transition cursor-pointer">
+                  <i class="fa-solid fa-arrows-rotate"></i>
+                  <span>Apply to All Classes</span>
+                </button>
+                <button id="btnResetUcbDefaults" type="button"
+                  class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold theme-btn-secondary cursor-pointer">
+                  <i class="fa-solid fa-rotate-left text-indigo-400"></i>
+                  <span>Reset to UC Berkeley</span>
+                </button>
+              </div>
             </div>
 
-            <div class="flex flex-wrap items-center gap-2 shrink-0">
-              <button id="btnSaveDefaultDefinitions" type="button"
-                class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white shadow-xs transition cursor-pointer">
-                <i class="fa-solid fa-floppy-disk"></i>
-                <span>Save Default Definitions</span>
-              </button>
-              <button id="btnApplyDefaultsToAllClasses" type="button"
-                class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white shadow-xs transition cursor-pointer">
-                <i class="fa-solid fa-arrows-rotate"></i>
-                <span>Apply to All Classes</span>
-              </button>
-              <button id="btnResetUcbDefaults" type="button"
-                class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold theme-btn-secondary cursor-pointer">
-                <i class="fa-solid fa-rotate-left text-indigo-400"></i>
-                <span>Reset to UC Berkeley Defaults</span>
-              </button>
+            <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_auto] gap-3 items-end">
+              <label class="flex flex-col gap-1.5 text-xs">
+                <span class="font-semibold text-theme-secondary">Institution preset</span>
+                <select id="selectInstitutionPreset"
+                  class="w-full theme-select rounded-xl px-3.5 py-2.5 text-xs font-semibold cursor-pointer"></select>
+              </label>
+              <div class="flex flex-wrap items-center gap-2">
+                <button id="btnApplyInstitutionPreset" type="button"
+                  class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold theme-btn-secondary cursor-pointer"
+                  title="Load this campus scale into your default grade definitions">
+                  <i class="fa-solid fa-download text-indigo-400"></i>
+                  <span>Apply Preset</span>
+                </button>
+                <button id="btnExportPresetJson" type="button"
+                  class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold theme-btn-secondary cursor-pointer">
+                  <i class="fa-solid fa-file-export text-indigo-400"></i>
+                  <span>Export Preset</span>
+                </button>
+                <label for="inputImportPresetJson"
+                  class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold theme-btn-secondary cursor-pointer">
+                  <i class="fa-solid fa-file-import text-indigo-400"></i>
+                  <span>Import Preset</span>
+                  <input id="inputImportPresetJson" type="file" accept=".json,application/json" class="hidden" />
+                </label>
+              </div>
             </div>
+
+            <div id="institutionPresetMeta" class="text-[11px] text-theme-muted leading-relaxed space-y-1"></div>
           </div>
 
           <div class="p-4 sm:p-6 overflow-x-auto">
@@ -1246,9 +1277,9 @@
               </div>
               <div>
                 <h2 class="text-lg font-extrabold text-theme-primary">GPA Planner</h2>
-                <p class="text-xs text-theme-muted">Pick a grade for each class to see your term and overall GPA. Add prior
-                  credit for a cumulative estimate, or use the goal calculator for target planning. GPA is unit-weighted
-                  (UC Berkeley method): total grade points &divide; total graded units; P/NP classes are excluded. Choices
+                <p id="gpaPlannerMethodNote" class="text-xs text-theme-muted">Pick a grade for each class to see your term and overall GPA. Add prior
+                  credit for a cumulative estimate, or use the goal calculator for target planning. GPA is unit-weighted:
+                  total grade points &divide; total graded units; P/NP classes are excluded. Choices
                   are saved separately and never change your Gradebook.</p>
               </div>
             </div>
@@ -1315,14 +1346,24 @@
             <div>
               <h1 class="text-lg font-extrabold tracking-tight text-theme-primary font-mono">GradeCraft — Changelog</h1>
               <p class="text-xs text-theme-muted mt-1">Chronological record of releases and commits (<code
-                  class="font-mono">v1_1</code> &rarr; <code class="font-mono">v1_25</code>).</p>
+                  class="font-mono">v1_1</code> &rarr; <code class="font-mono">v1_26</code>).</p>
             </div>
             <span class="text-[11px] font-mono text-indigo-400 px-2.5 py-0.5 rounded-full accent-pill border">Latest:
-              v1_25</span>
+              v1_26</span>
           </div>
 
           <!-- Simple, clean text-based changelog list (Newest to Oldest & Plain-Text Block) -->
           <div class="space-y-4 font-mono text-xs leading-relaxed text-theme-secondary">
+            <div class="p-3.5 rounded-xl surface-alt border border-theme-subtle">
+              <div class="flex items-center justify-between gap-3">
+                <span class="font-bold text-indigo-400">v1_26</span>
+                <span class="text-[11px] font-mono text-theme-faint">11/22/2026</span>
+              </div>
+              <p class="mt-1 text-theme-primary font-sans text-xs leading-relaxed">
+                Added institution presets for all UC undergraduate campuses (Berkeley default plus Davis, UCLA, San Diego, Santa Barbara, Irvine, Santa Cruz, Riverside, Merced): grade-point scales, semester/quarter unit notes, P/NP guidance, Apply / Export / Import JSON, and GPA Planner display decimals that follow the active preset (UCSD omits D+/D−).
+              </p>
+            </div>
+
             <div class="p-3.5 rounded-xl surface-alt border border-theme-subtle">
               <div class="flex items-center justify-between gap-3">
                 <span class="font-bold text-indigo-400">v1_25</span>
@@ -1654,7 +1695,7 @@
           <details id="rawChangelogDetails" class="pt-4 border-t border-theme">
             <summary class="raw-changelog-summary flex items-center justify-between gap-2 cursor-pointer select-none">
               <span class="text-[11px] font-bold uppercase tracking-wider text-theme-faint font-mono">Raw Plain-Text
-                Changelog (v1_1 &rarr; v1_25)</span>
+                Changelog (v1_1 &rarr; v1_26)</span>
               <i
                 class="fa-solid fa-chevron-down raw-changelog-chevron text-[11px] text-theme-faint transition-transform"></i>
             </summary>
@@ -1686,7 +1727,8 @@ v1_21 (11/22/2026) - Added Charts & Trends: group points breakdown, grade-over-t
 v1_22 (11/22/2026) - Added Share & Export: print/PDF for planner and changelog, assignments CSV export, and read-only lz-string share links (file fallback; never writes localStorage).
 v1_23 (11/22/2026) - Added Import from Syllabus (rule-based, no LLM): paste or PDF (pdf.js on-device), parse name+percent pairs, review table with ~100% check, create groups only on confirm.
 v1_24 (11/22/2026) - Added optional Firebase cloud sync and accounts behind Sync (beta): email link + Google, batched push, realtime pull, first-sign-in merge choices, tombstones, privacy note, delete-my-data; local-only until Firebase config is set.
-v1_25 (11/22/2026) - Added Undo for deleted classes (full snapshot until next navigation) with a high-contrast orange Undo toast.</pre>
+v1_25 (11/22/2026) - Added Undo for deleted classes (full snapshot until next navigation) with a high-contrast orange Undo toast.
+v1_26 (11/22/2026) - Added institution presets for all UC undergraduate campuses (Berkeley + Davis, UCLA, San Diego, Santa Barbara, Irvine, Santa Cruz, Riverside, Merced): grade scales, semester/quarter notes, Apply/Export/Import, UCSD without D+/D−, GPA decimals from active preset.</pre>
           </details>
         </section>
       </div>
@@ -2134,6 +2176,7 @@ v1_25 (11/22/2026) - Added Undo for deleted classes (full snapshot until next na
             major: ''
           },
           defaultGradeDefinitions: cloneGradeScale(defaultScale),
+          activePresetId: 'uc_berkeley',
           classes: stamped,
           classTombstones: [],
           settingsUpdatedAt: new Date().toISOString()
@@ -2160,6 +2203,94 @@ v1_25 (11/22/2026) - Added Undo for deleted classes (full snapshot until next na
 
       const DEFAULT_CLASS_UNITS = 4;
       const UPCOMING_WINDOW_DAYS = 14;
+
+      function presetsApi() {
+        return window.GRADECRAFT_PRESETS || null;
+      }
+
+      function getActiveInstitutionPreset() {
+        const api = presetsApi();
+        if (!api) return null;
+        if (state.activePresetId === 'custom') return null;
+        return api.getPresetById(state.activePresetId) || api.getPresetById(api.DEFAULT_PRESET_ID);
+      }
+
+      function getActiveGpaDecimals() {
+        const api = presetsApi();
+        if (!api) return 2;
+        if (state.activePresetId === 'custom') return 2;
+        return api.getGpaDisplayDecimals(state.activePresetId, 2);
+      }
+
+      function syncActivePresetFromDefinitions() {
+        const api = presetsApi();
+        if (!api) return;
+        state.activePresetId = api.matchPresetId(state.defaultGradeDefinitions);
+      }
+
+      function applyInstitutionPreset(presetId, { applyToClasses = false } = {}) {
+        const api = presetsApi();
+        if (!api) {
+          showToast('Institution presets failed to load.', 'warning');
+          return false;
+        }
+        const preset = api.getPresetById(presetId);
+        if (!preset) {
+          showToast('Unknown institution preset.', 'warning');
+          return false;
+        }
+        state.defaultGradeDefinitions = api.clonePresetGradeDefinitions(presetId);
+        state.activePresetId = presetId;
+        if (applyToClasses) {
+          state.classes.forEach(c => {
+            c.buckets = cloneGradeScale(state.defaultGradeDefinitions);
+            c.updatedAt = new Date().toISOString();
+          });
+        }
+        saveState();
+        return true;
+      }
+
+      function renderInstitutionPresetControls() {
+        const api = presetsApi();
+        const select = document.getElementById('selectInstitutionPreset');
+        const meta = document.getElementById('institutionPresetMeta');
+        if (!select || !api) return;
+
+        const options = api.INSTITUTION_PRESETS.map(p =>
+          `<option value="${escapeHtml(p.id)}">${escapeHtml(p.name)} (${p.unitSystem})</option>`
+        ).join('') + `<option value="custom">Custom (edited scale)</option>`;
+        select.innerHTML = options;
+
+        const matched = api.matchPresetId(state.defaultGradeDefinitions);
+        const currentId = state.activePresetId === 'custom' ? 'custom' : (matched !== 'custom' ? matched : state.activePresetId);
+        if (currentId !== state.activePresetId && currentId !== 'custom') {
+          state.activePresetId = currentId;
+        }
+        select.value = state.activePresetId === 'custom' || matched === 'custom' ? 'custom' : state.activePresetId;
+
+        if (meta) {
+          if (select.value === 'custom') {
+            meta.innerHTML = `<p>Custom scale — grade points and cutoffs no longer match a built-in UC preset. Export JSON to share your rules, or apply a campus preset to reset.</p>`;
+          } else {
+            const preset = api.getPresetById(select.value);
+            if (!preset) {
+              meta.innerHTML = '';
+            } else {
+              const source = preset.sourceUrl
+                ? `<a href="${escapeHtml(preset.sourceUrl)}" target="_blank" rel="noopener noreferrer" class="text-indigo-400 hover:underline">${escapeHtml(preset.sourceLabel || preset.sourceUrl)}</a>`
+                : '—';
+              meta.innerHTML = `
+                <p><span class="font-semibold text-theme-secondary">Units:</span> ${escapeHtml(preset.unitSystem)} — ${escapeHtml(preset.unitNote)}</p>
+                <p><span class="font-semibold text-theme-secondary">P/NP:</span> ${escapeHtml(preset.pnp?.note || 'Excluded from GPA.')}</p>
+                <p><span class="font-semibold text-theme-secondary">Cutoffs:</span> ${escapeHtml(preset.cutoffsNote || '')}</p>
+                <p><span class="font-semibold text-theme-secondary">Source:</span> ${source}
+                  ${preset.lastVerified ? ` · verified ${escapeHtml(preset.lastVerified)}` : ''}</p>
+              `;
+            }
+          }
+        }
+      }
 
       function normalizeUnits(value, fallback = DEFAULT_CLASS_UNITS) {
         if (value === null || value === undefined || value === '') return fallback;
@@ -2298,6 +2429,9 @@ v1_25 (11/22/2026) - Added Undo for deleted classes (full snapshot until next na
             major: String(rawState.profile?.major || '')
           },
           defaultGradeDefinitions: defaultDefs,
+          activePresetId: typeof rawState.activePresetId === 'string' && rawState.activePresetId
+            ? rawState.activePresetId
+            : 'uc_berkeley',
           classes: [],
           classTombstones: [],
           settingsUpdatedAt: settingsUpdatedAt || new Date().toISOString()
@@ -4458,7 +4592,8 @@ v1_25 (11/22/2026) - Added Undo for deleted classes (full snapshot until next na
         const prior = normalizePriorCredit(gpaPlan.prior);
         const cumulative = computeCumulativeGpa(overall, prior);
         const goalResult = computeGoalGpaNeeded(cumulative, gpaPlan.goal);
-        const fmtGpa = (v) => (v === null || v === undefined ? '--' : formatNumber(v, 2, 2));
+        const gpaDec = getActiveGpaDecimals();
+        const fmtGpa = (v) => (v === null || v === undefined ? '--' : formatNumber(v, gpaDec, gpaDec));
 
         const priorGpEl = document.querySelector('#gpaPriorContainer .font-mono.theme-input');
         // Prefer a dedicated hook if present after re-render
@@ -4521,7 +4656,19 @@ v1_25 (11/22/2026) - Added Undo for deleted classes (full snapshot until next na
         gpaPlan = sanitizeGpaPlan(gpaPlan);
         renderGpaCharts();
         const scale = getSortedBuckets(state.defaultGradeDefinitions);
-        const fmtGpa = (v) => (v === null || v === undefined ? '--' : formatNumber(v, 2, 2));
+        const gpaDec = getActiveGpaDecimals();
+        const fmtGpa = (v) => (v === null || v === undefined ? '--' : formatNumber(v, gpaDec, gpaDec));
+        const activePreset = getActiveInstitutionPreset();
+        const methodNote = document.getElementById('gpaPlannerMethodNote');
+        if (methodNote) {
+          const campus = activePreset?.shortName || activePreset?.name || 'your institution';
+          const units = activePreset?.unitSystem === 'quarter' ? 'quarter units' : 'semester units';
+          const unitExtra = activePreset?.unitNote
+            ? ` ${activePreset.unitNote}`
+            : '';
+          methodNote.textContent =
+            `Pick a grade for each class to see your term and overall GPA. Add prior credit for a cumulative estimate, or use the goal calculator for target planning. GPA is unit-weighted (${campus} · ${units}): total grade points ÷ total graded units; P/NP classes are excluded.${unitExtra} Choices are saved separately and never change your Gradebook.`;
+        }
         const prior = normalizePriorCredit(gpaPlan.prior);
         const overall = computePlannerSummary(state.classes);
         const cumulative = computeCumulativeGpa(overall, prior);
@@ -5986,6 +6133,8 @@ v1_25 (11/22/2026) - Added Undo for deleted classes (full snapshot until next na
         if (cascadeLabel) cascadeLabel.textContent = `${state.locale} → ${langRoot} → en-US (fallback)`;
         if (sampleNum) sampleNum.textContent = formatPercent(94.75, 2);
 
+        renderInstitutionPresetControls();
+
         const tbodyDefs = document.getElementById('tbodyDefaultGradeDefinitions');
         if (tbodyDefs) {
           tbodyDefs.innerHTML = defs.map(d => `
@@ -6818,10 +6967,91 @@ v1_25 (11/22/2026) - Added Undo for deleted classes (full snapshot until next na
           }
 
           if (target.closest('#btnResetUcbDefaults')) {
-            state.defaultGradeDefinitions = cloneGradeScale(UC_BERKELEY_GRADE_DEFINITIONS);
-            saveState();
+            applyInstitutionPreset('uc_berkeley');
             renderApp();
             showToast('Reset to UC Berkeley Registrar defaults', 'success');
+            return;
+          }
+
+          if (target.closest('#btnApplyInstitutionPreset')) {
+            const select = document.getElementById('selectInstitutionPreset');
+            const presetId = select?.value;
+            if (!presetId || presetId === 'custom') {
+              showToast('Choose a UC campus preset first.', 'warning');
+              return;
+            }
+            const api = presetsApi();
+            const preset = api?.getPresetById(presetId);
+            openConfirmModal(
+              `Apply ${preset?.name || 'institution'} preset?`,
+              'This replaces your default grade definitions (grade points and cutoffs) with the selected campus scale. Class-specific scales are unchanged until you use Apply to All Classes.',
+              () => {
+                if (applyInstitutionPreset(presetId)) {
+                  renderApp();
+                  showToast(`Applied ${preset?.shortName || presetId} preset`, 'success');
+                }
+              }
+            );
+            return;
+          }
+
+          if (target.closest('#btnExportPresetJson')) {
+            const api = presetsApi();
+            if (!api) {
+              showToast('Institution presets failed to load.', 'warning');
+              return;
+            }
+            let payload;
+            if (state.activePresetId && state.activePresetId !== 'custom') {
+              const preset = api.getPresetById(state.activePresetId);
+              payload = preset
+                ? {
+                  id: preset.id,
+                  name: preset.name,
+                  shortName: preset.shortName,
+                  unitSystem: preset.unitSystem,
+                  unitNote: preset.unitNote,
+                  rounding: preset.rounding,
+                  gradeDefinitions: cloneGradeScale(state.defaultGradeDefinitions),
+                  pnp: preset.pnp,
+                  cutoffsAreOfficial: preset.cutoffsAreOfficial,
+                  cutoffsNote: preset.cutoffsNote,
+                  sourceLabel: preset.sourceLabel,
+                  sourceUrl: preset.sourceUrl,
+                  lastVerified: preset.lastVerified,
+                  exportedAt: new Date().toISOString()
+                }
+                : null;
+            }
+            if (!payload) {
+              payload = {
+                id: 'custom',
+                name: 'Custom GradeCraft Scale',
+                shortName: 'Custom',
+                unitSystem: 'semester',
+                unitNote: 'Exported from GradeCraft custom definitions.',
+                rounding: { gpaDecimals: 2 },
+                gradeDefinitions: cloneGradeScale(state.defaultGradeDefinitions),
+                pnp: {
+                  excludeFromGpa: true,
+                  passMinLetter: 'C',
+                  note: 'Pass/No Pass grades are excluded from GPA.'
+                },
+                cutoffsAreOfficial: false,
+                cutoffsNote: 'Custom cutoffs as edited in Profile.',
+                exportedAt: new Date().toISOString()
+              };
+            }
+            const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `gradecraft-preset-${payload.id || 'custom'}.json`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            URL.revokeObjectURL(url);
+            showToast('Exported institution preset JSON', 'success');
             return;
           }
 
@@ -7108,7 +7338,9 @@ v1_25 (11/22/2026) - Added Undo for deleted classes (full snapshot until next na
             const def = state.defaultGradeDefinitions.find(d => d.id === defGradeId);
             if (!def) return;
             def.min = Math.max(0, Math.min(100, parseFloat(target.value) || 0));
+            syncActivePresetFromDefinitions();
             saveState();
+            renderInstitutionPresetControls();
           }
         });
 
@@ -7119,6 +7351,34 @@ v1_25 (11/22/2026) - Added Undo for deleted classes (full snapshot until next na
 
           if (target.id === 'syncBetaToggle') {
             enableSyncBeta(!!target.checked);
+            return;
+          }
+
+          if (target.id === 'inputImportPresetJson' && target.files && target.files[0]) {
+            const file = target.files[0];
+            const reader = new FileReader();
+            reader.onload = () => {
+              const api = presetsApi();
+              if (!api) {
+                showToast('Institution presets failed to load.', 'warning');
+                return;
+              }
+              const result = api.importPresetFromJson(String(reader.result || ''));
+              if (!result.ok) {
+                showToast(result.errors.join(' '), 'warning');
+                return;
+              }
+              const preset = result.preset;
+              state.defaultGradeDefinitions = cloneGradeScale(preset.gradeDefinitions);
+              const known = api.getPresetById(preset.id);
+              state.activePresetId = known ? known.id : api.matchPresetId(preset.gradeDefinitions);
+              saveState();
+              renderApp();
+              showToast(`Imported ${preset.shortName || preset.name} preset`, 'success');
+            };
+            reader.onerror = () => showToast('Could not read preset file.', 'warning');
+            reader.readAsText(file);
+            target.value = '';
             return;
           }
 

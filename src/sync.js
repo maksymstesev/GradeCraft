@@ -104,7 +104,10 @@ export function settingsToCloudDoc(state, at = null) {
     locale: state?.locale || 'en-US',
     defaultGradeDefinitions: cloneGradeScale(
       state?.defaultGradeDefinitions || UC_BERKELEY_GRADE_DEFINITIONS
-    )
+    ),
+    activePresetId: typeof state?.activePresetId === 'string' && state.activePresetId
+      ? state.activePresetId
+      : 'uc_berkeley'
   };
 }
 
@@ -125,6 +128,9 @@ export function applyCloudSettings(state, settingsDoc) {
   if (settingsDoc.locale) next.locale = String(settingsDoc.locale);
   if (Array.isArray(settingsDoc.defaultGradeDefinitions) && settingsDoc.defaultGradeDefinitions.length) {
     next.defaultGradeDefinitions = cloneGradeScale(settingsDoc.defaultGradeDefinitions);
+  }
+  if (typeof settingsDoc.activePresetId === 'string' && settingsDoc.activePresetId) {
+    next.activePresetId = settingsDoc.activePresetId;
   }
   next.settingsUpdatedAt = normalizeUpdatedAt(settingsDoc.updatedAt, nowIso());
   return next;
