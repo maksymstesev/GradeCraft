@@ -253,7 +253,19 @@
         } catch {
           db = fsMod.getFirestore(app);
         }
-        syncFirebase = { app, auth, db, authMod, fsMod };
+        let analytics = null;
+        // Optional: never block Auth/Firestore if Analytics fails (ad blockers, unsupported env).
+        if (window.GRADECRAFT_FIREBASE?.measurementId) {
+          try {
+            const analyticsMod = await import('https://www.gstatic.com/firebasejs/11.0.2/firebase-analytics.js');
+            if (analyticsMod.isSupported ? await analyticsMod.isSupported() : true) {
+              analytics = analyticsMod.getAnalytics(app);
+            }
+          } catch (err) {
+            console.warn('Firebase Analytics unavailable:', err);
+          }
+        }
+        syncFirebase = { app, auth, db, analytics, authMod, fsMod };
         return syncFirebase;
       }
 

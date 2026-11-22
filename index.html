@@ -1151,8 +1151,10 @@
                 When Sync is on and you sign in, GradeCraft stores your classes (groups, policies, assignments, due dates,
                 What-If scores), GPA Planner choices (including prior credit and goals), profile fields, theme, locale and
                 custom grade scale in your Firebase project under <code class="font-mono">users/{your uid}</code>.
-                Nothing is sold or used for analytics by GradeCraft. The app works fully without an account. Delete my data
-                removes your cloud documents and then the Firebase account (you may need to sign in again first).
+                With Sync enabled, Firebase Analytics may also collect standard usage metrics in your project
+                (<code class="font-mono">measurementId</code>). GradeCraft does not sell that data. The app works fully
+                without an account. Delete my data removes your cloud documents and then the Firebase account
+                (you may need to sign in again first).
               </p>
             </details>
           </div>
@@ -7520,7 +7522,19 @@ v1_24 (11/22/2026) - Added optional Firebase cloud sync and accounts behind Sync
         } catch {
           db = fsMod.getFirestore(app);
         }
-        syncFirebase = { app, auth, db, authMod, fsMod };
+        let analytics = null;
+        // Optional: never block Auth/Firestore if Analytics fails (ad blockers, unsupported env).
+        if (window.GRADECRAFT_FIREBASE?.measurementId) {
+          try {
+            const analyticsMod = await import('https://www.gstatic.com/firebasejs/11.0.2/firebase-analytics.js');
+            if (analyticsMod.isSupported ? await analyticsMod.isSupported() : true) {
+              analytics = analyticsMod.getAnalytics(app);
+            }
+          } catch (err) {
+            console.warn('Firebase Analytics unavailable:', err);
+          }
+        }
+        syncFirebase = { app, auth, db, analytics, authMod, fsMod };
         return syncFirebase;
       }
 
