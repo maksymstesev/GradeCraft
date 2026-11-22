@@ -215,8 +215,8 @@
         <!-- Top-Left Graduation Cap Brand Button -> Navigates to Main Landing Page (...github.io/GradeCraft/) -->
         <a
           id="btnBrandReload"
-          href="https://themaximmus.github.io/GradeCraft/"
-          title="Go to GradeCraft Main Landing Page (themaximmus.github.io/GradeCraft)"
+          href="https://maksymstesev.github.io/GradeCraft/"
+          title="Go to GradeCraft Main Landing Page (maksymstesev.github.io/GradeCraft)"
           aria-label="Go to GradeCraft Main Landing Page"
           class="group flex items-center gap-3 text-left cursor-pointer rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-400 transition-transform duration-150 hover:scale-[1.02] active:scale-95 no-underline"
         >
@@ -1111,7 +1111,7 @@
                 <span class="text-[11px] font-mono text-theme-faint">11/16/2026</span>
               </div>
               <p class="mt-1 text-theme-primary font-sans text-xs leading-relaxed">
-                Set the Gradebook dashboard as the main landing page (<code class="font-mono">/GradeCraft/</code>), separated <code class="font-mono">Profile &amp; Settings</code> (<code class="font-mono">#/profile</code> / <code class="font-mono">profile.html</code>) and <code class="font-mono">Changelog</code> (<code class="font-mono">#/changelog</code> / <code class="font-mono">changelog.html</code>) into dedicated subpages with URL routing, and updated the top-left GradeCraft graduation cap brand button to navigate directly to the main landing page (<code class="font-mono">https://themaximmus.github.io/GradeCraft/</code>).
+                Set the Gradebook dashboard as the main landing page (<code class="font-mono">/GradeCraft/</code>), separated <code class="font-mono">Profile &amp; Settings</code> (<code class="font-mono">#/profile</code> / <code class="font-mono">profile.html</code>) and <code class="font-mono">Changelog</code> (<code class="font-mono">#/changelog</code> / <code class="font-mono">changelog.html</code>) into dedicated subpages with URL routing, and updated the top-left GradeCraft graduation cap brand button to navigate directly to the main landing page (<code class="font-mono">https://maksymstesev.github.io/GradeCraft/</code>).
               </p>
             </div>
 
@@ -1243,7 +1243,7 @@ v1_8 (11/16/2026) - Organized archived index.html versions into a local ignored 
 v1_9 (11/16/2026) - Added Academic Term tab bar (Fall 2026, Spring 2026, All Terms, + New Term) with Term GPA calculation, unified document-level event delegation, preserved saved localStorage course data alongside CS 61A, DATA C8, and MATH 54 templates, and removed the "Academic Standing" field from Profile &amp; Settings.
 v1_10 (11/16/2026) - Added drag-and-drop reordering for Assignment Groups via left slider icon handles and expanded the Class Grade Bucket Distribution card to stretch and fill 100% of its dedicated vertical and horizontal space.
 v1_11 (11/16/2026) - Added footer "Changelog" link leading to a dedicated text-based Changelog page (v1_1 through v1_11).
-v1_12 (11/16/2026) - Set the Gradebook dashboard as the main landing page (/GradeCraft/), separated Profile &amp; Settings (#/profile / profile.html) and Changelog (#/changelog / changelog.html) into dedicated subpages with URL routing, and updated the top-left GradeCraft graduation cap brand button to navigate directly to the main landing page (https://themaximmus.github.io/GradeCraft/).
+v1_12 (11/16/2026) - Set the Gradebook dashboard as the main landing page (/GradeCraft/), separated Profile &amp; Settings (#/profile / profile.html) and Changelog (#/changelog / changelog.html) into dedicated subpages with URL routing, and updated the top-left GradeCraft graduation cap brand button to navigate directly to the main landing page (https://maksymstesev.github.io/GradeCraft/).
 v1_15_2 (11/17/2026) - Added a dedicated GPA Planner page (#/gpa) with a header navigation button: classes are listed by academic term with course code, title, and a grade drop-down, followed by a Term GPA per term and an Overall GPA. Planner grades are saved as a separate localStorage record and never modify the Gradebook.
 v1_15_3 (11/17/2026) - Removed redundant "+" and "←" symbols from the New Term, Add Class and Back to Gradebook button labels (the icons already convey the action).
 v1_16 (11/17/2026) - Added per-class Units (0–20 in 0.5-unit steps, defaulting to 4 for new, duplicated, imported, and existing classes) and updated Term and Overall GPAs to be unit-weighted (excluding ungraded and 0-unit classes). Gradebook term tabs and All Terms now show total units alongside weighted GPA, and the GPA Planner includes a read-only Units column, weighted summaries, and a method note.
@@ -3227,7 +3227,7 @@ v1_16_4 (11/20/2026) - Fixed duplicate classes (such as CS 61A and DATA C8) appe
             const targetLandingUrl = getMainLandingPageUrl();
             const host = (window.location.hostname || '').toLowerCase();
             if (host.endsWith('github.io')) {
-              window.location.href = 'https://themaximmus.github.io/GradeCraft/';
+              window.location.href = 'https://maksymstesev.github.io/GradeCraft/';
             } else {
               try {
                 window.history.pushState({ view: 'gradebook' }, 'GradeCraft — Class Grade Calculator & Forecaster', window.location.pathname);
