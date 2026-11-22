@@ -1025,9 +1025,10 @@
               </div>
               <div>
                 <h2 class="text-lg font-extrabold text-theme-primary">GPA Planner</h2>
-                <p class="text-xs text-theme-muted">Pick a grade for each class to see your term and overall GPA. GPA is
-                  unit-weighted (UC Berkeley method): total grade points &divide; total graded units; P/NP classes are
-                  excluded. Choices are saved separately and never change your Gradebook.</p>
+                <p class="text-xs text-theme-muted">Pick a grade for each class to see your term and overall GPA. Add prior
+                  credit for a cumulative estimate, or use the goal calculator for target planning. GPA is unit-weighted
+                  (UC Berkeley method): total grade points &divide; total graded units; P/NP classes are excluded. Choices
+                  are saved separately and never change your Gradebook.</p>
               </div>
             </div>
             <button id="btnClearGpaGrades" type="button"
@@ -1038,9 +1039,11 @@
           </div>
         </section>
 
+        <section id="gpaPriorContainer" class="space-y-4"></section>
+
         <div id="gpaTermsContainer" class="space-y-6"></div>
 
-        <section id="gpaOverallContainer"></section>
+        <section id="gpaOverallContainer" class="space-y-4"></section>
       </div>
     </div>
 
@@ -1069,14 +1072,24 @@
             <div>
               <h1 class="text-lg font-extrabold tracking-tight text-theme-primary font-mono">GradeCraft — Changelog</h1>
               <p class="text-xs text-theme-muted mt-1">Chronological record of releases and commits (<code
-                  class="font-mono">v1_1</code> &rarr; <code class="font-mono">v1_18</code>).</p>
+                  class="font-mono">v1_1</code> &rarr; <code class="font-mono">v1_19</code>).</p>
             </div>
             <span class="text-[11px] font-mono text-indigo-400 px-2.5 py-0.5 rounded-full accent-pill border">Latest:
-              v1_18</span>
+              v1_19</span>
           </div>
 
           <!-- Simple, clean text-based changelog list (Newest to Oldest & Plain-Text Block) -->
           <div class="space-y-4 font-mono text-xs leading-relaxed text-theme-secondary">
+            <div class="p-3.5 rounded-xl surface-alt border border-theme-subtle">
+              <div class="flex items-center justify-between gap-3">
+                <span class="font-bold text-indigo-400">v1_19</span>
+                <span class="text-[11px] font-mono text-theme-faint">11/21/2026</span>
+              </div>
+              <p class="mt-1 text-theme-primary font-sans text-xs leading-relaxed">
+                Extended the GPA Planner with Prior Credit (graded units + GPA) and a Cumulative GPA row that folds that credit into the unit-weighted total, plus a Goal Calculator that estimates the average GPA needed on future units to hit a target cumulative GPA (with clear unreachable / already-met messaging and the formula shown). Prior and goal fields live only in the planner localStorage record; Clear All Grades keeps them.
+              </p>
+            </div>
+
             <div class="p-3.5 rounded-xl surface-alt border border-theme-subtle">
               <div class="flex items-center justify-between gap-3">
                 <span class="font-bold text-indigo-400">v1_18</span>
@@ -1338,7 +1351,7 @@
           <details id="rawChangelogDetails" class="pt-4 border-t border-theme">
             <summary class="raw-changelog-summary flex items-center justify-between gap-2 cursor-pointer select-none">
               <span class="text-[11px] font-bold uppercase tracking-wider text-theme-faint font-mono">Raw Plain-Text
-                Changelog (v1_1 &rarr; v1_18)</span>
+                Changelog (v1_1 &rarr; v1_19)</span>
               <i
                 class="fa-solid fa-chevron-down raw-changelog-chevron text-[11px] text-theme-faint transition-transform"></i>
             </summary>
@@ -1363,7 +1376,8 @@ v1_16_2 (11/18/2026) - Removed hardcoded values from the Profile & Settings inpu
 v1_16_3 (11/18/2026) - Set the release date for v1_1 through v1_12 to 11/16/2026 and switched all changelog dates (cards and raw log) to the mm/dd/yyyy format.
 v1_16_4 (11/20/2026) - Fixed duplicate classes (such as CS 61A and DATA C8) appearing on open or after JSON import: saved data is now the only source once it exists, so older storage keys no longer re-add classes, and classes with the same ID or the same code, term and title are merged on load and import. Default examples are now CS 61A and DATA C8 only (MATH 54 removed), and the Restore Demo Courses message lists the examples it checks.
 v1_17 (11/21/2026) - Implemented Quality Foundation: extracted calculation and storage logic into standalone modules (src/calc.js, src/storage.js, src/constants.js), added 74 automated Vitest unit tests covering GPA math, unit weighting, and migration, added Playwright E2E and axe accessibility tests, configured GitHub Actions CI workflow, and added accessibility improvements (polite toast announcements, keyboard group reordering, and prefers-reduced-motion support).
-v1_18 (11/21/2026) - Added grading policy rules per assignment group (drop lowest N, best N of M, late penalty, score replacement, extra credit) via computeGroupResult, Policies menu UI, active-rule badges, and Target Forecaster approximate notes; legacy saves migrate empty policies on load.</pre>
+v1_18 (11/21/2026) - Added grading policy rules per assignment group (drop lowest N, best N of M, late penalty, score replacement, extra credit) via computeGroupResult, Policies menu UI, active-rule badges, and Target Forecaster approximate notes; legacy saves migrate empty policies on load.
+v1_19 (11/21/2026) - Extended the GPA Planner with Prior Credit, Cumulative GPA, and a Goal Calculator (needed average on future units, unreachable/already-met handling, formula note); prior/goal persist in the planner record only.</pre>
           </details>
         </section>
       </div>
@@ -1852,31 +1866,167 @@ v1_18 (11/21/2026) - Added grading policy rules per assignment group (drop lowes
       // GPA Planner: stored as its own record, fully separate from the Gradebook state
       const GPA_STORAGE_KEY = 'gradecraft_gpa_planner_v1';
 
+      function createDefaultGpaPlan() {
+        return {
+          grades: {},
+          prior: { units: 0, gpa: null },
+          goal: { targetGpa: null, futureUnits: null }
+        };
+      }
+
+      function sanitizeGpaPlan(raw) {
+        const clean = createDefaultGpaPlan();
+        if (!raw || typeof raw !== 'object') return clean;
+
+        if (raw.grades && typeof raw.grades === 'object') {
+          Object.keys(raw.grades).forEach(k => {
+            const v = raw.grades[k];
+            if (typeof v === 'string' && v) clean.grades[k] = v;
+          });
+        }
+
+        const prior = raw.prior && typeof raw.prior === 'object' ? raw.prior : {};
+        const priorUnits = Number(prior.units);
+        clean.prior.units = Number.isFinite(priorUnits) && priorUnits > 0 ? priorUnits : 0;
+        if (prior.gpa !== null && prior.gpa !== undefined && prior.gpa !== '' && Number.isFinite(Number(prior.gpa))) {
+          clean.prior.gpa = Math.max(0, Number(prior.gpa));
+        } else if (
+          prior.gradePoints !== null && prior.gradePoints !== undefined && prior.gradePoints !== ''
+          && Number.isFinite(Number(prior.gradePoints)) && clean.prior.units > 0
+        ) {
+          clean.prior.gpa = Math.max(0, Number(prior.gradePoints) / clean.prior.units);
+        } else {
+          clean.prior.gpa = null;
+        }
+
+        const goal = raw.goal && typeof raw.goal === 'object' ? raw.goal : {};
+        if (goal.targetGpa !== null && goal.targetGpa !== undefined && goal.targetGpa !== '' && Number.isFinite(Number(goal.targetGpa))) {
+          clean.goal.targetGpa = Math.max(0, Number(goal.targetGpa));
+        }
+        if (goal.futureUnits !== null && goal.futureUnits !== undefined && goal.futureUnits !== '' && Number.isFinite(Number(goal.futureUnits))) {
+          clean.goal.futureUnits = Math.max(0, Number(goal.futureUnits));
+        }
+
+        return clean;
+      }
+
       function loadGpaPlan() {
-        const grades = {};
         try {
           const raw = localStorage.getItem(GPA_STORAGE_KEY);
           const parsed = raw ? JSON.parse(raw) : null;
-          if (parsed && parsed.grades && typeof parsed.grades === 'object') {
-            Object.keys(parsed.grades).forEach(k => {
-              const v = parsed.grades[k];
-              if (typeof v === 'string' && v) grades[k] = v;
-            });
-          }
+          return sanitizeGpaPlan(parsed);
         } catch {
-          // Ignore malformed record
+          return createDefaultGpaPlan();
         }
-        return { grades };
       }
 
       let gpaPlan = loadGpaPlan();
 
       function saveGpaPlan() {
         try {
+          gpaPlan = sanitizeGpaPlan(gpaPlan);
           localStorage.setItem(GPA_STORAGE_KEY, JSON.stringify(gpaPlan));
         } catch (err) {
           console.error('Failed to save GPA planner:', err);
         }
+      }
+
+      function normalizePriorCredit(raw) {
+        const unitsRaw = raw?.units;
+        const gpaRaw = raw?.gpa;
+        const units = unitsRaw === null || unitsRaw === undefined || unitsRaw === ''
+          ? 0
+          : Math.max(0, Number(unitsRaw) || 0);
+        let gpa = null;
+        if (gpaRaw !== null && gpaRaw !== undefined && gpaRaw !== '' && Number.isFinite(Number(gpaRaw))) {
+          gpa = Math.max(0, Number(gpaRaw));
+        }
+        return { units, gpa };
+      }
+
+      function normalizeGoalInputs(raw) {
+        const targetRaw = raw?.targetGpa;
+        const futureRaw = raw?.futureUnits;
+        let targetGpa = null;
+        let futureUnits = null;
+        if (targetRaw !== null && targetRaw !== undefined && targetRaw !== '' && Number.isFinite(Number(targetRaw))) {
+          targetGpa = Math.max(0, Number(targetRaw));
+        }
+        if (futureRaw !== null && futureRaw !== undefined && futureRaw !== '' && Number.isFinite(Number(futureRaw))) {
+          futureUnits = Math.max(0, Number(futureRaw));
+        }
+        return { targetGpa, futureUnits };
+      }
+
+      function computePriorGradePoints(prior) {
+        const p = normalizePriorCredit(prior);
+        if (p.gpa === null || p.units <= 0) return 0;
+        return p.gpa * p.units;
+      }
+
+      function computeCumulativeGpa(plannerSummary, prior) {
+        const p = normalizePriorCredit(prior);
+        const plannerGP = Number(plannerSummary?.gradePoints) || 0;
+        const plannerUnits = Number(plannerSummary?.gradedUnits) || 0;
+        const priorActive = p.gpa !== null && p.units > 0;
+        const priorUnits = priorActive ? p.units : 0;
+        const priorGP = priorActive ? p.gpa * p.units : 0;
+        const gradedUnits = plannerUnits + priorUnits;
+        const gradePoints = plannerGP + priorGP;
+        return {
+          priorActive,
+          priorUnits,
+          priorGradePoints: priorGP,
+          plannerUnits,
+          plannerGradePoints: plannerGP,
+          gradedUnits,
+          gradePoints,
+          avg: gradedUnits > 0 ? gradePoints / gradedUnits : null
+        };
+      }
+
+      function computeGoalGpaNeeded(cumulative, goal, maxGpa = 4.0) {
+        const g = normalizeGoalInputs(goal);
+        const currentUnits = Number(cumulative?.gradedUnits) || 0;
+        const currentGP = Number(cumulative?.gradePoints) || 0;
+        const currentAvg = currentUnits > 0 ? currentGP / currentUnits : null;
+        const ceiling = Number.isFinite(Number(maxGpa)) ? Number(maxGpa) : 4.0;
+
+        const base = {
+          neededGpa: null,
+          currentAvg,
+          currentUnits,
+          currentGradePoints: currentGP,
+          targetGpa: g.targetGpa,
+          futureUnits: g.futureUnits,
+          maxPossible: null
+        };
+
+        if (g.targetGpa === null || g.futureUnits === null) {
+          return { ...base, status: 'incomplete' };
+        }
+
+        if (g.futureUnits <= 0) {
+          const met = currentAvg !== null && currentAvg + 1e-12 >= g.targetGpa;
+          return {
+            ...base,
+            status: met ? 'already_met' : 'unreachable_zero_future',
+            maxPossible: currentAvg
+          };
+        }
+
+        const needed = (g.targetGpa * (currentUnits + g.futureUnits) - currentGP) / g.futureUnits;
+        const maxPossible = (currentGP + ceiling * g.futureUnits) / (currentUnits + g.futureUnits);
+
+        if (needed <= 0 + 1e-12) {
+          return { ...base, status: 'already_met', neededGpa: needed, maxPossible };
+        }
+
+        if (needed > ceiling + 1e-12) {
+          return { ...base, status: 'unreachable_above_max', neededGpa: needed, maxPossible };
+        }
+
+        return { ...base, status: 'ok', neededGpa: needed, maxPossible };
       }
 
       function termSortValue(termName) {
@@ -1935,6 +2085,7 @@ v1_18 (11/21/2026) - Added grading policy rules per assignment group (drop lowes
           gpaUnits,
           pnpCount,
           gradedUnits,
+          gradePoints,
           avg: gradedUnits > 0 ? gradePoints / gradedUnits : null
         };
       }
@@ -2632,13 +2783,119 @@ v1_18 (11/21/2026) - Added grading policy rules per assignment group (drop lowes
         if (gpaBtn) gpaBtn.className = state.activeView === 'gpa' ? activeCls : idleCls;
       }
 
+      function parseOptionalNumberInput(raw) {
+        const text = String(raw ?? '').trim();
+        if (text === '') return null;
+        const n = Number(text);
+        return Number.isFinite(n) ? n : null;
+      }
+
+      function refreshGpaDerivedDisplays() {
+        const overall = computePlannerSummary(state.classes);
+        const prior = normalizePriorCredit(gpaPlan.prior);
+        const cumulative = computeCumulativeGpa(overall, prior);
+        const goalResult = computeGoalGpaNeeded(cumulative, gpaPlan.goal);
+        const fmtGpa = (v) => (v === null || v === undefined ? '--' : formatNumber(v, 2, 2));
+
+        const priorGpEl = document.querySelector('#gpaPriorContainer .font-mono.theme-input');
+        // Prefer a dedicated hook if present after re-render
+        const priorGpHook = document.getElementById('gpaPriorGradePoints');
+        if (priorGpHook) {
+          priorGpHook.textContent = prior.gpa !== null && prior.units > 0
+            ? formatNumber(computePriorGradePoints(prior), 2, 2)
+            : '--';
+        } else if (priorGpEl) {
+          priorGpEl.textContent = prior.gpa !== null && prior.units > 0
+            ? formatNumber(computePriorGradePoints(prior), 2, 2)
+            : '--';
+        }
+
+        const cumAvg = document.getElementById('gpaCumulativeAvg');
+        const cumMeta = document.getElementById('gpaCumulativeMeta');
+        const cumNote = document.getElementById('gpaCumulativeNote');
+        if (cumAvg) cumAvg.textContent = fmtGpa(cumulative.avg);
+        if (cumMeta) cumMeta.textContent = `Cumulative GPA · ${formatNumber(cumulative.gradedUnits, 0, 1)} units`;
+        if (cumNote) {
+          cumNote.textContent = cumulative.priorActive
+            ? `Includes prior ${formatNumber(cumulative.priorUnits, 0, 1)} units @ ${fmtGpa(prior.gpa)} (${formatNumber(cumulative.priorGradePoints, 2, 2)} grade points)`
+            : 'Add prior units and GPA above to include transfer / earlier credit';
+        }
+
+        const goalBox = document.getElementById('gpaGoalResult');
+        if (goalBox) goalBox.innerHTML = renderGoalResultHtml(goalResult);
+      }
+
+      function renderGoalResultHtml(goalResult) {
+        if (goalResult.status === 'incomplete') {
+          return `<p class="text-xs text-theme-muted">Enter a target cumulative GPA and future units to see the average you need on those units.</p>`;
+        }
+        if (goalResult.status === 'already_met') {
+          return `<div class="text-emerald-400 text-xs font-semibold"><i class="fa-solid fa-circle-check mr-1.5"></i>Target <strong>${formatNumber(goalResult.targetGpa, 2, 2)}</strong> is already met (or clinched even with 0.00 on remaining work). Current cumulative estimate: <span class="font-mono">${goalResult.currentAvg === null ? '--' : formatNumber(goalResult.currentAvg, 2, 2)}</span>.</div>`;
+        }
+        if (goalResult.status === 'unreachable_zero_future') {
+          return `<div class="text-amber-400 text-xs font-semibold"><i class="fa-solid fa-circle-info mr-1.5"></i>No future units left. Current cumulative estimate <span class="font-mono">${formatNumber(goalResult.currentAvg, 2, 2)}</span> is below the target of <span class="font-mono">${formatNumber(goalResult.targetGpa, 2, 2)}</span>.</div>`;
+        }
+        if (goalResult.status === 'unreachable_above_max') {
+          return `<div class="text-rose-400 text-xs font-semibold"><i class="fa-solid fa-triangle-exclamation mr-1.5"></i>Requires <span class="font-mono">${formatNumber(goalResult.neededGpa, 2, 2)}</span> on the next ${formatNumber(goalResult.futureUnits, 0, 1)} units (above 4.00). Max reachable cumulative is about <span class="font-mono">${formatNumber(goalResult.maxPossible, 2, 2)}</span>.</div>`;
+        }
+        return `
+          <div class="text-theme-secondary text-xs">
+            To reach a cumulative <strong class="text-indigo-400">${formatNumber(goalResult.targetGpa, 2, 2)}</strong>, you need an average of:
+          </div>
+          <div class="text-2xl font-extrabold font-mono text-indigo-400 mt-1">
+            ${formatNumber(goalResult.neededGpa, 2, 2)}
+            <span class="text-xs font-sans font-normal text-theme-muted">GPA across ${formatNumber(goalResult.futureUnits, 0, 1)} future units</span>
+          </div>
+        `;
+      }
+
       function renderGpaDOM() {
+        const priorEl = document.getElementById('gpaPriorContainer');
         const termsEl = document.getElementById('gpaTermsContainer');
         const overallEl = document.getElementById('gpaOverallContainer');
         if (!termsEl || !overallEl) return;
 
+        gpaPlan = sanitizeGpaPlan(gpaPlan);
         const scale = getSortedBuckets(state.defaultGradeDefinitions);
-        const fmtGpa = (v) => (v === null ? '--' : formatNumber(v, 2, 2));
+        const fmtGpa = (v) => (v === null || v === undefined ? '--' : formatNumber(v, 2, 2));
+        const prior = normalizePriorCredit(gpaPlan.prior);
+        const overall = computePlannerSummary(state.classes);
+        const cumulative = computeCumulativeGpa(overall, prior);
+        const goalResult = computeGoalGpaNeeded(cumulative, gpaPlan.goal);
+        const priorGpDisplay = prior.gpa !== null && prior.units > 0
+          ? formatNumber(computePriorGradePoints(prior), 2, 2)
+          : '--';
+
+        if (priorEl) {
+          priorEl.innerHTML = `
+            <section class="surface-card rounded-2xl border overflow-hidden">
+              <div class="px-5 py-4 border-b border-theme surface-alt">
+                <h3 class="text-sm font-bold text-theme-primary flex items-center gap-2">
+                  <i class="fa-solid fa-clock-rotate-left text-indigo-400"></i>
+                  <span>Prior Credit</span>
+                </h3>
+                <p class="text-xs text-theme-muted mt-1">Work completed before GradeCraft (transfer credit, earlier terms). Stored only in the GPA Planner record.</p>
+              </div>
+              <div class="p-5 grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <label class="flex flex-col gap-1.5 text-xs">
+                  <span class="font-semibold text-theme-secondary">Prior graded units</span>
+                  <input id="gpaPriorUnits" type="number" min="0" step="0.5" value="${prior.units || ''}" placeholder="e.g. 30"
+                    class="w-full font-mono theme-input rounded-lg px-3 py-2" aria-label="Prior graded units" />
+                </label>
+                <label class="flex flex-col gap-1.5 text-xs">
+                  <span class="font-semibold text-theme-secondary">Prior GPA</span>
+                  <input id="gpaPriorGpa" type="number" min="0" max="4" step="0.01" value="${prior.gpa === null ? '' : prior.gpa}" placeholder="e.g. 3.50"
+                    class="w-full font-mono theme-input rounded-lg px-3 py-2" aria-label="Prior GPA" />
+                </label>
+                <div class="flex flex-col gap-1.5 text-xs">
+                  <span class="font-semibold text-theme-secondary">Prior grade points</span>
+                  <div id="gpaPriorGradePoints" class="font-mono theme-input rounded-lg px-3 py-2 text-theme-muted bg-transparent">${priorGpDisplay}</div>
+                  <span class="text-[11px] text-theme-faint">units × GPA (read-only)</span>
+                </div>
+              </div>
+            </section>
+          `;
+        }
 
         termsEl.innerHTML = getTermsChronological().map(termName => {
           const termClasses = state.classes.filter(c => normalizeTermName(c.term) === termName);
@@ -2722,23 +2979,69 @@ v1_18 (11/21/2026) - Added grading policy rules per assignment group (drop lowes
           `;
         }).join('');
 
-        const overall = computePlannerSummary(state.classes);
         overallEl.innerHTML = `
-          <div class="bg-gradient-to-br from-[#0c0d18] via-[#11152c] to-[#1b173b] text-white rounded-2xl border border-indigo-500/35 p-5 shadow-lg flex flex-wrap items-center justify-between gap-4">
-            <div>
-              <div class="text-xs font-bold uppercase tracking-wider text-indigo-300 flex items-center gap-1.5">
-                <i class="fa-solid fa-chart-line text-amber-400"></i>
-                Overall Summary
+          <div class="bg-gradient-to-br from-[#0c0d18] via-[#11152c] to-[#1b173b] text-white rounded-2xl border border-indigo-500/35 p-5 shadow-lg space-y-4">
+            <div class="flex flex-wrap items-center justify-between gap-4">
+              <div>
+                <div class="text-xs font-bold uppercase tracking-wider text-indigo-300 flex items-center gap-1.5">
+                  <i class="fa-solid fa-chart-line text-amber-400"></i>
+                  Overall Summary
+                </div>
+                <div class="text-xs text-indigo-200/80 mt-1">
+                  Across all terms &bull; ${overall.graded} of ${overall.total} ${overall.total === 1 ? 'class' : 'classes'} graded &bull; ${formatNumber(overall.gradedUnits, 0, 1)} of ${formatNumber(overall.gpaUnits, 0, 1)} units${overall.pnpCount ? ` &bull; ${overall.pnpCount} P/NP excluded` : ""}
+                </div>
               </div>
-              <div class="text-xs text-indigo-200/80 mt-1">
-                Across all terms &bull; ${overall.graded} of ${overall.total} ${overall.total === 1 ? 'class' : 'classes'} graded &bull; ${formatNumber(overall.gradedUnits, 0, 1)} of ${formatNumber(overall.gpaUnits, 0, 1)} units${overall.pnpCount ? ` &bull; ${overall.pnpCount} P/NP excluded` : ""}
+              <div class="text-right">
+                <div class="text-4xl sm:text-5xl font-extrabold tracking-tight font-mono text-white">${fmtGpa(overall.avg)}</div>
+                <div class="text-[11px] text-indigo-300 mt-1">Planner Overall GPA</div>
               </div>
             </div>
-            <div class="text-right">
-              <div class="text-4xl sm:text-5xl font-extrabold tracking-tight font-mono text-white">${fmtGpa(overall.avg)}</div>
-              <div class="text-[11px] text-indigo-300 mt-1">Overall GPA</div>
+            <div class="pt-3 border-t border-white/10 flex flex-wrap items-end justify-between gap-3">
+              <div class="text-xs text-indigo-200/85">
+                Cumulative estimate
+                <span id="gpaCumulativeNote" class="block text-[11px] text-indigo-300/80 mt-0.5">
+                  ${cumulative.priorActive
+                    ? `Includes prior ${formatNumber(cumulative.priorUnits, 0, 1)} units @ ${fmtGpa(prior.gpa)} (${formatNumber(cumulative.priorGradePoints, 2, 2)} grade points)`
+                    : 'Add prior units and GPA above to include transfer / earlier credit'}
+                </span>
+              </div>
+              <div class="text-right">
+                <div id="gpaCumulativeAvg" class="text-2xl font-extrabold font-mono text-amber-300">${fmtGpa(cumulative.avg)}</div>
+                <div id="gpaCumulativeMeta" class="text-[11px] text-indigo-300">Cumulative GPA · ${formatNumber(cumulative.gradedUnits, 0, 1)} units</div>
+              </div>
             </div>
           </div>
+
+          <section class="surface-card rounded-2xl border overflow-hidden">
+            <div class="px-5 py-4 border-b border-theme surface-alt">
+              <h3 class="text-sm font-bold text-theme-primary flex items-center gap-2">
+                <i class="fa-solid fa-bullseye text-indigo-400"></i>
+                <span>Goal Calculator</span>
+              </h3>
+              <p class="text-xs text-theme-muted mt-1">Estimate the average GPA needed on future units to hit a cumulative target. Results are estimates using the same unit-weighted method as Term / Overall GPA.</p>
+            </div>
+            <div class="p-5 grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <label class="flex flex-col gap-1.5 text-xs">
+                <span class="font-semibold text-theme-secondary">Target cumulative GPA</span>
+                <input id="gpaGoalTarget" type="number" min="0" max="4" step="0.01"
+                  value="${gpaPlan.goal.targetGpa === null || gpaPlan.goal.targetGpa === undefined ? '' : gpaPlan.goal.targetGpa}"
+                  placeholder="e.g. 3.70" class="w-full font-mono theme-input rounded-lg px-3 py-2" aria-label="Target cumulative GPA" />
+              </label>
+              <label class="flex flex-col gap-1.5 text-xs">
+                <span class="font-semibold text-theme-secondary">Future units to attempt</span>
+                <input id="gpaGoalFutureUnits" type="number" min="0" step="0.5"
+                  value="${gpaPlan.goal.futureUnits === null || gpaPlan.goal.futureUnits === undefined ? '' : gpaPlan.goal.futureUnits}"
+                  placeholder="e.g. 24" class="w-full font-mono theme-input rounded-lg px-3 py-2" aria-label="Future units to attempt" />
+              </label>
+            </div>
+            <div id="gpaGoalResult" class="px-5 pb-5">${renderGoalResultHtml(goalResult)}</div>
+            <div class="px-5 pb-5">
+              <p class="text-[11px] text-theme-faint leading-relaxed">
+                Method: <span class="font-mono">G<sub>needed</sub> = (G<sub>target</sub> × (U<sub>current</sub> + U<sub>future</sub>) − GP<sub>current</sub>) ÷ U<sub>future</sub></span>,
+                where current includes prior credit plus graded planner classes. Unreachable if the needed average is above 4.00.
+              </p>
+            </div>
+          </section>
         `;
       }
 
@@ -3861,7 +4164,11 @@ v1_18 (11/21/2026) - Added grading policy rules per assignment group (drop lowes
               'Clear All Planner Grades?',
               'This removes every grade you picked on the GPA Planner page. Your Gradebook is not affected.',
               () => {
-                gpaPlan = { grades: {} };
+                gpaPlan = sanitizeGpaPlan({
+                  grades: {},
+                  prior: gpaPlan.prior,
+                  goal: gpaPlan.goal
+                });
                 saveGpaPlan();
                 renderApp();
                 showToast('Cleared GPA Planner grades', 'info');
@@ -4367,6 +4674,39 @@ v1_18 (11/21/2026) - Added grading policy rules per assignment group (drop lowes
         document.addEventListener('input', (e) => {
           const target = e.target;
           if (!target) return;
+
+          if (target.id === 'gpaPriorUnits') {
+            const n = parseOptionalNumberInput(target.value);
+            gpaPlan.prior = gpaPlan.prior || { units: 0, gpa: null };
+            gpaPlan.prior.units = n === null ? 0 : Math.max(0, n);
+            saveGpaPlan();
+            refreshGpaDerivedDisplays();
+            return;
+          }
+          if (target.id === 'gpaPriorGpa') {
+            const n = parseOptionalNumberInput(target.value);
+            gpaPlan.prior = gpaPlan.prior || { units: 0, gpa: null };
+            gpaPlan.prior.gpa = n === null ? null : Math.max(0, n);
+            saveGpaPlan();
+            refreshGpaDerivedDisplays();
+            return;
+          }
+          if (target.id === 'gpaGoalTarget') {
+            const n = parseOptionalNumberInput(target.value);
+            gpaPlan.goal = gpaPlan.goal || { targetGpa: null, futureUnits: null };
+            gpaPlan.goal.targetGpa = n === null ? null : Math.max(0, n);
+            saveGpaPlan();
+            refreshGpaDerivedDisplays();
+            return;
+          }
+          if (target.id === 'gpaGoalFutureUnits') {
+            const n = parseOptionalNumberInput(target.value);
+            gpaPlan.goal = gpaPlan.goal || { targetGpa: null, futureUnits: null };
+            gpaPlan.goal.futureUnits = n === null ? null : Math.max(0, n);
+            saveGpaPlan();
+            refreshGpaDerivedDisplays();
+            return;
+          }
 
           if (target.id === 'inputClassCode') {
             const cls = getActiveClass();

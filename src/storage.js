@@ -295,26 +295,64 @@ export function saveState(state, storage = globalThis.localStorage) {
   }
 }
 
+export function createDefaultGpaPlan() {
+  return {
+    grades: {},
+    prior: { units: 0, gpa: null },
+    goal: { targetGpa: null, futureUnits: null }
+  };
+}
+
+export function sanitizeGpaPlan(raw) {
+  const clean = createDefaultGpaPlan();
+  if (!raw || typeof raw !== 'object') return clean;
+
+  if (raw.grades && typeof raw.grades === 'object') {
+    Object.keys(raw.grades).forEach(k => {
+      const v = raw.grades[k];
+      if (typeof v === 'string' && v) clean.grades[k] = v;
+    });
+  }
+
+  const prior = raw.prior && typeof raw.prior === 'object' ? raw.prior : {};
+  const priorUnits = Number(prior.units);
+  clean.prior.units = Number.isFinite(priorUnits) && priorUnits > 0 ? priorUnits : 0;
+  if (prior.gpa !== null && prior.gpa !== undefined && prior.gpa !== '' && Number.isFinite(Number(prior.gpa))) {
+    clean.prior.gpa = Math.max(0, Number(prior.gpa));
+  } else if (
+    prior.gradePoints !== null && prior.gradePoints !== undefined && prior.gradePoints !== ''
+    && Number.isFinite(Number(prior.gradePoints)) && clean.prior.units > 0
+  ) {
+    // Legacy / alternate input: grade points → GPA
+    clean.prior.gpa = Math.max(0, Number(prior.gradePoints) / clean.prior.units);
+  } else {
+    clean.prior.gpa = null;
+  }
+
+  const goal = raw.goal && typeof raw.goal === 'object' ? raw.goal : {};
+  if (goal.targetGpa !== null && goal.targetGpa !== undefined && goal.targetGpa !== '' && Number.isFinite(Number(goal.targetGpa))) {
+    clean.goal.targetGpa = Math.max(0, Number(goal.targetGpa));
+  }
+  if (goal.futureUnits !== null && goal.futureUnits !== undefined && goal.futureUnits !== '' && Number.isFinite(Number(goal.futureUnits))) {
+    clean.goal.futureUnits = Math.max(0, Number(goal.futureUnits));
+  }
+
+  return clean;
+}
+
 export function loadGpaPlan(storage = globalThis.localStorage) {
-  const grades = {};
   try {
     const raw = storage.getItem(GPA_STORAGE_KEY);
     const parsed = raw ? JSON.parse(raw) : null;
-    if (parsed && parsed.grades && typeof parsed.grades === 'object') {
-      Object.keys(parsed.grades).forEach(k => {
-        const v = parsed.grades[k];
-        if (typeof v === 'string' && v) grades[k] = v;
-      });
-    }
+    return sanitizeGpaPlan(parsed);
   } catch {
-    // Ignore malformed record
+    return createDefaultGpaPlan();
   }
-  return { grades };
 }
 
 export function saveGpaPlan(gpaPlan, storage = globalThis.localStorage) {
   try {
-    storage.setItem(GPA_STORAGE_KEY, JSON.stringify(gpaPlan));
+    storage.setItem(GPA_STORAGE_KEY, JSON.stringify(sanitizeGpaPlan(gpaPlan)));
   } catch (err) {
     console.error('Failed to save GPA planner:', err);
   }

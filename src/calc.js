@@ -492,6 +492,130 @@ export function computePlannerSummary(classesList, gradeDefinitions, plannerGrad
     gpaUnits,
     pnpCount,
     gradedUnits,
+    gradePoints,
     avg: gradedUnits > 0 ? gradePoints / gradedUnits : null
   };
+}
+
+// ─── Cumulative GPA + goal calculator ────────────────────────────────
+
+/** Normalize prior credit (units + GPA). Empty GPA means prior is unused. */
+export function normalizePriorCredit(raw) {
+  const unitsRaw = raw?.units;
+  const gpaRaw = raw?.gpa;
+  const units = unitsRaw === null || unitsRaw === undefined || unitsRaw === ''
+    ? 0
+    : Math.max(0, Number(unitsRaw) || 0);
+  let gpa = null;
+  if (gpaRaw !== null && gpaRaw !== undefined && gpaRaw !== '' && Number.isFinite(Number(gpaRaw))) {
+    gpa = Math.max(0, Number(gpaRaw));
+  }
+  return { units, gpa };
+}
+
+export function normalizeGoalInputs(raw) {
+  const targetRaw = raw?.targetGpa;
+  const futureRaw = raw?.futureUnits;
+  let targetGpa = null;
+  let futureUnits = null;
+  if (targetRaw !== null && targetRaw !== undefined && targetRaw !== '' && Number.isFinite(Number(targetRaw))) {
+    targetGpa = Math.max(0, Number(targetRaw));
+  }
+  if (futureRaw !== null && futureRaw !== undefined && futureRaw !== '' && Number.isFinite(Number(futureRaw))) {
+    futureUnits = Math.max(0, Number(futureRaw));
+  }
+  return { targetGpa, futureUnits };
+}
+
+/**
+ * Grade points from prior credit. Returns 0 when GPA is unset or units are 0.
+ */
+export function computePriorGradePoints(prior) {
+  const p = normalizePriorCredit(prior);
+  if (p.gpa === null || p.units <= 0) return 0;
+  return p.gpa * p.units;
+}
+
+/**
+ * Cumulative GPA = (planner grade points + prior grade points) / (planner units + prior units).
+ * Prior units only count when a prior GPA is set.
+ */
+export function computeCumulativeGpa(plannerSummary, prior) {
+  const p = normalizePriorCredit(prior);
+  const plannerGP = Number(plannerSummary?.gradePoints) || 0;
+  const plannerUnits = Number(plannerSummary?.gradedUnits) || 0;
+  const priorActive = p.gpa !== null && p.units > 0;
+  const priorUnits = priorActive ? p.units : 0;
+  const priorGP = priorActive ? p.gpa * p.units : 0;
+  const gradedUnits = plannerUnits + priorUnits;
+  const gradePoints = plannerGP + priorGP;
+  return {
+    priorActive,
+    priorUnits,
+    priorGradePoints: priorGP,
+    plannerUnits,
+    plannerGradePoints: plannerGP,
+    gradedUnits,
+    gradePoints,
+    avg: gradedUnits > 0 ? gradePoints / gradedUnits : null
+  };
+}
+
+/**
+ * Average GPA needed on future units to hit a target cumulative GPA.
+ * G_needed = (G_target * (U_current + U_future) - GP_current) / U_future
+ *
+ * @returns {{
+ *   status: 'incomplete'|'unreachable_zero_future'|'already_met'|'unreachable_above_max'|'ok',
+ *   neededGpa: number|null,
+ *   currentAvg: number|null,
+ *   currentUnits: number,
+ *   currentGradePoints: number,
+ *   targetGpa: number|null,
+ *   futureUnits: number|null,
+ *   maxPossible: number|null
+ * }}
+ */
+export function computeGoalGpaNeeded(cumulative, goal, maxGpa = 4.0) {
+  const g = normalizeGoalInputs(goal);
+  const currentUnits = Number(cumulative?.gradedUnits) || 0;
+  const currentGP = Number(cumulative?.gradePoints) || 0;
+  const currentAvg = currentUnits > 0 ? currentGP / currentUnits : null;
+  const ceiling = Number.isFinite(Number(maxGpa)) ? Number(maxGpa) : 4.0;
+
+  const base = {
+    neededGpa: null,
+    currentAvg,
+    currentUnits,
+    currentGradePoints: currentGP,
+    targetGpa: g.targetGpa,
+    futureUnits: g.futureUnits,
+    maxPossible: null
+  };
+
+  if (g.targetGpa === null || g.futureUnits === null) {
+    return { ...base, status: 'incomplete' };
+  }
+
+  if (g.futureUnits <= 0) {
+    const met = currentAvg !== null && currentAvg + 1e-12 >= g.targetGpa;
+    return {
+      ...base,
+      status: met ? 'already_met' : 'unreachable_zero_future',
+      maxPossible: currentAvg
+    };
+  }
+
+  const needed = (g.targetGpa * (currentUnits + g.futureUnits) - currentGP) / g.futureUnits;
+  const maxPossible = (currentGP + ceiling * g.futureUnits) / (currentUnits + g.futureUnits);
+
+  if (needed <= 0 + 1e-12) {
+    return { ...base, status: 'already_met', neededGpa: needed, maxPossible };
+  }
+
+  if (needed > ceiling + 1e-12) {
+    return { ...base, status: 'unreachable_above_max', neededGpa: needed, maxPossible };
+  }
+
+  return { ...base, status: 'ok', neededGpa: needed, maxPossible };
 }

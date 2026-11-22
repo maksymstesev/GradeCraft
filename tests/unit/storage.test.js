@@ -361,6 +361,8 @@ describe('GPA Planner storage', () => {
     const storage = createMockStorage();
     const plan = loadGpaPlan(storage);
     expect(plan.grades).toEqual({});
+    expect(plan.prior).toEqual({ units: 0, gpa: null });
+    expect(plan.goal).toEqual({ targetGpa: null, futureUnits: null });
   });
 
   it('round-trips planner grades', () => {
@@ -369,6 +371,7 @@ describe('GPA Planner storage', () => {
     saveGpaPlan(plan, storage);
     const loaded = loadGpaPlan(storage);
     expect(loaded.grades).toEqual({ c1: 'A', c2: 'B+' });
+    expect(loaded.prior).toEqual({ units: 0, gpa: null });
   });
 
   it('handles corrupted planner data gracefully', () => {
@@ -377,5 +380,6 @@ describe('GPA Planner storage', () => {
     });
     const plan = loadGpaPlan(storage);
     expect(plan.grades).toEqual({});
+    expect(plan.prior).toEqual({ units: 0, gpa: null });
   });
 });
