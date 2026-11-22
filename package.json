@@ -1,0 +1,21 @@
+{
+  "name": "gradecraft",
+  "version": "1.16.4",
+  "private": true,
+  "type": "module",
+  "description": "Browser-based grade calculator, forecaster and GPA planner",
+  "scripts": {
+    "test": "npm run test:unit",
+    "test:unit": "vitest run",
+    "test:unit:watch": "vitest",
+    "test:e2e": "playwright test",
+    "test:e2e:install": "playwright install chromium",
+    "test:all": "npm run test:unit && npm run test:e2e"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.10.1",
+    "@playwright/test": "^1.52.0",
+    "serve": "^14.2.8",
+    "vitest": "^3.2.1"
+  }
+}
