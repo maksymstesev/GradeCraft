@@ -347,6 +347,7 @@
       #confirmModalBackdrop,
       #policiesModalBackdrop,
       #shareModalBackdrop,
+      #syllabusModalBackdrop,
       #shareReadonlyBanner {
         display: none !important;
       }
@@ -698,6 +699,12 @@
               <button id="btnNormalizeWeights" type="button"
                 class="hidden px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/35 transition cursor-pointer">
                 Normalize to 100%
+              </button>
+              <button id="btnImportSyllabus" type="button"
+                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold theme-btn-secondary cursor-pointer"
+                title="Paste a grading section or drop a PDF to propose assignment groups">
+                <i class="fa-solid fa-file-import text-indigo-400"></i>
+                <span>Import from Syllabus</span>
               </button>
               <button id="btnAddGroup" type="button"
                 class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm transition cursor-pointer">
@@ -1234,14 +1241,24 @@
             <div>
               <h1 class="text-lg font-extrabold tracking-tight text-theme-primary font-mono">GradeCraft — Changelog</h1>
               <p class="text-xs text-theme-muted mt-1">Chronological record of releases and commits (<code
-                  class="font-mono">v1_1</code> &rarr; <code class="font-mono">v1_22</code>).</p>
+                  class="font-mono">v1_1</code> &rarr; <code class="font-mono">v1_23</code>).</p>
             </div>
             <span class="text-[11px] font-mono text-indigo-400 px-2.5 py-0.5 rounded-full accent-pill border">Latest:
-              v1_22</span>
+              v1_23</span>
           </div>
 
           <!-- Simple, clean text-based changelog list (Newest to Oldest & Plain-Text Block) -->
           <div class="space-y-4 font-mono text-xs leading-relaxed text-theme-secondary">
+            <div class="p-3.5 rounded-xl surface-alt border border-theme-subtle">
+              <div class="flex items-center justify-between gap-3">
+                <span class="font-bold text-indigo-400">v1_23</span>
+                <span class="text-[11px] font-mono text-theme-faint">11/22/2026</span>
+              </div>
+              <p class="mt-1 text-theme-primary font-sans text-xs leading-relaxed">
+                Added Import from Syllabus (rule-based, no LLM): paste a grading section or drop a PDF (pdf.js, on-device), parse name + percent pairs, review/edit proposed groups with a ~100% weight check, then create groups only on confirm. Optional LLM extraction is deferred.
+              </p>
+            </div>
+
             <div class="p-3.5 rounded-xl surface-alt border border-theme-subtle">
               <div class="flex items-center justify-between gap-3">
                 <span class="font-bold text-indigo-400">v1_22</span>
@@ -1543,7 +1560,7 @@
           <details id="rawChangelogDetails" class="pt-4 border-t border-theme">
             <summary class="raw-changelog-summary flex items-center justify-between gap-2 cursor-pointer select-none">
               <span class="text-[11px] font-bold uppercase tracking-wider text-theme-faint font-mono">Raw Plain-Text
-                Changelog (v1_1 &rarr; v1_22)</span>
+                Changelog (v1_1 &rarr; v1_23)</span>
               <i
                 class="fa-solid fa-chevron-down raw-changelog-chevron text-[11px] text-theme-faint transition-transform"></i>
             </summary>
@@ -1572,7 +1589,8 @@ v1_18 (11/21/2026) - Added grading policy rules per assignment group (drop lowes
 v1_19 (11/21/2026) - Extended the GPA Planner with Prior Credit, Cumulative GPA, and a Goal Calculator (needed average on future units, unreachable/already-met handling, formula note); prior/goal persist in the planner record only.
 v1_20 (11/22/2026) - Added assignment due dates, Upcoming panel (14-day + overdue, ranked by weight at stake), unified sort by due date, and .ics calendar export with stable UIDs.
 v1_21 (11/22/2026) - Added Charts & Trends: group points breakdown, grade-over-time line, and Term GPA trend with text summaries and table fallbacks.
-v1_22 (11/22/2026) - Added Share & Export: print/PDF for planner and changelog, assignments CSV export, and read-only lz-string share links (file fallback; never writes localStorage).</pre>
+v1_22 (11/22/2026) - Added Share & Export: print/PDF for planner and changelog, assignments CSV export, and read-only lz-string share links (file fallback; never writes localStorage).
+v1_23 (11/22/2026) - Added Import from Syllabus (rule-based, no LLM): paste or PDF (pdf.js on-device), parse name+percent pairs, review table with ~100% check, create groups only on confirm.</pre>
           </details>
         </section>
       </div>
@@ -1744,6 +1762,97 @@ v1_22 (11/22/2026) - Added Share & Export: print/PDF for planner and changelog, 
         <button id="policiesModalSaveBtn" type="button"
           class="px-4 py-2 rounded-xl text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm transition cursor-pointer">Save
           policies</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SYLLABUS IMPORT MODAL (rule-based parser; no LLM) -->
+  <div id="syllabusModalBackdrop"
+    class="fixed inset-0 z-50 bg-black/75 backdrop-blur-xs hidden items-center justify-center p-4">
+    <div class="surface-card rounded-2xl border max-w-2xl w-full p-6 space-y-4 max-h-[92vh] overflow-y-auto"
+      role="dialog" aria-modal="true" aria-labelledby="syllabusModalTitle">
+      <div class="flex items-start justify-between gap-3">
+        <div>
+          <h3 id="syllabusModalTitle" class="text-base font-bold text-theme-primary">Import from Syllabus</h3>
+          <p class="text-xs text-theme-muted mt-1 leading-relaxed">
+            Paste the grading breakdown or drop a PDF. GradeCraft finds name + percent pairs on-device (nothing is
+            uploaded). Review the proposed groups below — nothing is created until you confirm.
+          </p>
+        </div>
+        <button id="syllabusModalCloseBtn" type="button"
+          class="text-theme-faint hover:text-theme-primary p-1.5 rounded-lg transition cursor-pointer"
+          aria-label="Close syllabus import">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <label class="flex flex-col gap-1.5 text-xs sm:col-span-2">
+          <span class="font-semibold text-theme-secondary">Grading section text</span>
+          <textarea id="syllabusPasteInput" rows="7"
+            placeholder="Homework 20%&#10;Labs 10%&#10;Midterm 30%&#10;Final 40%"
+            class="w-full text-xs font-mono theme-input rounded-xl px-3 py-2.5 resize-y"></textarea>
+        </label>
+
+        <div id="syllabusDropZone"
+          class="sm:col-span-2 rounded-xl border border-dashed border-theme-subtle surface-alt px-4 py-5 text-center cursor-pointer transition hover:border-indigo-500/50">
+          <input id="syllabusPdfInput" type="file" accept="application/pdf,.pdf" class="hidden" />
+          <p class="text-xs font-semibold text-theme-secondary">
+            <i class="fa-solid fa-file-pdf text-indigo-400 mr-1.5"></i>
+            Drop a syllabus PDF here, or click to choose
+          </p>
+          <p id="syllabusPdfStatus" class="text-[11px] text-theme-faint mt-1">PDF text stays in this browser.</p>
+        </div>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-2">
+        <button id="syllabusParseBtn" type="button"
+          class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm transition cursor-pointer">
+          <i class="fa-solid fa-wand-magic-sparkles"></i>
+          <span>Parse weights</span>
+        </button>
+        <p id="syllabusParseSummary" class="text-xs text-theme-muted"></p>
+      </div>
+
+      <div id="syllabusReviewBlock" class="hidden space-y-3">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <h4 class="text-sm font-bold text-theme-primary">Review proposed groups</h4>
+          <label class="inline-flex items-center gap-2 text-xs text-theme-secondary cursor-pointer select-none">
+            <input id="syllabusReplaceExisting" type="checkbox" checked class="rounded border-theme"
+              style="accent-color: #6366f1;" />
+            Replace existing groups
+          </label>
+        </div>
+        <p id="syllabusAssignmentWarning" class="hidden text-[11px] text-amber-300/90 leading-relaxed"></p>
+        <div class="overflow-x-auto rounded-xl border border-theme">
+          <table class="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr class="border-b border-theme surface-alt text-[11px] font-bold uppercase tracking-wider text-theme-faint">
+                <th class="px-3 py-2">Group name</th>
+                <th class="px-3 py-2 text-right w-28">Weight %</th>
+                <th class="px-3 py-2 w-16 text-center">Remove</th>
+              </tr>
+            </thead>
+            <tbody id="syllabusReviewBody"></tbody>
+            <tfoot>
+              <tr class="border-t border-theme font-semibold">
+                <td class="px-3 py-2 text-theme-secondary">Total</td>
+                <td id="syllabusReviewTotal" class="px-3 py-2 text-right font-mono text-theme-primary">0%</td>
+                <td></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+        <ul id="syllabusWarningsList" class="hidden space-y-1 text-[11px] text-amber-300/90 list-disc pl-5"></ul>
+      </div>
+
+      <div class="flex items-center justify-end gap-2 pt-1">
+        <button id="syllabusModalCancelBtn" type="button"
+          class="px-4 py-2 rounded-xl text-xs font-semibold theme-btn-secondary cursor-pointer">Cancel</button>
+        <button id="syllabusConfirmBtn" type="button" disabled
+          class="px-4 py-2 rounded-xl text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 disabled:cursor-not-allowed text-white shadow-sm transition cursor-pointer">
+          Create groups
+        </button>
       </div>
     </div>
   </div>
@@ -3054,6 +3163,411 @@ v1_22 (11/22/2026) - Added Share & Export: print/PDF for planner and changelog, 
         }
         enterShareView(payload);
         return true;
+      }
+
+      // ─── Syllabus import (rule-based; no LLM) ───────────────────────────
+      /** Allowed absolute deviation from 100% before flagging. */
+      const WEIGHT_TOTAL_TOLERANCE = 1;
+
+      /** Words that usually mean a letter-grade scale row, not an assignment group. */
+      const LETTER_GRADE_NAME = /^(?:letter\s*grade|grade\s*range|percentage|percent(?:age)?|score|points?|gpa)$/i;
+      const LETTER_GRADE_LINE = /^(?:[A-F][+\-]?|P|NP|Pass|No\s*Pass)\b/i;
+      const RANGE_PERCENT = /\d{1,3}(?:\.\d+)?\s*[-–—]\s*\d{1,3}(?:\.\d+)?\s*%/;
+
+      /**
+       * Normalize a candidate group name for display / dedupe.
+       */
+      function cleanGroupName(raw) {
+        let name = String(raw || '')
+          .replace(/^[\s•●◦▪▫\-–—*·]+/, '')
+          .replace(/^\d{1,2}[.)]\s*/, '')
+          .replace(/\s+/g, ' ')
+          .replace(/[:\-–—|,.;]+$/g, '')
+          .trim();
+        // Strip trailing weight leftovers accidentally captured
+        name = name.replace(/\(?\s*\d{1,3}(?:\.\d+)?\s*%\s*\)?$/g, '').trim();
+        return name;
+      }
+
+      function looksLikeLetterGradeRow(name, line) {
+        if (LETTER_GRADE_NAME.test(name)) return true;
+        if (LETTER_GRADE_LINE.test(name)) return true;
+        if (RANGE_PERCENT.test(line) && /grade|scale|letter/i.test(line)) return true;
+        // "A 90%" / "A+: 97%" style rows
+        if (/^[A-F][+\-]?\b/i.test(name) && name.length <= 3) return true;
+        return false;
+      }
+
+      function pushUnique(groups, name, weight, sourceLine, warnings) {
+        const cleaned = cleanGroupName(name);
+        if (!cleaned || cleaned.length < 2) return;
+        if (!Number.isFinite(weight) || weight <= 0 || weight > 100) {
+          warnings.push(`Skipped invalid weight on: "${sourceLine.trim()}"`);
+          return;
+        }
+        if (looksLikeLetterGradeRow(cleaned, sourceLine)) return;
+
+        const key = cleaned.toLowerCase();
+        const existing = groups.find(g => g.name.toLowerCase() === key);
+        if (existing) {
+          // Prefer the later occurrence (often the grading breakdown repeats)
+          existing.weight = weight;
+          existing.sourceLine = sourceLine.trim();
+          return;
+        }
+        groups.push({
+          name: cleaned,
+          weight: Math.round(weight * 100) / 100,
+          sourceLine: sourceLine.trim()
+        });
+      }
+
+      /**
+       * Extract pairs from a single line. Returns array of {name, weight}.
+       */
+      function extractPairsFromLine(line) {
+        const raw = String(line || '').trim();
+        if (!raw || raw.length < 3) return [];
+        // Letter-grade bands like "A: 90-100%" or "80-89%" are not group weights
+        if (RANGE_PERCENT.test(raw)) return [];
+        if (LETTER_GRADE_LINE.test(raw) && /%/.test(raw)) return [];
+
+        const results = [];
+
+        // Inline list: "Homework (20%), Midterm (25%), Final (55%)"
+        const inlineRe = /([A-Za-z][^,%()]{1,60}?)\s*\((\d{1,3}(?:\.\d+)?)\s*%\)/g;
+        let inlineMatch;
+        const inlineHits = [];
+        while ((inlineMatch = inlineRe.exec(raw)) !== null) {
+          inlineHits.push({ name: inlineMatch[1], weight: Number(inlineMatch[2]) });
+        }
+        if (inlineHits.length >= 2) {
+          return inlineHits;
+        }
+
+        // Name … percent  OR  Name: 20%  OR  Name — 20%  OR  Name (20%)
+        const nameThenPct = raw.match(
+          /^(?:[\s•●◦▪▫\-–—*·]+|\d{1,2}[.)]\s*)*(.+?)\s*[:\-–—]?\s*\(?\s*(\d{1,3}(?:\.\d+)?)\s*%\s*\)?\s*\.?$/i
+        );
+        if (nameThenPct) {
+          const name = nameThenPct[1].trim();
+          // Avoid matching pure "20%" lines or "worth 20%" without a real name
+          if (!/^\d/.test(name) && /[A-Za-z]/.test(name)) {
+            results.push({ name, weight: Number(nameThenPct[2]) });
+            return results;
+          }
+        }
+
+        // Percent first: "20% Homework" / "20% — Midterm Exam"
+        const pctThenName = raw.match(
+          /^(?:[\s•●◦▪▫\-–—*·]+|\d{1,2}[.)]\s*)*(\d{1,3}(?:\.\d+)?)\s*%\s*[:\-–—]?\s*(.+?)\s*$/i
+        );
+        if (pctThenName && /[A-Za-z]/.test(pctThenName[2])) {
+          results.push({ name: pctThenName[2].trim(), weight: Number(pctThenName[1]) });
+          return results;
+        }
+
+        // Tab / multi-space separated: "Homework    20"
+        const spaced = raw.match(/^(.+?)(?:\t+|\s{2,})(\d{1,3}(?:\.\d+)?)\s*%?\s*$/);
+        if (spaced && /[A-Za-z]/.test(spaced[1]) && !RANGE_PERCENT.test(raw)) {
+          results.push({ name: spaced[1].trim(), weight: Number(spaced[2]) });
+        }
+
+        return results;
+      }
+
+      /**
+       * Summarize whether proposed weights total about 100%.
+       */
+      function summarizeWeightTotal(groups, tolerance = WEIGHT_TOTAL_TOLERANCE) {
+        const list = Array.isArray(groups) ? groups : [];
+        const total = list.reduce((sum, g) => sum + (Number(g.weight) || 0), 0);
+        const rounded = Math.round(total * 100) / 100;
+        const delta = Math.abs(rounded - 100);
+        const ok = list.length > 0 && delta <= tolerance;
+        let message = '';
+        if (list.length === 0) {
+          message = 'No assignment-group weights found. Paste the grading breakdown (e.g. “Homework 20%, Midterm 30%, Final 50%”).';
+        } else if (ok) {
+          message = `Weights total ${rounded}% (within ±${tolerance}% of 100%).`;
+        } else if (rounded < 100) {
+          message = `Weights total ${rounded}% — ${Math.round((100 - rounded) * 100) / 100}% short of 100%.`;
+        } else {
+          message = `Weights total ${rounded}% — ${Math.round((rounded - 100) * 100) / 100}% over 100%.`;
+        }
+        return { total: rounded, ok, message, delta };
+      }
+
+      /**
+       * Parse pasted syllabus / grading-section text into proposed groups.
+       * @returns {{ groups: Array<{name, weight, sourceLine}>, warnings: string[], total: number, ok: boolean, message: string }}
+       */
+      function parseSyllabusWeights(text) {
+        const warnings = [];
+        const groups = [];
+        const raw = String(text || '').replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+
+        // Prefer a "Grading" section if present
+        let focused = raw;
+        const sectionMatch = raw.match(
+          /(?:^|\n)\s*(?:grading|grade\s*breakdown|course\s*grading|assessment|evaluation|components?|weight(?:s|ing)?)\s*[:\n]([\s\S]{20,2500}?)(?=\n\s*(?:schedule|calendar|policies|late\s*work|academic|office\s*hours|textbook|readings|week\s*\d)\b|$)/i
+        );
+        if (sectionMatch) {
+          focused = sectionMatch[1];
+        }
+
+        const lines = focused.split('\n');
+        lines.forEach(line => {
+          extractPairsFromLine(line).forEach(pair => {
+            pushUnique(groups, pair.name, pair.weight, line, warnings);
+          });
+        });
+
+        // If line-based parse found nothing, try the whole text as one inline list
+        if (groups.length === 0) {
+          extractPairsFromLine(focused.replace(/\n/g, ', ')).forEach(pair => {
+            pushUnique(groups, pair.name, pair.weight, pair.name, warnings);
+          });
+        }
+
+        const summary = summarizeWeightTotal(groups);
+        if (groups.length > 0 && !summary.ok) {
+          warnings.push(summary.message);
+        }
+
+        return {
+          groups,
+          warnings,
+          total: summary.total,
+          ok: summary.ok,
+          message: summary.message
+        };
+      }
+
+      /**
+       * Map proposed rows into class group objects (ids assigned by caller via uidFn).
+       */
+      function proposedGroupsToClassGroups(proposed, { uidFn, createPolicies } = {}) {
+        const makeId = typeof uidFn === 'function' ? uidFn : (() => `grp_${Math.random().toString(36).slice(2, 9)}`);
+        const policiesFn = typeof createPolicies === 'function'
+          ? createPolicies
+          : (() => ({
+            dropLowest: 0,
+            bestOf: 0,
+            latePenalty: { enabled: false, percentPerDay: 10, cap: 100 },
+            replacement: { enabled: false, sourceAssignmentId: '', targetAssignmentId: '' }
+          }));
+
+        return (proposed || [])
+          .filter(g => g && cleanGroupName(g.name) && Number(g.weight) > 0)
+          .map((g, idx) => ({
+            id: makeId(`grp_syll_${idx}`),
+            name: cleanGroupName(g.name),
+            weight: Math.round(Number(g.weight) * 100) / 100,
+            policies: policiesFn()
+          }));
+      }
+
+
+      let syllabusDraftGroups = [];
+      let pdfJsLibPromise = null;
+
+      function loadPdfJs() {
+        if (window.pdfjsLib) return Promise.resolve(window.pdfjsLib);
+        if (pdfJsLibPromise) return pdfJsLibPromise;
+        pdfJsLibPromise = import('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.min.mjs')
+          .then((pdfjs) => {
+            pdfjs.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.worker.min.mjs';
+            window.pdfjsLib = pdfjs;
+            return pdfjs;
+          })
+          .catch((err) => {
+            pdfJsLibPromise = null;
+            throw err;
+          });
+        return pdfJsLibPromise;
+      }
+
+      async function extractTextFromPdfFile(file) {
+        const pdfjs = await loadPdfJs();
+        const data = await file.arrayBuffer();
+        const doc = await pdfjs.getDocument({ data }).promise;
+        const pages = [];
+        for (let i = 1; i <= doc.numPages; i++) {
+          const page = await doc.getPage(i);
+          const content = await page.getTextContent();
+          const lineMap = new Map();
+          content.items.forEach((item) => {
+            const str = item.str || '';
+            if (!str.trim()) return;
+            const y = item.transform ? Math.round(item.transform[5]) : 0;
+            const prev = lineMap.get(y) || '';
+            lineMap.set(y, prev ? prev + ' ' + str : str);
+          });
+          const sortedYs = [...lineMap.keys()].sort((a, b) => b - a);
+          pages.push(sortedYs.map((y) => lineMap.get(y)).join('\n'));
+        }
+        return pages.join('\n\n');
+      }
+
+      function openSyllabusModal() {
+        if (readOnlyMode) {
+          showToast('Syllabus import is disabled in a read-only shared view.', 'info');
+          return;
+        }
+        const cls = getActiveClass();
+        if (!cls) {
+          showToast('Select a class first', 'warning');
+          return;
+        }
+        syllabusDraftGroups = [];
+        const backdrop = document.getElementById('syllabusModalBackdrop');
+        const paste = document.getElementById('syllabusPasteInput');
+        const status = document.getElementById('syllabusPdfStatus');
+        const review = document.getElementById('syllabusReviewBlock');
+        const summary = document.getElementById('syllabusParseSummary');
+        const warnList = document.getElementById('syllabusWarningsList');
+        const confirmBtn = document.getElementById('syllabusConfirmBtn');
+        const fileInput = document.getElementById('syllabusPdfInput');
+        if (paste) paste.value = '';
+        if (status) status.textContent = 'PDF text stays in this browser.';
+        if (summary) summary.textContent = '';
+        if (review) review.classList.add('hidden');
+        if (warnList) {
+          warnList.classList.add('hidden');
+          warnList.innerHTML = '';
+        }
+        if (confirmBtn) confirmBtn.disabled = true;
+        if (fileInput) fileInput.value = '';
+        if (backdrop) {
+          backdrop.classList.remove('hidden');
+          backdrop.classList.add('flex');
+        }
+      }
+
+      function closeSyllabusModal() {
+        const backdrop = document.getElementById('syllabusModalBackdrop');
+        if (!backdrop) return;
+        backdrop.classList.add('hidden');
+        backdrop.classList.remove('flex');
+        syllabusDraftGroups = [];
+      }
+
+      function refreshSyllabusReview() {
+        const body = document.getElementById('syllabusReviewBody');
+        const totalEl = document.getElementById('syllabusReviewTotal');
+        const review = document.getElementById('syllabusReviewBlock');
+        const confirmBtn = document.getElementById('syllabusConfirmBtn');
+        const warnList = document.getElementById('syllabusWarningsList');
+        const asgWarn = document.getElementById('syllabusAssignmentWarning');
+        const summary = summarizeWeightTotal(syllabusDraftGroups);
+        if (review) review.classList.toggle('hidden', syllabusDraftGroups.length === 0);
+        if (body) {
+          body.innerHTML = syllabusDraftGroups.map((g, idx) => `
+            <tr class="border-b border-theme-subtle" data-syllabus-row="${idx}">
+              <td class="px-3 py-2">
+                <input type="text" data-syllabus-field="name" data-idx="${idx}" value="${escapeHtml(g.name)}"
+                  class="w-full theme-input rounded-lg px-2.5 py-1.5 text-xs" aria-label="Group name ${idx + 1}" />
+              </td>
+              <td class="px-3 py-2 text-right">
+                <input type="number" min="0" max="100" step="0.1" data-syllabus-field="weight" data-idx="${idx}" value="${g.weight}"
+                  class="w-24 ml-auto font-mono theme-input rounded-lg px-2.5 py-1.5 text-xs text-right" aria-label="Weight ${idx + 1}" />
+              </td>
+              <td class="px-3 py-2 text-center">
+                <button type="button" data-action="syllabus-remove-row" data-idx="${idx}"
+                  class="text-rose-400 hover:text-rose-300 p-1.5 rounded-lg transition cursor-pointer" aria-label="Remove row">
+                  <i class="fa-solid fa-xmark"></i>
+                </button>
+              </td>
+            </tr>
+          `).join('');
+        }
+        if (totalEl) {
+          totalEl.textContent = `${summary.total}%`;
+          totalEl.className = `px-3 py-2 text-right font-mono ${summary.ok ? 'text-emerald-400' : 'text-amber-300'}`;
+        }
+        if (confirmBtn) confirmBtn.disabled = syllabusDraftGroups.length === 0;
+        const cls = getActiveClass();
+        if (asgWarn) {
+          const asgCount = cls?.assignments?.length || 0;
+          if (asgCount > 0) {
+            asgWarn.textContent = `This class has ${asgCount} assignment${asgCount === 1 ? '' : 's'}. Replacing groups will move them onto the first imported group.`;
+            asgWarn.classList.remove('hidden');
+          } else {
+            asgWarn.classList.add('hidden');
+            asgWarn.textContent = '';
+          }
+        }
+        if (warnList) {
+          const notes = [];
+          if (syllabusDraftGroups.length > 0 && !summary.ok) notes.push(summary.message);
+          if (notes.length) {
+            warnList.innerHTML = notes.map((n) => `<li>${escapeHtml(n)}</li>`).join('');
+            warnList.classList.remove('hidden');
+          } else {
+            warnList.innerHTML = '';
+            warnList.classList.add('hidden');
+          }
+        }
+      }
+
+      function runSyllabusParse(text, extraWarnings = []) {
+        const result = parseSyllabusWeights(text);
+        syllabusDraftGroups = (result.groups || []).map((g) => ({
+          name: g.name,
+          weight: g.weight,
+          sourceLine: g.sourceLine || ''
+        }));
+        const summaryEl = document.getElementById('syllabusParseSummary');
+        if (summaryEl) {
+          summaryEl.textContent = result.groups.length
+            ? `Found ${result.groups.length} group${result.groups.length === 1 ? '' : 's'}. ${result.message}`
+            : result.message;
+        }
+        const warnList = document.getElementById('syllabusWarningsList');
+        const allWarnings = [...extraWarnings, ...(result.warnings || [])];
+        refreshSyllabusReview();
+        if (warnList && allWarnings.length) {
+          const existing = warnList.innerHTML;
+          warnList.innerHTML = allWarnings.map((n) => `<li>${escapeHtml(n)}</li>`).join('') + existing;
+          warnList.classList.remove('hidden');
+        }
+        if (!result.groups.length) {
+          showToast('No weight lines found. Try pasting only the grading breakdown.', 'warning');
+        } else {
+          showToast(`Parsed ${result.groups.length} proposed group${result.groups.length === 1 ? '' : 's'}`, 'success');
+        }
+      }
+
+      function confirmSyllabusImport() {
+        const cls = getActiveClass();
+        if (!cls || readOnlyMode) return;
+        const rows = syllabusDraftGroups
+          .map((g) => ({ name: cleanGroupName(g.name), weight: Number(g.weight) }))
+          .filter((g) => g.name && Number.isFinite(g.weight) && g.weight > 0);
+        if (!rows.length) {
+          showToast('Add at least one group with a positive weight', 'warning');
+          return;
+        }
+        const replaceEl = document.getElementById('syllabusReplaceExisting');
+        const replace = !replaceEl || replaceEl.checked;
+        const newGroups = proposedGroupsToClassGroups(rows, {
+          uidFn: (prefix) => uid(prefix),
+          createPolicies: createDefaultGroupPolicies
+        });
+        if (replace) {
+          const firstId = newGroups[0]?.id;
+          (cls.assignments || []).forEach((a) => {
+            if (firstId) a.groupId = firstId;
+          });
+          cls.groups = newGroups;
+        } else {
+          cls.groups = [...(cls.groups || []), ...newGroups];
+        }
+        saveState();
+        closeSyllabusModal();
+        renderApp();
+        showToast(`Imported ${newGroups.length} assignment group${newGroups.length === 1 ? '' : 's'} from syllabus`, 'success');
       }
 
       function applyTheme(theme) {
@@ -5349,6 +5863,38 @@ v1_22 (11/22/2026) - Added Share & Export: print/PDF for planner and changelog, 
           renderApp(false);
         });
 
+        const syllabusDrop = document.getElementById('syllabusDropZone');
+        if (syllabusDrop) {
+          ['dragenter', 'dragover'].forEach((evtName) => {
+            syllabusDrop.addEventListener(evtName, (e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              syllabusDrop.classList.add('border-indigo-500/60');
+            });
+          });
+          ['dragleave', 'drop'].forEach((evtName) => {
+            syllabusDrop.addEventListener(evtName, (e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              syllabusDrop.classList.remove('border-indigo-500/60');
+            });
+          });
+          syllabusDrop.addEventListener('drop', (e) => {
+            const file = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+            if (!file) return;
+            const input = document.getElementById('syllabusPdfInput');
+            if (!input) return;
+            if (!/\.pdf$/i.test(file.name) && file.type !== 'application/pdf') {
+              showToast('Please drop a PDF syllabus file', 'warning');
+              return;
+            }
+            const transfer = new DataTransfer();
+            transfer.items.add(file);
+            input.files = transfer.files;
+            input.dispatchEvent(new Event('change', { bubbles: true }));
+          });
+        }
+
         // A. CLICK DELEGATION
         document.addEventListener('click', (e) => {
           const target = e.target;
@@ -5681,6 +6227,42 @@ v1_22 (11/22/2026) - Added Share & Export: print/PDF for planner and changelog, 
             return;
           }
 
+          if (target.closest('#btnImportSyllabus')) {
+            openSyllabusModal();
+            return;
+          }
+
+          if (target.closest('#syllabusModalCloseBtn') || target.closest('#syllabusModalCancelBtn') || target.id === 'syllabusModalBackdrop') {
+            closeSyllabusModal();
+            return;
+          }
+
+          if (target.closest('#syllabusParseBtn')) {
+            const paste = document.getElementById('syllabusPasteInput');
+            runSyllabusParse(paste?.value || '');
+            return;
+          }
+
+          if (target.closest('#syllabusConfirmBtn')) {
+            confirmSyllabusImport();
+            return;
+          }
+
+          const syllabusRemove = target.closest('[data-action="syllabus-remove-row"]');
+          if (syllabusRemove) {
+            const idx = Number(syllabusRemove.getAttribute('data-idx'));
+            if (Number.isInteger(idx) && idx >= 0) {
+              syllabusDraftGroups.splice(idx, 1);
+              refreshSyllabusReview();
+            }
+            return;
+          }
+
+          if (target.closest('#syllabusDropZone') && !target.closest('#syllabusPdfInput')) {
+            document.getElementById('syllabusPdfInput')?.click();
+            return;
+          }
+
           if (target.closest('#btnAddGroup')) {
             const cls = getActiveClass();
             if (!cls) return;
@@ -5982,6 +6564,35 @@ v1_22 (11/22/2026) - Added Share & Export: print/PDF for planner and changelog, 
           if (!target) return;
           if (readOnlyMode) return;
 
+          const syllabusField = target.getAttribute && target.getAttribute('data-syllabus-field');
+          if (syllabusField) {
+            const idx = Number(target.getAttribute('data-idx'));
+            if (!Number.isInteger(idx) || !syllabusDraftGroups[idx]) return;
+            if (syllabusField === 'name') {
+              syllabusDraftGroups[idx].name = target.value;
+            } else if (syllabusField === 'weight') {
+              const n = Number(target.value);
+              syllabusDraftGroups[idx].weight = Number.isFinite(n) ? n : 0;
+              const summary = summarizeWeightTotal(syllabusDraftGroups);
+              const totalEl = document.getElementById('syllabusReviewTotal');
+              if (totalEl) {
+                totalEl.textContent = `${summary.total}%`;
+                totalEl.className = `px-3 py-2 text-right font-mono ${summary.ok ? 'text-emerald-400' : 'text-amber-300'}`;
+              }
+              const warnList = document.getElementById('syllabusWarningsList');
+              if (warnList) {
+                if (!summary.ok && syllabusDraftGroups.length) {
+                  warnList.innerHTML = `<li>${escapeHtml(summary.message)}</li>`;
+                  warnList.classList.remove('hidden');
+                } else {
+                  warnList.innerHTML = '';
+                  warnList.classList.add('hidden');
+                }
+              }
+            }
+            return;
+          }
+
           if (target.id === 'gpaPriorUnits') {
             const n = parseOptionalNumberInput(target.value);
             gpaPlan.prior = gpaPlan.prior || { units: 0, gpa: null };
@@ -6193,6 +6804,25 @@ v1_22 (11/22/2026) - Added Share & Export: print/PDF for planner and changelog, 
         document.addEventListener('change', (e) => {
           const target = e.target;
           if (!target) return;
+
+          if (target.id === 'syllabusPdfInput' && target.files && target.files[0]) {
+            const file = target.files[0];
+            const status = document.getElementById('syllabusPdfStatus');
+            if (status) status.textContent = `Reading ${file.name}…`;
+            extractTextFromPdfFile(file)
+              .then((text) => {
+                const paste = document.getElementById('syllabusPasteInput');
+                if (paste) paste.value = text;
+                if (status) status.textContent = `Loaded text from ${file.name} (${text.length.toLocaleString()} chars).`;
+                runSyllabusParse(text);
+              })
+              .catch((err) => {
+                console.error(err);
+                if (status) status.textContent = 'Could not read that PDF. Paste the grading section instead.';
+                showToast('PDF text extraction failed. Paste the grading text instead.', 'warning');
+              });
+            return;
+          }
 
           if (target.id === 'inputClassPnp') {
             const cls = getActiveClass();
