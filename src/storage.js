@@ -18,7 +18,8 @@ import {
   normalizeTermName,
   normalizeUnits,
   cloneGradeScale,
-  normalizeGroupPolicies
+  normalizeGroupPolicies,
+  normalizeDueDate
 } from './calc.js';
 
 // ─── Helpers ─────────────────────────────────────────────────────────
@@ -82,13 +83,13 @@ export function createExampleCourses(defaultScale) {
       ],
       buckets: cloneGradeScale(scale),
       assignments: [
-        { id: 'asg_61a_1', name: 'Lab 01: Functions', groupId: 'grp_61a_hw', earned: 10, available: 10, whatIfEarned: null, extraCredit: false, lateDays: 0 },
-        { id: 'asg_61a_2', name: 'HW 01: Control', groupId: 'grp_61a_hw', earned: 2, available: 2, whatIfEarned: null, extraCredit: false, lateDays: 0 },
-        { id: 'asg_61a_3', name: 'Project 1: Hog', groupId: 'grp_61a_proj', earned: 25, available: 25, whatIfEarned: null, extraCredit: false, lateDays: 0 },
-        { id: 'asg_61a_4', name: 'Project 2: Cats', groupId: 'grp_61a_proj', earned: 24, available: 25, whatIfEarned: null, extraCredit: false, lateDays: 0 },
-        { id: 'asg_61a_5', name: 'Midterm 1', groupId: 'grp_61a_mt1', earned: 36, available: 40, whatIfEarned: null, extraCredit: false, lateDays: 0 },
-        { id: 'asg_61a_6', name: 'Midterm 2', groupId: 'grp_61a_mt2', earned: 35, available: 40, whatIfEarned: null, extraCredit: false, lateDays: 0 },
-        { id: 'asg_61a_7', name: 'Final Exam', groupId: 'grp_61a_fin', earned: null, available: 75, whatIfEarned: 68, extraCredit: false, lateDays: 0 }
+        { id: 'asg_61a_1', name: 'Lab 01: Functions', groupId: 'grp_61a_hw', earned: 10, available: 10, whatIfEarned: null, extraCredit: false, lateDays: 0, due: '' },
+        { id: 'asg_61a_2', name: 'HW 01: Control', groupId: 'grp_61a_hw', earned: 2, available: 2, whatIfEarned: null, extraCredit: false, lateDays: 0, due: '' },
+        { id: 'asg_61a_3', name: 'Project 1: Hog', groupId: 'grp_61a_proj', earned: 25, available: 25, whatIfEarned: null, extraCredit: false, lateDays: 0, due: '' },
+        { id: 'asg_61a_4', name: 'Project 2: Cats', groupId: 'grp_61a_proj', earned: 24, available: 25, whatIfEarned: null, extraCredit: false, lateDays: 0, due: '' },
+        { id: 'asg_61a_5', name: 'Midterm 1', groupId: 'grp_61a_mt1', earned: 36, available: 40, whatIfEarned: null, extraCredit: false, lateDays: 0, due: '' },
+        { id: 'asg_61a_6', name: 'Midterm 2', groupId: 'grp_61a_mt2', earned: 35, available: 40, whatIfEarned: null, extraCredit: false, lateDays: 0, due: '' },
+        { id: 'asg_61a_7', name: 'Final Exam', groupId: 'grp_61a_fin', earned: null, available: 75, whatIfEarned: 68, extraCredit: false, lateDays: 0, due: '' }
       ]
     },
     {
@@ -107,11 +108,11 @@ export function createExampleCourses(defaultScale) {
       ],
       buckets: cloneGradeScale(scale),
       assignments: [
-        { id: 'asg_c8_1', name: 'Lab 01: Expressions', groupId: 'grp_c8_lab', earned: 10, available: 10, whatIfEarned: null, extraCredit: false, lateDays: 0 },
-        { id: 'asg_c8_2', name: 'HW 01: Causality', groupId: 'grp_c8_hw', earned: 18, available: 20, whatIfEarned: null, extraCredit: false, lateDays: 0 },
-        { id: 'asg_c8_3', name: 'Project 1: World Progress', groupId: 'grp_c8_proj', earned: 29, available: 30, whatIfEarned: null, extraCredit: false, lateDays: 0 },
-        { id: 'asg_c8_4', name: 'Midterm Exam', groupId: 'grp_c8_mt', earned: 44, available: 50, whatIfEarned: null, extraCredit: false, lateDays: 0 },
-        { id: 'asg_c8_5', name: 'Final Exam', groupId: 'grp_c8_fin', earned: null, available: 100, whatIfEarned: 90, extraCredit: false, lateDays: 0 }
+        { id: 'asg_c8_1', name: 'Lab 01: Expressions', groupId: 'grp_c8_lab', earned: 10, available: 10, whatIfEarned: null, extraCredit: false, lateDays: 0, due: '' },
+        { id: 'asg_c8_2', name: 'HW 01: Causality', groupId: 'grp_c8_hw', earned: 18, available: 20, whatIfEarned: null, extraCredit: false, lateDays: 0, due: '' },
+        { id: 'asg_c8_3', name: 'Project 1: World Progress', groupId: 'grp_c8_proj', earned: 29, available: 30, whatIfEarned: null, extraCredit: false, lateDays: 0, due: '' },
+        { id: 'asg_c8_4', name: 'Midterm Exam', groupId: 'grp_c8_mt', earned: 44, available: 50, whatIfEarned: null, extraCredit: false, lateDays: 0, due: '' },
+        { id: 'asg_c8_5', name: 'Final Exam', groupId: 'grp_c8_fin', earned: null, available: 100, whatIfEarned: 90, extraCredit: false, lateDays: 0, due: '' }
       ]
     }
   ];
@@ -124,6 +125,7 @@ export function createDefaultState() {
     activeTermFilter: 'Fall 2026',
     activeClassId: 'class_cs61a',
     gradebookViewMode: 'grouped',
+    gradebookSortMode: 'group',
     theme: 'black',
     locale: 'en-US',
     profile: {
@@ -169,7 +171,8 @@ export function sanitizeClassObject(c, idx, defaultDefs) {
           available: Math.max(0.01, Number(availVal ?? 100) || 100),
           whatIfEarned: isGradedValue(whatIfVal) ? Number(whatIfVal) : null,
           extraCredit: a?.extraCredit === true,
-          lateDays: Math.max(0, Number(a?.lateDays) || 0)
+          lateDays: Math.max(0, Number(a?.lateDays) || 0),
+          due: normalizeDueDate(a?.due)
         };
       })
     : [];
@@ -213,6 +216,7 @@ export function sanitizeState(rawState) {
     activeTermFilter: String(rawState.activeTermFilter || ''),
     activeClassId: String(rawState.activeClassId || ''),
     gradebookViewMode: (rawState.gradebookViewMode === 'unified' || rawState.viewMode === 'unified') ? 'unified' : 'grouped',
+    gradebookSortMode: rawState.gradebookSortMode === 'due' ? 'due' : 'group',
     theme: ['black', 'midnight', 'light'].includes(rawState.theme) ? rawState.theme : 'black',
     locale: String(rawState.locale || rawState.language || 'en-US'),
     profile: {

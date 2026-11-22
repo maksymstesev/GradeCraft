@@ -41,6 +41,9 @@ export const GPA_STORAGE_KEY = 'gradecraft_gpa_planner_v1';
 
 export const DEFAULT_CLASS_UNITS = 4;
 
+/** Upcoming panel looks this many days ahead (plus overdue items). */
+export const UPCOMING_WINDOW_DAYS = 14;
+
 /** Default grading policies for an assignment group (all off). */
 export function createDefaultGroupPolicies() {
   return {

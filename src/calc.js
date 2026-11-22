@@ -7,7 +7,8 @@
 import {
   UC_BERKELEY_GRADE_DEFINITIONS,
   DEFAULT_CLASS_UNITS,
-  createDefaultGroupPolicies
+  createDefaultGroupPolicies,
+  UPCOMING_WINDOW_DAYS
 } from './constants.js';
 
 // ─── Primitive helpers ───────────────────────────────────────────────
@@ -618,4 +619,226 @@ export function computeGoalGpaNeeded(cumulative, goal, maxGpa = 4.0) {
   }
 
   return { ...base, status: 'ok', neededGpa: needed, maxPossible };
+}
+
+// ─── Due dates, Upcoming, calendar export ────────────────────────────
+
+/** Accepts YYYY-MM-DD only; anything else becomes ''. */
+export function normalizeDueDate(value) {
+  const raw = String(value ?? '').trim();
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(raw)) return '';
+  const [y, m, d] = raw.split('-').map(Number);
+  const dt = new Date(Date.UTC(y, m - 1, d));
+  if (dt.getUTCFullYear() !== y || dt.getUTCMonth() !== m - 1 || dt.getUTCDate() !== d) return '';
+  return raw;
+}
+
+/** Local calendar YYYY-MM-DD for a Date (or today). */
+export function toLocalDateString(date = new Date()) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
+/** Add whole days to a YYYY-MM-DD string (UTC-safe calendar arithmetic). */
+export function addDaysToDateString(dateStr, days) {
+  const normalized = normalizeDueDate(dateStr);
+  if (!normalized) return '';
+  const [y, m, d] = normalized.split('-').map(Number);
+  const dt = new Date(Date.UTC(y, m - 1, d + Number(days) || 0));
+  return [
+    dt.getUTCFullYear(),
+    String(dt.getUTCMonth() + 1).padStart(2, '0'),
+    String(dt.getUTCDate()).padStart(2, '0')
+  ].join('-');
+}
+
+export function formatDueDateDisplay(due, locale = 'en-US') {
+  const normalized = normalizeDueDate(due);
+  if (!normalized) return '';
+  const [y, m, d] = normalized.split('-').map(Number);
+  try {
+    return new Intl.DateTimeFormat(locale, {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      timeZone: 'UTC'
+    }).format(new Date(Date.UTC(y, m - 1, d)));
+  } catch {
+    return normalized;
+  }
+}
+
+/**
+ * Course-weight percentage this assignment represents within its group:
+ * group.weight × (assignment.available / Σ group available points).
+ */
+export function computeAssignmentWeightAtStake(assignment, group, groupAssignments) {
+  const groupWeight = Math.max(0, Number(group?.weight) || 0);
+  const avail = Math.max(0, Number(assignment?.available) || 0);
+  let groupTotal = 0;
+  (groupAssignments || []).forEach(a => {
+    groupTotal += Math.max(0, Number(a.available) || 0);
+  });
+  if (groupTotal <= 0 || avail <= 0) return 0;
+  return groupWeight * (avail / groupTotal);
+}
+
+/**
+ * Unscored assignments with a due date that are overdue or due within the window.
+ * Ranked by weight at stake (desc), then due date (asc).
+ */
+export function buildUpcomingAssignments(classesList, options = {}) {
+  const windowDays = Number.isFinite(Number(options.windowDays))
+    ? Math.max(0, Number(options.windowDays))
+    : UPCOMING_WINDOW_DAYS;
+  const todayStr = normalizeDueDate(options.today) || toLocalDateString(options.now instanceof Date ? options.now : new Date());
+  const horizonStr = addDaysToDateString(todayStr, windowDays);
+  const items = [];
+
+  (classesList || []).forEach(cls => {
+    const groupsById = Object.fromEntries((cls.groups || []).map(g => [g.id, g]));
+    (cls.assignments || []).forEach(a => {
+      if (isGradedValue(a.earned)) return;
+      const due = normalizeDueDate(a.due);
+      if (!due) return;
+      const overdue = due < todayStr;
+      const upcoming = due >= todayStr && due <= horizonStr;
+      if (!overdue && !upcoming) return;
+
+      const group = groupsById[a.groupId] || null;
+      const groupAssignments = (cls.assignments || []).filter(x => x.groupId === a.groupId);
+      const weightAtStake = computeAssignmentWeightAtStake(a, group, groupAssignments);
+
+      items.push({
+        classId: cls.id,
+        classCode: cls.code || '',
+        className: cls.name || '',
+        term: normalizeTermName(cls.term),
+        assignmentId: a.id,
+        assignmentName: a.name || '',
+        groupId: a.groupId,
+        groupName: group?.name || '',
+        groupWeight: Math.max(0, Number(group?.weight) || 0),
+        due,
+        overdue,
+        available: Math.max(0, Number(a.available) || 0),
+        weightAtStake
+      });
+    });
+  });
+
+  items.sort((a, b) => {
+    if (b.weightAtStake !== a.weightAtStake) return b.weightAtStake - a.weightAtStake;
+    if (a.due !== b.due) return a.due < b.due ? -1 : 1;
+    return String(a.assignmentId).localeCompare(String(b.assignmentId));
+  });
+
+  return items;
+}
+
+function escapeIcsText(value) {
+  return String(value ?? '')
+    .replace(/\\/g, '\\\\')
+    .replace(/\n/g, '\\n')
+    .replace(/,/g, '\\,')
+    .replace(/;/g, '\\;');
+}
+
+function foldIcsLine(line) {
+  const str = String(line);
+  if (str.length <= 75) return str;
+  const parts = [];
+  let remaining = str;
+  parts.push(remaining.slice(0, 75));
+  remaining = remaining.slice(75);
+  while (remaining.length > 0) {
+    parts.push(' ' + remaining.slice(0, 74));
+    remaining = remaining.slice(74);
+  }
+  return parts.join('\r\n');
+}
+
+/** Stable UID so re-importing updates instead of duplicating. */
+export function buildAssignmentIcsUid(assignmentId) {
+  const safe = String(assignmentId || 'unknown').replace(/[^A-Za-z0-9_.-]/g, '_');
+  return `gradecraft-${safe}@gradecraft.local`;
+}
+
+/**
+ * Build ICS events (all-day) for every assignment that has a due date.
+ */
+export function buildCalendarEventsFromClasses(classesList) {
+  const events = [];
+  (classesList || []).forEach(cls => {
+    const groupsById = Object.fromEntries((cls.groups || []).map(g => [g.id, g]));
+    (cls.assignments || []).forEach(a => {
+      const due = normalizeDueDate(a.due);
+      if (!due) return;
+      const group = groupsById[a.groupId] || null;
+      const groupAssignments = (cls.assignments || []).filter(x => x.groupId === a.groupId);
+      const weightAtStake = computeAssignmentWeightAtStake(a, group, groupAssignments);
+      const code = cls.code || 'Course';
+      events.push({
+        uid: buildAssignmentIcsUid(a.id),
+        due,
+        summary: `${code}: ${a.name || 'Assignment'}`,
+        description: [
+          `Class: ${code} — ${cls.name || ''}`,
+          `Group: ${group?.name || '—'} (${formatNumber(group?.weight ?? 0, 0, 1)}% of course)`,
+          `Weight at stake: ${formatNumber(weightAtStake, 1, 2)}% of course`,
+          `Available points: ${formatNumber(a.available, 0, 2)}`
+        ].join('\n')
+      });
+    });
+  });
+  events.sort((a, b) => (a.due === b.due ? a.uid.localeCompare(b.uid) : (a.due < b.due ? -1 : 1)));
+  return events;
+}
+
+/**
+ * Hand-written RFC 5545 iCalendar document (all-day events).
+ * @param {Array<{uid:string, due:string, summary:string, description?:string}>} events
+ * @param {object} [options]
+ */
+export function buildIcsCalendar(events, options = {}) {
+  const now = options.now instanceof Date ? options.now : new Date();
+  const stamp = [
+    now.getUTCFullYear(),
+    String(now.getUTCMonth() + 1).padStart(2, '0'),
+    String(now.getUTCDate()).padStart(2, '0'),
+    'T',
+    String(now.getUTCHours()).padStart(2, '0'),
+    String(now.getUTCMinutes()).padStart(2, '0'),
+    String(now.getUTCSeconds()).padStart(2, '0'),
+    'Z'
+  ].join('');
+
+  const lines = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//GradeCraft//Grade Calculator//EN',
+    'CALSCALE:GREGORIAN',
+    'METHOD:PUBLISH'
+  ];
+
+  (events || []).forEach(ev => {
+    const due = normalizeDueDate(ev.due);
+    if (!due || !ev.uid) return;
+    const end = addDaysToDateString(due, 1);
+    const compactStart = due.replace(/-/g, '');
+    const compactEnd = end.replace(/-/g, '');
+    lines.push('BEGIN:VEVENT');
+    lines.push(`UID:${ev.uid}`);
+    lines.push(`DTSTAMP:${stamp}`);
+    lines.push(`DTSTART;VALUE=DATE:${compactStart}`);
+    lines.push(`DTEND;VALUE=DATE:${compactEnd}`);
+    lines.push(`SUMMARY:${escapeIcsText(ev.summary || 'Assignment')}`);
+    if (ev.description) lines.push(`DESCRIPTION:${escapeIcsText(ev.description)}`);
+    lines.push('END:VEVENT');
+  });
+
+  lines.push('END:VCALENDAR');
+  return lines.map(foldIcsLine).join('\r\n') + '\r\n';
 }
