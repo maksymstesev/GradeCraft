@@ -120,6 +120,10 @@ export function createExampleCourses(defaultScale) {
 
 export function createDefaultState() {
   const defaultScale = cloneGradeScale(UC_BERKELEY_GRADE_DEFINITIONS);
+  const stamped = createExampleCourses(defaultScale).map(c => ({
+    ...c,
+    updatedAt: c.updatedAt || new Date().toISOString()
+  }));
   return {
     activeView: 'gradebook',
     activeTermFilter: 'Fall 2026',
@@ -135,7 +139,9 @@ export function createDefaultState() {
       major: ''
     },
     defaultGradeDefinitions: cloneGradeScale(defaultScale),
-    classes: createExampleCourses(defaultScale)
+    classes: stamped,
+    classTombstones: [],
+    settingsUpdatedAt: new Date().toISOString()
   };
 }
 
@@ -189,6 +195,13 @@ export function sanitizeClassObject(c, idx, defaultDefs) {
     }
   }
 
+  const updatedAtRaw = c?.updatedAt;
+  let updatedAt = null;
+  if (updatedAtRaw !== null && updatedAtRaw !== undefined && updatedAtRaw !== '') {
+    const t = Date.parse(String(updatedAtRaw));
+    if (Number.isFinite(t)) updatedAt = new Date(t).toISOString();
+  }
+
   return {
     id: String(c?.id || uid(`class_${idx}`)),
     code: courseCode || `COURSE ${101 + idx}`,
@@ -199,7 +212,9 @@ export function sanitizeClassObject(c, idx, defaultDefs) {
     targetLetter: String(c?.targetLetter || c?.targetGrade || 'A'),
     groups: safeGroups,
     buckets: cloneGradeScale(rawBuckets),
-    assignments: safeAssignments
+    assignments: safeAssignments,
+    // Migrated on load when missing; sync uses this for last-write-wins
+    updatedAt: updatedAt || new Date().toISOString()
   };
 }
 
@@ -210,6 +225,13 @@ export function sanitizeState(rawState) {
   const defaultDefs = cloneGradeScale(
     rawState.defaultGradeDefinitions || rawState.defaultBuckets || rawState.customDefaultScale || UC_BERKELEY_GRADE_DEFINITIONS
   );
+
+  const settingsUpdatedAtRaw = rawState.settingsUpdatedAt;
+  let settingsUpdatedAt = null;
+  if (settingsUpdatedAtRaw) {
+    const t = Date.parse(String(settingsUpdatedAtRaw));
+    if (Number.isFinite(t)) settingsUpdatedAt = new Date(t).toISOString();
+  }
 
   const clean = {
     activeView: 'gradebook',
@@ -226,8 +248,23 @@ export function sanitizeState(rawState) {
       major: String(rawState.profile?.major || '')
     },
     defaultGradeDefinitions: defaultDefs,
-    classes: []
+    classes: [],
+    classTombstones: [],
+    settingsUpdatedAt: settingsUpdatedAt || new Date().toISOString()
   };
+
+  if (Array.isArray(rawState.classTombstones)) {
+    clean.classTombstones = rawState.classTombstones
+      .filter(t => t && t.id)
+      .map(t => ({
+        id: String(t.id),
+        deleted: true,
+        updatedAt: (() => {
+          const ts = Date.parse(String(t.updatedAt || ''));
+          return Number.isFinite(ts) ? new Date(ts).toISOString() : new Date().toISOString();
+        })()
+      }));
+  }
 
   if (Array.isArray(rawState.classes) && rawState.classes.length > 0) {
     clean.classes = dedupeClasses(rawState.classes.map((c, idx) => sanitizeClassObject(c, idx, defaultDefs)));
@@ -303,7 +340,8 @@ export function createDefaultGpaPlan() {
   return {
     grades: {},
     prior: { units: 0, gpa: null },
-    goal: { targetGpa: null, futureUnits: null }
+    goal: { targetGpa: null, futureUnits: null },
+    updatedAt: new Date().toISOString()
   };
 }
 
@@ -339,6 +377,11 @@ export function sanitizeGpaPlan(raw) {
   }
   if (goal.futureUnits !== null && goal.futureUnits !== undefined && goal.futureUnits !== '' && Number.isFinite(Number(goal.futureUnits))) {
     clean.goal.futureUnits = Math.max(0, Number(goal.futureUnits));
+  }
+
+  if (raw.updatedAt) {
+    const t = Date.parse(String(raw.updatedAt));
+    if (Number.isFinite(t)) clean.updatedAt = new Date(t).toISOString();
   }
 
   return clean;

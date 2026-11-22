@@ -348,6 +348,7 @@
       #policiesModalBackdrop,
       #shareModalBackdrop,
       #syllabusModalBackdrop,
+      #syncConflictModalBackdrop,
       #shareReadonlyBanner {
         display: none !important;
       }
@@ -381,6 +382,8 @@
 
   <!-- lz-string URI codec for share-link payloads (same algorithm as src/lzstring.js) -->
   <script src="./src/lzstring-browser.js"></script>
+  <!-- Optional Firebase web config (null until you paste a Spark project config) -->
+  <script src="./src/firebase-config.browser.js"></script>
 </head>
 
 <body class="min-h-screen flex flex-col selection:bg-indigo-500/30 selection:text-indigo-200">
@@ -1059,49 +1062,99 @@
           </div>
         </section>
 
-        <!-- 4. Authorization UI Placeholder Card -->
-        <section class="surface-card rounded-2xl border p-6 space-y-5">
+        <!-- 4. Optional cloud sync & accounts (Firebase, Sync beta) -->
+        <section id="syncAccountSection" class="surface-card rounded-2xl border p-6 space-y-5">
           <div class="flex flex-wrap items-center justify-between gap-3 border-b border-theme pb-4">
             <div>
               <div class="flex flex-wrap items-center gap-2">
                 <h3 class="text-sm font-bold text-theme-primary flex items-center gap-2">
-                  <i class="fa-solid fa-shield-halved text-indigo-400"></i>
-                  <span>Account &amp; Cloud Sync Authorization</span>
+                  <i class="fa-solid fa-cloud-arrow-up text-indigo-400"></i>
+                  <span>Account &amp; Cloud Sync</span>
                 </h3>
+                <span id="syncStatusChip"
+                  class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-zinc-500/15 text-theme-muted border border-theme">
+                  Local only
+                </span>
                 <span
                   class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30">
-                  UI Preview Only — Auth Logic Not Yet Implemented
+                  Sync (beta)
                 </span>
               </div>
-              <p class="text-xs text-theme-muted mt-1">Sign in, create an account, or link institutional SSO to
-                synchronize gradebooks across devices in a future release.</p>
+              <p class="text-xs text-theme-muted mt-1">
+                Optional Firebase sign-in so classes, planner, profile and grade scale follow you across devices.
+                The local copy stays the working copy. Read-only share links never sync.
+              </p>
             </div>
+            <label class="inline-flex items-center gap-2 text-xs font-semibold text-theme-secondary cursor-pointer select-none">
+              <input id="syncBetaToggle" type="checkbox" class="rounded border-theme" style="accent-color: #6366f1;" />
+              Enable Sync (beta)
+            </label>
           </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end opacity-80">
-            <div class="md:col-span-4 space-y-1.5">
-              <label for="authPreviewEmail" class="block text-xs font-semibold text-theme-secondary">Academic
-                Email</label>
-              <input id="authPreviewEmail" type="email" disabled placeholder="student@university.edu"
-                class="w-full text-xs theme-input rounded-xl px-3.5 py-2.5 cursor-not-allowed" />
-            </div>
-            <div class="md:col-span-4 space-y-1.5">
-              <label for="authPreviewPassword" class="block text-xs font-semibold text-theme-secondary">Password</label>
-              <input id="authPreviewPassword" type="password" disabled placeholder="••••••••••••"
-                class="w-full text-xs theme-input rounded-xl px-3.5 py-2.5 cursor-not-allowed" />
-            </div>
-            <div class="md:col-span-4 flex items-center gap-2">
-              <button type="button" disabled
-                class="flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-semibold bg-indigo-600/60 text-white/80 cursor-not-allowed">
-                <i class="fa-solid fa-right-to-bracket"></i>
-                <span>Sign In</span>
+          <div id="syncDisabledHint" class="text-xs text-theme-muted leading-relaxed">
+            Sync is off by default. Turn it on only after you add a Firebase web config
+            (<code class="font-mono">src/firebase-config.js</code> or <code class="font-mono">window.GRADECRAFT_FIREBASE</code>).
+            Until then GradeCraft stays fully local.
+          </div>
+
+          <div id="syncActivePanel" class="hidden space-y-4">
+            <div id="syncSignedOutPanel" class="space-y-3">
+              <div class="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-3 items-end">
+                <label class="flex flex-col gap-1.5 text-xs">
+                  <span class="font-semibold text-theme-secondary">Email for sign-in link</span>
+                  <input id="syncEmailInput" type="email" autocomplete="email" placeholder="student@university.edu"
+                    class="w-full text-xs theme-input rounded-xl px-3.5 py-2.5" />
+                </label>
+                <button id="btnSyncEmailLink" type="button"
+                  class="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm transition cursor-pointer">
+                  <i class="fa-solid fa-envelope"></i>
+                  <span>Email me a link</span>
+                </button>
+              </div>
+              <button id="btnSyncGoogle" type="button"
+                class="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-semibold theme-btn-secondary cursor-pointer">
+                <i class="fa-brands fa-google text-indigo-400"></i>
+                <span>Continue with Google</span>
               </button>
-              <button type="button" disabled
-                class="flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-semibold theme-btn-secondary opacity-70 cursor-not-allowed">
-                <i class="fa-solid fa-user-plus"></i>
-                <span>Create Account</span>
-              </button>
+              <p id="syncAuthMessage" class="text-[11px] text-theme-faint"></p>
             </div>
+
+            <div id="syncSignedInPanel" class="hidden space-y-3">
+              <p class="text-xs text-theme-secondary">
+                Signed in as <span id="syncUserEmail" class="font-semibold text-theme-primary">—</span>
+              </p>
+              <p class="text-[11px] text-theme-muted">
+                Last synced: <span id="syncLastSyncedAt" class="font-mono">never</span>
+              </p>
+              <div class="flex flex-wrap items-center gap-2">
+                <button id="btnSyncNow" type="button"
+                  class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold theme-btn-secondary cursor-pointer">
+                  <i class="fa-solid fa-arrows-rotate text-indigo-400"></i>
+                  <span>Sync now</span>
+                </button>
+                <button id="btnSyncSignOut" type="button"
+                  class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold theme-btn-secondary cursor-pointer">
+                  <i class="fa-solid fa-right-from-bracket"></i>
+                  <span>Sign out</span>
+                </button>
+                <button id="btnSyncDeleteData" type="button"
+                  class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 transition cursor-pointer">
+                  <i class="fa-solid fa-user-slash"></i>
+                  <span>Delete my data</span>
+                </button>
+              </div>
+            </div>
+
+            <details class="rounded-xl border border-theme-subtle surface-alt p-3">
+              <summary class="text-xs font-semibold text-theme-secondary cursor-pointer select-none">Privacy note</summary>
+              <p class="mt-2 text-[11px] text-theme-muted leading-relaxed">
+                When Sync is on and you sign in, GradeCraft stores your classes (groups, policies, assignments, due dates,
+                What-If scores), GPA Planner choices (including prior credit and goals), profile fields, theme, locale and
+                custom grade scale in your Firebase project under <code class="font-mono">users/{your uid}</code>.
+                Nothing is sold or used for analytics by GradeCraft. The app works fully without an account. Delete my data
+                removes your cloud documents and then the Firebase account (you may need to sign in again first).
+              </p>
+            </details>
           </div>
         </section>
 
@@ -1241,14 +1294,24 @@
             <div>
               <h1 class="text-lg font-extrabold tracking-tight text-theme-primary font-mono">GradeCraft — Changelog</h1>
               <p class="text-xs text-theme-muted mt-1">Chronological record of releases and commits (<code
-                  class="font-mono">v1_1</code> &rarr; <code class="font-mono">v1_23</code>).</p>
+                  class="font-mono">v1_1</code> &rarr; <code class="font-mono">v1_24</code>).</p>
             </div>
             <span class="text-[11px] font-mono text-indigo-400 px-2.5 py-0.5 rounded-full accent-pill border">Latest:
-              v1_23</span>
+              v1_24</span>
           </div>
 
           <!-- Simple, clean text-based changelog list (Newest to Oldest & Plain-Text Block) -->
           <div class="space-y-4 font-mono text-xs leading-relaxed text-theme-secondary">
+            <div class="p-3.5 rounded-xl surface-alt border border-theme-subtle">
+              <div class="flex items-center justify-between gap-3">
+                <span class="font-bold text-indigo-400">v1_24</span>
+                <span class="text-[11px] font-mono text-theme-faint">11/22/2026</span>
+              </div>
+              <p class="mt-1 text-theme-primary font-sans text-xs leading-relaxed">
+                Added optional cloud sync and accounts (Firebase Auth + Firestore) behind a Sync (beta) toggle: email-link and Google sign-in, debounced batched uploads, real-time listeners, first-sign-in cloud/device/merge choice with local backup, deletion markers, privacy note, Sign out and Delete my data. App stays fully usable offline/local without config; paste a Spark web config to enable.
+              </p>
+            </div>
+
             <div class="p-3.5 rounded-xl surface-alt border border-theme-subtle">
               <div class="flex items-center justify-between gap-3">
                 <span class="font-bold text-indigo-400">v1_23</span>
@@ -1560,7 +1623,7 @@
           <details id="rawChangelogDetails" class="pt-4 border-t border-theme">
             <summary class="raw-changelog-summary flex items-center justify-between gap-2 cursor-pointer select-none">
               <span class="text-[11px] font-bold uppercase tracking-wider text-theme-faint font-mono">Raw Plain-Text
-                Changelog (v1_1 &rarr; v1_23)</span>
+                Changelog (v1_1 &rarr; v1_24)</span>
               <i
                 class="fa-solid fa-chevron-down raw-changelog-chevron text-[11px] text-theme-faint transition-transform"></i>
             </summary>
@@ -1590,7 +1653,8 @@ v1_19 (11/21/2026) - Extended the GPA Planner with Prior Credit, Cumulative GPA,
 v1_20 (11/22/2026) - Added assignment due dates, Upcoming panel (14-day + overdue, ranked by weight at stake), unified sort by due date, and .ics calendar export with stable UIDs.
 v1_21 (11/22/2026) - Added Charts & Trends: group points breakdown, grade-over-time line, and Term GPA trend with text summaries and table fallbacks.
 v1_22 (11/22/2026) - Added Share & Export: print/PDF for planner and changelog, assignments CSV export, and read-only lz-string share links (file fallback; never writes localStorage).
-v1_23 (11/22/2026) - Added Import from Syllabus (rule-based, no LLM): paste or PDF (pdf.js on-device), parse name+percent pairs, review table with ~100% check, create groups only on confirm.</pre>
+v1_23 (11/22/2026) - Added Import from Syllabus (rule-based, no LLM): paste or PDF (pdf.js on-device), parse name+percent pairs, review table with ~100% check, create groups only on confirm.
+v1_24 (11/22/2026) - Added optional Firebase cloud sync and accounts behind Sync (beta): email link + Google, batched push, realtime pull, first-sign-in merge choices, tombstones, privacy note, delete-my-data; local-only until Firebase config is set.</pre>
           </details>
         </section>
       </div>
@@ -1762,6 +1826,34 @@ v1_23 (11/22/2026) - Added Import from Syllabus (rule-based, no LLM): paste or P
         <button id="policiesModalSaveBtn" type="button"
           class="px-4 py-2 rounded-xl text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm transition cursor-pointer">Save
           policies</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FIRST SIGN-IN SYNC CONFLICT MODAL -->
+  <div id="syncConflictModalBackdrop"
+    class="fixed inset-0 z-50 bg-black/75 backdrop-blur-xs hidden items-center justify-center p-4">
+    <div class="surface-card rounded-2xl border max-w-lg w-full p-6 space-y-4" role="dialog" aria-modal="true"
+      aria-labelledby="syncConflictTitle">
+      <div>
+        <h3 id="syncConflictTitle" class="text-base font-bold text-theme-primary">Cloud and this device both have data</h3>
+        <p class="text-xs text-theme-muted mt-1 leading-relaxed">
+          Choose how to continue. A JSON backup of this device is downloaded first so you can undo a bad pick.
+        </p>
+      </div>
+      <div class="flex flex-col gap-2">
+        <button id="btnSyncUseCloud" type="button"
+          class="w-full text-left px-4 py-3 rounded-xl text-xs font-semibold theme-btn-secondary cursor-pointer">
+          Use cloud — replace this device with the cloud copy
+        </button>
+        <button id="btnSyncUseDevice" type="button"
+          class="w-full text-left px-4 py-3 rounded-xl text-xs font-semibold theme-btn-secondary cursor-pointer">
+          Use this device — upload local data and overwrite the cloud
+        </button>
+        <button id="btnSyncMerge" type="button"
+          class="w-full text-left px-4 py-3 rounded-xl text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm transition cursor-pointer">
+          Merge — keep the newer class per ID, then remove code/term/title duplicates
+        </button>
       </div>
     </div>
   </div>
@@ -1991,6 +2083,10 @@ v1_23 (11/22/2026) - Added Import from Syllabus (rule-based, no LLM): paste or P
 
       function createDefaultState() {
         const defaultScale = cloneGradeScale(UC_BERKELEY_GRADE_DEFINITIONS);
+        const stamped = createExampleCourses(defaultScale).map(c => ({
+          ...c,
+          updatedAt: c.updatedAt || new Date().toISOString()
+        }));
         return {
           activeView: 'gradebook',
           activeTermFilter: 'Fall 2026',
@@ -2006,7 +2102,9 @@ v1_23 (11/22/2026) - Added Import from Syllabus (rule-based, no LLM): paste or P
             major: ''
           },
           defaultGradeDefinitions: cloneGradeScale(defaultScale),
-          classes: createExampleCourses(defaultScale)
+          classes: stamped,
+          classTombstones: [],
+          settingsUpdatedAt: new Date().toISOString()
         };
       }
 
@@ -2086,6 +2184,13 @@ v1_23 (11/22/2026) - Added Import from Syllabus (rule-based, no LLM): paste or P
           }
         }
 
+        const updatedAtRaw = c?.updatedAt;
+        let updatedAt = null;
+        if (updatedAtRaw !== null && updatedAtRaw !== undefined && updatedAtRaw !== '') {
+          const t = Date.parse(String(updatedAtRaw));
+          if (Number.isFinite(t)) updatedAt = new Date(t).toISOString();
+        }
+
         return {
           id: String(c?.id || uid(`class_${idx}`)),
           code: courseCode || `COURSE ${101 + idx}`,
@@ -2096,7 +2201,8 @@ v1_23 (11/22/2026) - Added Import from Syllabus (rule-based, no LLM): paste or P
           targetLetter: String(c?.targetLetter || c?.targetGrade || 'A'),
           groups: safeGroups,
           buckets: cloneGradeScale(rawBuckets),
-          assignments: safeAssignments
+          assignments: safeAssignments,
+          updatedAt: updatedAt || new Date().toISOString()
         };
       }
 
@@ -2138,12 +2244,19 @@ v1_23 (11/22/2026) - Added Import from Syllabus (rule-based, no LLM): paste or P
           rawState.defaultGradeDefinitions || rawState.defaultBuckets || rawState.customDefaultScale || UC_BERKELEY_GRADE_DEFINITIONS
         );
 
+        const settingsUpdatedAtRaw = rawState.settingsUpdatedAt;
+        let settingsUpdatedAt = null;
+        if (settingsUpdatedAtRaw) {
+          const t = Date.parse(String(settingsUpdatedAtRaw));
+          if (Number.isFinite(t)) settingsUpdatedAt = new Date(t).toISOString();
+        }
+
         const clean = {
           activeView: 'gradebook',
           activeTermFilter: String(rawState.activeTermFilter || ''),
           activeClassId: String(rawState.activeClassId || ''),
           gradebookViewMode: (rawState.gradebookViewMode === 'unified' || rawState.viewMode === 'unified') ? 'unified' : 'grouped',
-        gradebookSortMode: rawState.gradebookSortMode === 'due' ? 'due' : 'group',
+          gradebookSortMode: rawState.gradebookSortMode === 'due' ? 'due' : 'group',
           theme: ['black', 'midnight', 'light'].includes(rawState.theme) ? rawState.theme : 'black',
           locale: String(rawState.locale || rawState.language || 'en-US'),
           profile: {
@@ -2153,13 +2266,31 @@ v1_23 (11/22/2026) - Added Import from Syllabus (rule-based, no LLM): paste or P
             major: String(rawState.profile?.major || '')
           },
           defaultGradeDefinitions: defaultDefs,
-          classes: []
+          classes: [],
+          classTombstones: [],
+          settingsUpdatedAt: settingsUpdatedAt || new Date().toISOString()
         };
+
+        if (Array.isArray(rawState.classTombstones)) {
+          clean.classTombstones = rawState.classTombstones
+            .filter(t => t && t.id)
+            .map(t => {
+              const ts = Date.parse(String(t.updatedAt || ''));
+              return {
+                id: String(t.id),
+                deleted: true,
+                updatedAt: Number.isFinite(ts) ? new Date(ts).toISOString() : new Date().toISOString()
+              };
+            });
+        }
 
         if (Array.isArray(rawState.classes) && rawState.classes.length > 0) {
           clean.classes = dedupeClasses(rawState.classes.map((c, idx) => sanitizeClassObject(c, idx, defaultDefs)));
         } else {
-          clean.classes = createExampleCourses(defaultDefs);
+          clean.classes = createExampleCourses(defaultDefs).map(c => ({
+            ...c,
+            updatedAt: c.updatedAt || new Date().toISOString()
+          }));
         }
 
         if (clean.classes.length === 0) {
@@ -2224,12 +2355,16 @@ v1_23 (11/22/2026) - Added Import from Syllabus (rule-based, no LLM): paste or P
 
       // GPA Planner: stored as its own record, fully separate from the Gradebook state
       const GPA_STORAGE_KEY = 'gradecraft_gpa_planner_v1';
+      const SYNC_PREFS_KEY = 'gradecraft_sync_prefs_v1';
+      const SYNC_DEBOUNCE_MS = 2000;
+      const SYNC_SCHEMA_VERSION = 1;
 
       function createDefaultGpaPlan() {
         return {
           grades: {},
           prior: { units: 0, gpa: null },
-          goal: { targetGpa: null, futureUnits: null }
+          goal: { targetGpa: null, futureUnits: null },
+          updatedAt: new Date().toISOString()
         };
       }
 
@@ -2266,6 +2401,11 @@ v1_23 (11/22/2026) - Added Import from Syllabus (rule-based, no LLM): paste or P
           clean.goal.futureUnits = Math.max(0, Number(goal.futureUnits));
         }
 
+        if (raw.updatedAt) {
+          const t = Date.parse(String(raw.updatedAt));
+          if (Number.isFinite(t)) clean.updatedAt = new Date(t).toISOString();
+        }
+
         return clean;
       }
 
@@ -2288,7 +2428,9 @@ v1_23 (11/22/2026) - Added Import from Syllabus (rule-based, no LLM): paste or P
         if (readOnlyMode) return;
         try {
           gpaPlan = sanitizeGpaPlan(gpaPlan);
+          gpaPlan.updatedAt = new Date().toISOString();
           localStorage.setItem(GPA_STORAGE_KEY, JSON.stringify(gpaPlan));
+          scheduleCloudSync();
         } catch (err) {
           console.error('Failed to save GPA planner:', err);
         }
@@ -2856,10 +2998,23 @@ v1_23 (11/22/2026) - Added Import from Syllabus (rule-based, no LLM): paste or P
         return `${window.location.origin}${cleanDir}`;
       }
 
-      function saveState() {
+      function saveState(options = {}) {
         if (readOnlyMode) return;
         try {
+          const touchSettings = options.touchSettings !== false;
+          const touchClass = options.touchClass !== false;
+          const now = new Date().toISOString();
+          if (!Array.isArray(state.classTombstones)) state.classTombstones = [];
+          if (touchSettings) state.settingsUpdatedAt = now;
+          state.classes.forEach(c => {
+            if (!c.updatedAt) c.updatedAt = now;
+          });
+          if (touchClass) {
+            const cls = state.classes.find(c => c.id === state.activeClassId);
+            if (cls) cls.updatedAt = now;
+          }
           localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+          scheduleCloudSync();
         } catch (err) {
           console.error('Failed to save state:', err);
         }
@@ -5841,6 +5996,7 @@ v1_23 (11/22/2026) - Added Import from Syllabus (rule-based, no LLM): paste or P
             renderGradebookDOM();
           }
           applyReadOnlyChrome();
+          if (typeof renderSyncAccountUI === 'function') renderSyncAccountUI();
         } catch (err) {
           console.error('Render error recovered:', err);
         }
@@ -6176,6 +6332,13 @@ v1_23 (11/22/2026) - Added Import from Syllabus (rule-based, no LLM): paste or P
               `This will permanently remove this class and all ${cls.assignments.length} assignment entries.`,
               () => {
                 const deletedTerm = normalizeTermName(cls.term);
+                const tombstone = {
+                  id: cls.id,
+                  deleted: true,
+                  updatedAt: new Date().toISOString()
+                };
+                state.classTombstones = (state.classTombstones || []).filter(t => t.id !== cls.id);
+                state.classTombstones.push(tombstone);
                 state.classes = state.classes.filter(c => c.id !== cls.id);
                 const remainingInTerm = state.classes.filter(c => normalizeTermName(c.term) === deletedTerm);
                 if (state.activeTermFilter !== 'ALL' && remainingInTerm.length > 0) {
@@ -6186,7 +6349,7 @@ v1_23 (11/22/2026) - Added Import from Syllabus (rule-based, no LLM): paste or P
                     state.activeTermFilter = normalizeTermName(state.classes[0].term);
                   }
                 }
-                saveState();
+                saveState({ touchSettings: false });
                 renderApp();
                 showToast('Deleted class gradebook', 'info');
               }
@@ -6224,6 +6387,45 @@ v1_23 (11/22/2026) - Added Import from Syllabus (rule-based, no LLM): paste or P
 
           if (target.closest('[data-action="open-profile-scale"]')) {
             switchAppView('profile');
+            return;
+          }
+
+          if (target.closest('#btnSyncEmailLink')) {
+            sendSyncEmailLink();
+            return;
+          }
+          if (target.closest('#btnSyncGoogle')) {
+            signInWithGoogle();
+            return;
+          }
+          if (target.closest('#btnSyncSignOut')) {
+            signOutSync();
+            return;
+          }
+          if (target.closest('#btnSyncNow')) {
+            if (!syncPrefs.enabled || !syncUser) {
+              showToast('Sign in with Sync (beta) enabled first.', 'info');
+              return;
+            }
+            pushLocalToCloud()
+              .then(() => showToast('Sync finished', 'success'))
+              .catch((err) => showToast(err.message || 'Sync failed', 'warning'));
+            return;
+          }
+          if (target.closest('#btnSyncDeleteData')) {
+            deleteMyCloudData();
+            return;
+          }
+          if (target.closest('#btnSyncUseCloud')) {
+            applyFirstSignInChoice('use_cloud', true);
+            return;
+          }
+          if (target.closest('#btnSyncUseDevice')) {
+            applyFirstSignInChoice('use_device', true);
+            return;
+          }
+          if (target.closest('#btnSyncMerge')) {
+            applyFirstSignInChoice('merge', true);
             return;
           }
 
@@ -6805,6 +7007,11 @@ v1_23 (11/22/2026) - Added Import from Syllabus (rule-based, no LLM): paste or P
           const target = e.target;
           if (!target) return;
 
+          if (target.id === 'syncBetaToggle') {
+            enableSyncBeta(!!target.checked);
+            return;
+          }
+
           if (target.id === 'syllabusPdfInput' && target.files && target.files[0]) {
             const file = target.files[0];
             const status = document.getElementById('syllabusPdfStatus');
@@ -7058,12 +7265,713 @@ v1_23 (11/22/2026) - Added Import from Syllabus (rule-based, no LLM): paste or P
         });
       }
 
+// ─── Cloud sync controller (Firebase optional; Sync beta) ─────────────
+      // Pure helpers mirror src/sync.js (kept inline for the single-page app).
+
+      function syncNowIso() {
+        return new Date().toISOString();
+      }
+
+      function syncNormalizeUpdatedAt(value, fallback = null) {
+        if (value === null || value === undefined || value === '') return fallback;
+        const t = Date.parse(String(value));
+        if (!Number.isFinite(t)) return fallback;
+        return new Date(t).toISOString();
+      }
+
+      function syncIsNewer(candidate, current) {
+        const ta = Date.parse(syncNormalizeUpdatedAt(candidate, '1970-01-01T00:00:00.000Z'));
+        const tb = Date.parse(syncNormalizeUpdatedAt(current, '1970-01-01T00:00:00.000Z'));
+        return ta > tb;
+      }
+
+      function createDefaultSyncPrefs() {
+        return {
+          enabled: false,
+          lastSyncedAt: null,
+          lastPushed: { classes: {}, plannerUpdatedAt: null, settingsUpdatedAt: null },
+          firstSyncDone: false
+        };
+      }
+
+      function sanitizeSyncPrefs(raw) {
+        const clean = createDefaultSyncPrefs();
+        if (!raw || typeof raw !== 'object') return clean;
+        clean.enabled = raw.enabled === true;
+        clean.lastSyncedAt = syncNormalizeUpdatedAt(raw.lastSyncedAt, null);
+        clean.firstSyncDone = raw.firstSyncDone === true;
+        if (raw.lastPushed && typeof raw.lastPushed === 'object') {
+          clean.lastPushed = {
+            classes: raw.lastPushed.classes && typeof raw.lastPushed.classes === 'object' ? { ...raw.lastPushed.classes } : {},
+            plannerUpdatedAt: syncNormalizeUpdatedAt(raw.lastPushed.plannerUpdatedAt, null),
+            settingsUpdatedAt: syncNormalizeUpdatedAt(raw.lastPushed.settingsUpdatedAt, null)
+          };
+        }
+        return clean;
+      }
+
+      function loadSyncPrefs() {
+        try {
+          return sanitizeSyncPrefs(JSON.parse(localStorage.getItem(SYNC_PREFS_KEY) || 'null'));
+        } catch {
+          return createDefaultSyncPrefs();
+        }
+      }
+
+      function saveSyncPrefs() {
+        try {
+          localStorage.setItem(SYNC_PREFS_KEY, JSON.stringify(syncPrefs));
+        } catch (err) {
+          console.error('Failed to save sync prefs:', err);
+        }
+      }
+
+      let syncPrefs = loadSyncPrefs();
+      let syncStatus = 'local'; // local | signed_out | syncing | synced | offline | error
+      let syncErrorMessage = '';
+      let syncUser = null;
+      let syncDebounceTimer = null;
+      let syncFirebase = null; // { app, auth, db, mods }
+      let syncUnsubscribes = [];
+      let syncSelfWriteTokens = new Set();
+      let pendingRemoteSnapshot = null;
+
+      function isFirebaseConfigured() {
+        const cfg = window.GRADECRAFT_FIREBASE;
+        return !!(cfg && cfg.apiKey && cfg.projectId && cfg.appId);
+      }
+
+      function classToCloudDoc(cls) {
+        const updatedAt = syncNormalizeUpdatedAt(cls?.updatedAt, syncNowIso());
+        if (cls?.deleted === true) {
+          return { id: String(cls.id), deleted: true, updatedAt };
+        }
+        return {
+          id: String(cls.id),
+          deleted: false,
+          updatedAt,
+          code: cls.code,
+          name: cls.name,
+          term: cls.term,
+          units: cls.units,
+          pnp: !!cls.pnp,
+          targetLetter: cls.targetLetter,
+          groups: cls.groups || [],
+          buckets: cls.buckets || [],
+          assignments: cls.assignments || []
+        };
+      }
+
+      function settingsToCloudDoc() {
+        return {
+          schemaVersion: SYNC_SCHEMA_VERSION,
+          updatedAt: syncNormalizeUpdatedAt(state.settingsUpdatedAt, syncNowIso()),
+          profile: { ...(state.profile || {}) },
+          theme: state.theme,
+          locale: state.locale,
+          defaultGradeDefinitions: cloneGradeScale(state.defaultGradeDefinitions)
+        };
+      }
+
+      function plannerToCloudDoc() {
+        const plan = sanitizeGpaPlan(gpaPlan);
+        return { ...plan, updatedAt: syncNormalizeUpdatedAt(gpaPlan.updatedAt, syncNowIso()) };
+      }
+
+      function mergeClassCollections(localClasses, localTombstones, remoteDocs) {
+        const byId = new Map();
+        const upsert = (entry) => {
+          if (!entry?.id) return;
+          const id = String(entry.id);
+          const prev = byId.get(id);
+          if (!prev || syncIsNewer(entry.updatedAt, prev.updatedAt)) byId.set(id, entry);
+        };
+        (localClasses || []).forEach((c, idx) => {
+          const cleaned = sanitizeClassObject(c, idx, state.defaultGradeDefinitions);
+          cleaned.updatedAt = syncNormalizeUpdatedAt(c.updatedAt, syncNowIso());
+          upsert({ ...cleaned, deleted: false });
+        });
+        (localTombstones || []).forEach((t) => {
+          upsert({ id: String(t.id), deleted: true, updatedAt: syncNormalizeUpdatedAt(t.updatedAt, syncNowIso()) });
+        });
+        (remoteDocs || []).forEach((doc) => {
+          if (!doc?.id) return;
+          if (doc.deleted === true) {
+            upsert({ id: String(doc.id), deleted: true, updatedAt: syncNormalizeUpdatedAt(doc.updatedAt, syncNowIso()) });
+          } else {
+            const cleaned = sanitizeClassObject(doc, 0, state.defaultGradeDefinitions);
+            cleaned.updatedAt = syncNormalizeUpdatedAt(doc.updatedAt, syncNowIso());
+            upsert({ ...cleaned, deleted: false });
+          }
+        });
+        const live = [];
+        const tombstones = [];
+        byId.forEach((entry) => {
+          if (entry.deleted) tombstones.push({ id: entry.id, deleted: true, updatedAt: entry.updatedAt });
+          else {
+            const { deleted, ...rest } = entry;
+            live.push(rest);
+          }
+        });
+        return { classes: dedupeClasses(live), tombstones };
+      }
+
+      function collapseContentDuplicates(classes) {
+        const best = new Map();
+        (classes || []).forEach((c) => {
+          const key = classDedupeKeys(c).content;
+          const prev = best.get(key);
+          if (!prev || syncIsNewer(c.updatedAt, prev.updatedAt)) best.set(key, c);
+        });
+        return [...best.values()];
+      }
+
+      function buildOutgoingSyncPayload() {
+        const last = syncPrefs.lastPushed || { classes: {}, plannerUpdatedAt: null, settingsUpdatedAt: null };
+        const classWrites = [];
+        (state.classes || []).forEach((cls) => {
+          const doc = classToCloudDoc(cls);
+          const prevAt = last.classes?.[cls.id];
+          if (!prevAt || syncIsNewer(doc.updatedAt, prevAt)) classWrites.push(doc);
+        });
+        (state.classTombstones || []).forEach((t) => {
+          const doc = classToCloudDoc(t);
+          const prevAt = last.classes?.[t.id];
+          if (!prevAt || syncIsNewer(doc.updatedAt, prevAt)) classWrites.push(doc);
+        });
+        const plannerDoc = plannerToCloudDoc();
+        const settingsDoc = settingsToCloudDoc();
+        const pushPlanner = !last.plannerUpdatedAt || syncIsNewer(plannerDoc.updatedAt, last.plannerUpdatedAt);
+        const pushSettings = !last.settingsUpdatedAt || syncIsNewer(settingsDoc.updatedAt, last.settingsUpdatedAt);
+        return {
+          classWrites,
+          plannerDoc: pushPlanner ? plannerDoc : null,
+          settingsDoc: pushSettings ? settingsDoc : null,
+          hasChanges: classWrites.length > 0 || pushPlanner || pushSettings
+        };
+      }
+
+      function setSyncStatus(next, message = '') {
+        syncStatus = next;
+        syncErrorMessage = message || '';
+        renderSyncAccountUI();
+      }
+
+      function renderSyncAccountUI() {
+        const toggle = document.getElementById('syncBetaToggle');
+        const disabledHint = document.getElementById('syncDisabledHint');
+        const activePanel = document.getElementById('syncActivePanel');
+        const signedOut = document.getElementById('syncSignedOutPanel');
+        const signedIn = document.getElementById('syncSignedInPanel');
+        const chip = document.getElementById('syncStatusChip');
+        const emailEl = document.getElementById('syncUserEmail');
+        const lastEl = document.getElementById('syncLastSyncedAt');
+        if (toggle) toggle.checked = !!syncPrefs.enabled;
+        const showActive = !!syncPrefs.enabled;
+        if (disabledHint) disabledHint.classList.toggle('hidden', showActive);
+        if (activePanel) activePanel.classList.toggle('hidden', !showActive);
+        const isSignedIn = !!(syncUser && syncUser.uid);
+        if (signedOut) signedOut.classList.toggle('hidden', !showActive || isSignedIn);
+        if (signedIn) signedIn.classList.toggle('hidden', !showActive || !isSignedIn);
+        if (emailEl) emailEl.textContent = syncUser?.email || syncUser?.uid || '—';
+        if (lastEl) {
+          lastEl.textContent = syncPrefs.lastSyncedAt
+            ? new Date(syncPrefs.lastSyncedAt).toLocaleString(state.locale || 'en-US')
+            : 'never';
+        }
+        if (chip) {
+          const labels = {
+            local: 'Local only',
+            signed_out: 'Signed out',
+            syncing: 'Syncing…',
+            synced: 'Synced',
+            offline: 'Offline — will sync later',
+            error: 'Error'
+          };
+          chip.textContent = labels[syncStatus] || syncStatus;
+          chip.className = 'px-2.5 py-0.5 rounded-full text-[10px] font-bold border ' + (
+            syncStatus === 'synced' ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
+              : syncStatus === 'syncing' ? 'bg-indigo-500/15 text-indigo-300 border-indigo-500/30'
+                : syncStatus === 'error' ? 'bg-rose-500/15 text-rose-400 border-rose-500/30'
+                  : syncStatus === 'offline' ? 'bg-amber-500/15 text-amber-400 border-amber-500/30'
+                    : 'bg-zinc-500/15 text-theme-muted border-theme'
+          );
+        }
+        const authMsg = document.getElementById('syncAuthMessage');
+        if (authMsg && syncErrorMessage) authMsg.textContent = syncErrorMessage;
+      }
+
+      async function loadFirebaseSdk() {
+        if (syncFirebase) return syncFirebase;
+        if (!isFirebaseConfigured()) throw new Error('Firebase is not configured');
+        const [{ initializeApp, getApps }, authMod, fsMod] = await Promise.all([
+          import('https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js'),
+          import('https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js'),
+          import('https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js')
+        ]);
+        const existing = getApps();
+        const app = existing.length ? existing[0] : initializeApp(window.GRADECRAFT_FIREBASE);
+        const auth = authMod.getAuth(app);
+        let db;
+        try {
+          db = fsMod.initializeFirestore(app, {
+            localCache: fsMod.persistentLocalCache({ tabManager: fsMod.persistentMultipleTabManager() })
+          });
+        } catch {
+          db = fsMod.getFirestore(app);
+        }
+        syncFirebase = { app, auth, db, authMod, fsMod };
+        return syncFirebase;
+      }
+
+      function clearSyncListeners() {
+        syncUnsubscribes.forEach((fn) => {
+          try { fn(); } catch { /* ignore */ }
+        });
+        syncUnsubscribes = [];
+      }
+
+      async function pushLocalToCloud() {
+        if (readOnlyMode || !syncPrefs.enabled || !syncUser) return;
+        const fb = await loadFirebaseSdk();
+        const { db, fsMod } = fb;
+        const uid = syncUser.uid;
+        const payload = buildOutgoingSyncPayload();
+        if (!payload.hasChanges) {
+          setSyncStatus(navigator.onLine === false ? 'offline' : 'synced');
+          return;
+        }
+        setSyncStatus('syncing');
+        const batch = fsMod.writeBatch(db);
+        payload.classWrites.forEach((doc) => {
+          const ref = fsMod.doc(db, 'users', uid, 'classes', doc.id);
+          syncSelfWriteTokens.add(`class:${doc.id}:${doc.updatedAt}`);
+          batch.set(ref, doc, { merge: true });
+        });
+        if (payload.plannerDoc) {
+          const ref = fsMod.doc(db, 'users', uid, 'planner', 'main');
+          syncSelfWriteTokens.add(`planner:${payload.plannerDoc.updatedAt}`);
+          batch.set(ref, payload.plannerDoc, { merge: true });
+        }
+        if (payload.settingsDoc) {
+          const ref = fsMod.doc(db, 'users', uid);
+          syncSelfWriteTokens.add(`settings:${payload.settingsDoc.updatedAt}`);
+          batch.set(ref, payload.settingsDoc, { merge: true });
+        }
+        await batch.commit();
+        payload.classWrites.forEach((doc) => {
+          syncPrefs.lastPushed.classes[doc.id] = doc.updatedAt;
+        });
+        if (payload.plannerDoc) syncPrefs.lastPushed.plannerUpdatedAt = payload.plannerDoc.updatedAt;
+        if (payload.settingsDoc) syncPrefs.lastPushed.settingsUpdatedAt = payload.settingsDoc.updatedAt;
+        syncPrefs.lastSyncedAt = syncNowIso();
+        saveSyncPrefs();
+        setSyncStatus(navigator.onLine === false ? 'offline' : 'synced');
+      }
+
+      function applyMergedCollections(merged) {
+        state.classes = merged.classes;
+        state.classTombstones = merged.tombstones;
+        if (!state.classes.some(c => c.id === state.activeClassId)) {
+          state.activeClassId = state.classes[0]?.id || null;
+        }
+      }
+
+      async function pullAndMaybePromptFirstSync() {
+        const fb = await loadFirebaseSdk();
+        const { db, fsMod } = fb;
+        const uid = syncUser.uid;
+        const classesSnap = await fsMod.getDocs(fsMod.collection(db, 'users', uid, 'classes'));
+        const remoteClasses = [];
+        classesSnap.forEach((d) => remoteClasses.push({ id: d.id, ...d.data() }));
+        const plannerSnap = await fsMod.getDoc(fsMod.doc(db, 'users', uid, 'planner', 'main'));
+        const settingsSnap = await fsMod.getDoc(fsMod.doc(db, 'users', uid));
+        const remotePlanner = plannerSnap.exists() ? plannerSnap.data() : null;
+        const remoteSettings = settingsSnap.exists() ? settingsSnap.data() : null;
+
+        const localHas = (state.classes || []).length > 0;
+        const remoteHas = remoteClasses.some(d => d && d.deleted !== true);
+        pendingRemoteSnapshot = { remoteClasses, remotePlanner, remoteSettings };
+
+        if (!syncPrefs.firstSyncDone && localHas && remoteHas) {
+          openSyncConflictModal();
+          return;
+        }
+
+        const choice = !localHas && remoteHas ? 'use_cloud'
+          : localHas && !remoteHas ? 'use_device'
+            : 'merge';
+        await applyFirstSignInChoice(choice, false);
+      }
+
+      function openSyncConflictModal() {
+        // Download local backup first
+        try {
+          const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'gradecraft-pre-sync-backup.json';
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          URL.revokeObjectURL(url);
+        } catch { /* ignore */ }
+        const backdrop = document.getElementById('syncConflictModalBackdrop');
+        if (backdrop) {
+          backdrop.classList.remove('hidden');
+          backdrop.classList.add('flex');
+        }
+      }
+
+      function closeSyncConflictModal() {
+        const backdrop = document.getElementById('syncConflictModalBackdrop');
+        if (!backdrop) return;
+        backdrop.classList.add('hidden');
+        backdrop.classList.remove('flex');
+      }
+
+      async function applyFirstSignInChoice(choice, fromModal) {
+        const snap = pendingRemoteSnapshot || { remoteClasses: [], remotePlanner: null, remoteSettings: null };
+        if (choice === 'use_cloud') {
+          const merged = mergeClassCollections([], [], snap.remoteClasses);
+          applyMergedCollections({
+            classes: collapseContentDuplicates(merged.classes),
+            tombstones: merged.tombstones
+          });
+          if (snap.remotePlanner) gpaPlan = sanitizeGpaPlan(snap.remotePlanner);
+          if (snap.remoteSettings) {
+            if (snap.remoteSettings.profile) state.profile = { ...state.profile, ...snap.remoteSettings.profile };
+            if (['black', 'midnight', 'light'].includes(snap.remoteSettings.theme)) state.theme = snap.remoteSettings.theme;
+            if (snap.remoteSettings.locale) state.locale = snap.remoteSettings.locale;
+            if (Array.isArray(snap.remoteSettings.defaultGradeDefinitions)) {
+              state.defaultGradeDefinitions = cloneGradeScale(snap.remoteSettings.defaultGradeDefinitions);
+            }
+            state.settingsUpdatedAt = syncNormalizeUpdatedAt(snap.remoteSettings.updatedAt, syncNowIso());
+          }
+        } else if (choice === 'use_device') {
+          // keep local; push will upload
+        } else {
+          const merged = mergeClassCollections(state.classes, state.classTombstones, snap.remoteClasses);
+          applyMergedCollections({
+            classes: collapseContentDuplicates(merged.classes),
+            tombstones: merged.tombstones
+          });
+          if (snap.remotePlanner && syncIsNewer(snap.remotePlanner.updatedAt, gpaPlan.updatedAt)) {
+            gpaPlan = sanitizeGpaPlan(snap.remotePlanner);
+          }
+          if (snap.remoteSettings && syncIsNewer(snap.remoteSettings.updatedAt, state.settingsUpdatedAt)) {
+            if (snap.remoteSettings.profile) state.profile = { ...state.profile, ...snap.remoteSettings.profile };
+            if (['black', 'midnight', 'light'].includes(snap.remoteSettings.theme)) state.theme = snap.remoteSettings.theme;
+            if (snap.remoteSettings.locale) state.locale = snap.remoteSettings.locale;
+            if (Array.isArray(snap.remoteSettings.defaultGradeDefinitions)) {
+              state.defaultGradeDefinitions = cloneGradeScale(snap.remoteSettings.defaultGradeDefinitions);
+            }
+            state.settingsUpdatedAt = syncNormalizeUpdatedAt(snap.remoteSettings.updatedAt, syncNowIso());
+          }
+        }
+
+        // Reset lastPushed so the chosen side fully uploads/downloads next
+        if (choice === 'use_device') {
+          syncPrefs.lastPushed = { classes: {}, plannerUpdatedAt: null, settingsUpdatedAt: null };
+        } else if (choice === 'use_cloud') {
+          (state.classes || []).forEach((c) => {
+            syncPrefs.lastPushed.classes[c.id] = c.updatedAt;
+          });
+          (state.classTombstones || []).forEach((t) => {
+            syncPrefs.lastPushed.classes[t.id] = t.updatedAt;
+          });
+          syncPrefs.lastPushed.plannerUpdatedAt = gpaPlan.updatedAt || null;
+          syncPrefs.lastPushed.settingsUpdatedAt = state.settingsUpdatedAt || null;
+        }
+
+        syncPrefs.firstSyncDone = true;
+        saveSyncPrefs();
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        localStorage.setItem(GPA_STORAGE_KEY, JSON.stringify(sanitizeGpaPlan(gpaPlan)));
+        if (fromModal) closeSyncConflictModal();
+        renderApp(false);
+        await pushLocalToCloud();
+        await startSyncListeners();
+        showToast('Cloud sync is ready', 'success');
+      }
+
+      async function startSyncListeners() {
+        if (!syncUser || !syncPrefs.enabled) return;
+        clearSyncListeners();
+        const fb = await loadFirebaseSdk();
+        const { db, fsMod } = fb;
+        const uid = syncUser.uid;
+
+        const unsubClasses = fsMod.onSnapshot(
+          fsMod.collection(db, 'users', uid, 'classes'),
+          (snap) => {
+            if (readOnlyMode) return;
+            const remoteDocs = [];
+            snap.docChanges().forEach((change) => {
+              const data = { id: change.doc.id, ...change.doc.data() };
+              const token = `class:${data.id}:${data.updatedAt || ''}`;
+              if (syncSelfWriteTokens.has(token)) {
+                syncSelfWriteTokens.delete(token);
+                return;
+              }
+              remoteDocs.push(data);
+            });
+            if (!remoteDocs.length) return;
+            const merged = mergeClassCollections(state.classes, state.classTombstones, remoteDocs);
+            applyMergedCollections({
+              classes: collapseContentDuplicates(merged.classes),
+              tombstones: merged.tombstones
+            });
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+            renderApp(true);
+            syncPrefs.lastSyncedAt = syncNowIso();
+            saveSyncPrefs();
+            setSyncStatus('synced');
+          },
+          (err) => setSyncStatus('error', err.message || 'Class listener failed')
+        );
+
+        const unsubPlanner = fsMod.onSnapshot(
+          fsMod.doc(db, 'users', uid, 'planner', 'main'),
+          (snap) => {
+            if (readOnlyMode || !snap.exists()) return;
+            const data = snap.data();
+            const token = `planner:${data.updatedAt || ''}`;
+            if (syncSelfWriteTokens.has(token)) {
+              syncSelfWriteTokens.delete(token);
+              return;
+            }
+            if (!syncIsNewer(data.updatedAt, gpaPlan.updatedAt)) return;
+            gpaPlan = sanitizeGpaPlan(data);
+            localStorage.setItem(GPA_STORAGE_KEY, JSON.stringify(gpaPlan));
+            if (state.activeView === 'gpa') renderApp(true);
+            syncPrefs.lastSyncedAt = syncNowIso();
+            saveSyncPrefs();
+            setSyncStatus('synced');
+          },
+          (err) => setSyncStatus('error', err.message || 'Planner listener failed')
+        );
+
+        const unsubSettings = fsMod.onSnapshot(
+          fsMod.doc(db, 'users', uid),
+          (snap) => {
+            if (readOnlyMode || !snap.exists()) return;
+            const data = snap.data();
+            const token = `settings:${data.updatedAt || ''}`;
+            if (syncSelfWriteTokens.has(token)) {
+              syncSelfWriteTokens.delete(token);
+              return;
+            }
+            if (!syncIsNewer(data.updatedAt, state.settingsUpdatedAt)) return;
+            if (data.profile) state.profile = { ...state.profile, ...data.profile };
+            if (['black', 'midnight', 'light'].includes(data.theme)) state.theme = data.theme;
+            if (data.locale) state.locale = data.locale;
+            if (Array.isArray(data.defaultGradeDefinitions)) {
+              state.defaultGradeDefinitions = cloneGradeScale(data.defaultGradeDefinitions);
+            }
+            state.settingsUpdatedAt = syncNormalizeUpdatedAt(data.updatedAt, syncNowIso());
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+            renderApp(true);
+            syncPrefs.lastSyncedAt = syncNowIso();
+            saveSyncPrefs();
+            setSyncStatus('synced');
+          },
+          (err) => setSyncStatus('error', err.message || 'Settings listener failed')
+        );
+
+        syncUnsubscribes.push(unsubClasses, unsubPlanner, unsubSettings);
+      }
+
+      function scheduleCloudSync() {
+        if (readOnlyMode || !syncPrefs.enabled || !syncUser) return;
+        if (syncDebounceTimer) clearTimeout(syncDebounceTimer);
+        syncDebounceTimer = setTimeout(() => {
+          pushLocalToCloud().catch((err) => {
+            console.error(err);
+            setSyncStatus(navigator.onLine === false ? 'offline' : 'error', err.message || 'Sync failed');
+          });
+        }, SYNC_DEBOUNCE_MS);
+      }
+
+      async function enableSyncBeta(enabled) {
+        syncPrefs.enabled = !!enabled;
+        saveSyncPrefs();
+        if (!enabled) {
+          clearSyncListeners();
+          syncUser = null;
+          setSyncStatus('local');
+          showToast('Cloud sync turned off. Local data is unchanged.', 'info');
+          return;
+        }
+        if (!isFirebaseConfigured()) {
+          setSyncStatus('error', 'Add Firebase config in src/firebase-config.browser.js (or window.GRADECRAFT_FIREBASE).');
+          showToast('Sync needs a Firebase web config first.', 'warning');
+          renderSyncAccountUI();
+          return;
+        }
+        try {
+          const fb = await loadFirebaseSdk();
+          fb.authMod.onAuthStateChanged(fb.auth, async (user) => {
+            syncUser = user;
+            if (!syncPrefs.enabled) return;
+            if (!user) {
+              clearSyncListeners();
+              setSyncStatus('signed_out');
+              return;
+            }
+            try {
+              setSyncStatus('syncing');
+              await pullAndMaybePromptFirstSync();
+              if (syncPrefs.firstSyncDone) {
+                await startSyncListeners();
+                await pushLocalToCloud();
+              }
+            } catch (err) {
+              console.error(err);
+              setSyncStatus('error', err.message || 'Sign-in sync failed');
+            }
+          });
+          // Complete email-link sign-in if the user opened a magic link
+          if (fb.authMod.isSignInWithEmailLink(fb.auth, window.location.href)) {
+            let email = window.localStorage.getItem('gradecraft_email_for_signin') || '';
+            if (!email) email = window.prompt('Confirm your email to finish signing in') || '';
+            if (email) {
+              await fb.authMod.signInWithEmailLink(fb.auth, email, window.location.href);
+              window.localStorage.removeItem('gradecraft_email_for_signin');
+              try {
+                window.history.replaceState({}, document.title, window.location.pathname + window.location.hash.replace(/[?&]apiKey=[^#]*/, ''));
+              } catch { /* ignore */ }
+            }
+          }
+          setSyncStatus(fb.auth.currentUser ? 'syncing' : 'signed_out');
+        } catch (err) {
+          console.error(err);
+          setSyncStatus('error', err.message || 'Could not start Firebase');
+        }
+      }
+
+      async function sendSyncEmailLink() {
+        const input = document.getElementById('syncEmailInput');
+        const email = String(input?.value || '').trim();
+        const msg = document.getElementById('syncAuthMessage');
+        if (!email) {
+          if (msg) msg.textContent = 'Enter an email address first.';
+          return;
+        }
+        if (!isFirebaseConfigured()) {
+          showToast('Firebase is not configured yet.', 'warning');
+          return;
+        }
+        try {
+          const fb = await loadFirebaseSdk();
+          const actionCodeSettings = {
+            url: window.location.href.split('#')[0] + '#/profile',
+            handleCodeInApp: true
+          };
+          await fb.authMod.sendSignInLinkToEmail(fb.auth, email, actionCodeSettings);
+          window.localStorage.setItem('gradecraft_email_for_signin', email);
+          if (msg) msg.textContent = 'Check your email for the sign-in link. It opens back into GradeCraft.';
+          showToast('Sign-in link sent', 'success');
+        } catch (err) {
+          console.error(err);
+          if (msg) msg.textContent = err.message || 'Could not send email link';
+          setSyncStatus('error', err.message || 'Email link failed');
+        }
+      }
+
+      async function signInWithGoogle() {
+        if (!isFirebaseConfigured()) {
+          showToast('Firebase is not configured yet.', 'warning');
+          return;
+        }
+        try {
+          const fb = await loadFirebaseSdk();
+          const provider = new fb.authMod.GoogleAuthProvider();
+          await fb.authMod.signInWithPopup(fb.auth, provider);
+          showToast('Signed in with Google', 'success');
+        } catch (err) {
+          console.error(err);
+          setSyncStatus('error', err.message || 'Google sign-in failed');
+          showToast(err.message || 'Google sign-in failed', 'warning');
+        }
+      }
+
+      async function signOutSync() {
+        if (!syncFirebase) {
+          syncUser = null;
+          setSyncStatus(syncPrefs.enabled ? 'signed_out' : 'local');
+          return;
+        }
+        clearSyncListeners();
+        await syncFirebase.authMod.signOut(syncFirebase.auth);
+        syncUser = null;
+        setSyncStatus('signed_out');
+        showToast('Signed out. Local data stays on this device.', 'info');
+      }
+
+      async function deleteMyCloudData() {
+        if (!syncUser) {
+          showToast('Sign in first to delete cloud data.', 'warning');
+          return;
+        }
+        openConfirmModal(
+          'Delete my cloud data and account?',
+          'This removes every GradeCraft document under your user in Firebase, then deletes the account. Local browser data is kept unless you factory-reset separately. You may need a recent sign-in.',
+          async () => {
+            try {
+              setSyncStatus('syncing');
+              const fb = await loadFirebaseSdk();
+              const { db, fsMod, auth } = fb;
+              const uid = syncUser.uid;
+              const classesSnap = await fsMod.getDocs(fsMod.collection(db, 'users', uid, 'classes'));
+              const batch = fsMod.writeBatch(db);
+              classesSnap.forEach((d) => batch.delete(d.ref));
+              batch.delete(fsMod.doc(db, 'users', uid, 'planner', 'main'));
+              batch.delete(fsMod.doc(db, 'users', uid));
+              await batch.commit();
+              clearSyncListeners();
+              await fb.authMod.deleteUser(auth.currentUser);
+              syncUser = null;
+              syncPrefs.firstSyncDone = false;
+              syncPrefs.lastPushed = { classes: {}, plannerUpdatedAt: null, settingsUpdatedAt: null };
+              syncPrefs.lastSyncedAt = null;
+              saveSyncPrefs();
+              setSyncStatus(syncPrefs.enabled ? 'signed_out' : 'local');
+              showToast('Cloud data and account deleted', 'success');
+            } catch (err) {
+              console.error(err);
+              setSyncStatus('error', err.message || 'Delete failed — sign in again and retry');
+              showToast(err.message || 'Delete failed. Sign in again, then retry.', 'warning');
+            }
+          }
+        );
+      }
+
+      function initSyncUi() {
+        renderSyncAccountUI();
+        if (syncPrefs.enabled) {
+          enableSyncBeta(true);
+        }
+        window.addEventListener('online', () => {
+          if (syncPrefs.enabled && syncUser) {
+            setSyncStatus('syncing');
+            pushLocalToCloud().catch(() => setSyncStatus('offline'));
+          }
+        });
+        window.addEventListener('offline', () => {
+          if (syncPrefs.enabled && syncUser) setSyncStatus('offline');
+        });
+      }
+
+
       function bootApp() {
         const openedShare = tryEnterShareFromLocation();
         if (!openedShare) {
           state.activeView = resolveViewFromLocation();
         }
         initEventListeners();
+        initSyncUi();
         renderApp(false);
         if (openedShare) {
           showToast('Opened a read-only shared GPA Planner. Local data was not modified.', 'info');

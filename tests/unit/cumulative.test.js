@@ -182,16 +182,20 @@ describe('GPA plan sanitize / migration', () => {
   });
 
   it('createDefaultGpaPlan returns empty structure', () => {
-    expect(createDefaultGpaPlan()).toEqual({
-      grades: {},
-      prior: { units: 0, gpa: null },
-      goal: { targetGpa: null, futureUnits: null },
-    });
+    const plan = createDefaultGpaPlan();
+    expect(plan.grades).toEqual({});
+    expect(plan.prior).toEqual({ units: 0, gpa: null });
+    expect(plan.goal).toEqual({ targetGpa: null, futureUnits: null });
+    expect(typeof plan.updatedAt).toBe('string');
+    expect(Number.isFinite(Date.parse(plan.updatedAt))).toBe(true);
   });
 
   it('loads empty plan when storage key missing', () => {
     const storage = createMockStorage();
-    expect(loadGpaPlan(storage)).toEqual(createDefaultGpaPlan());
+    const loaded = loadGpaPlan(storage);
+    expect(loaded.grades).toEqual({});
+    expect(loaded.prior).toEqual({ units: 0, gpa: null });
+    expect(loaded.goal).toEqual({ targetGpa: null, futureUnits: null });
     expect(storage.getItem(GPA_STORAGE_KEY)).toBeNull();
   });
 });

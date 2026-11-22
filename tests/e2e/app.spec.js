@@ -90,4 +90,16 @@ test.describe('GradeCraft App Smoke Tests', () => {
     const critical = results.violations.filter(v => v.impact === 'critical' || v.impact === 'serious');
     expect(critical).toEqual([]);
   });
+
+  test('Sync (beta) panel toggles on Profile without Firebase config', async ({ page }) => {
+    await page.goto(`${BASE_URL}#/profile`);
+    await expect(page.locator('#syncAccountSection')).toBeVisible({ timeout: 5000 });
+    await expect(page.locator('#syncBetaToggle')).toBeVisible();
+    await expect(page.locator('#syncActivePanel')).toBeHidden();
+    await page.check('#syncBetaToggle');
+    await expect(page.locator('#syncActivePanel')).toBeVisible();
+    await expect(page.locator('#btnSyncGoogle')).toBeVisible();
+    // Without Firebase config the status chip should show an error / setup hint path
+    await expect(page.locator('#syncStatusChip')).toBeVisible();
+  });
 });

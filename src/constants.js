@@ -39,7 +39,13 @@ export const ALL_STORAGE_KEYS = [
 
 export const GPA_STORAGE_KEY = 'gradecraft_gpa_planner_v1';
 
+/** Sync (beta) preferences: enabled flag, last sync time, last-pushed stamps. */
+export const SYNC_PREFS_KEY = 'gradecraft_sync_prefs_v1';
+
 export const DEFAULT_CLASS_UNITS = 4;
+
+/** Cloud document schema version stored under users/{uid}. */
+export const SYNC_SCHEMA_VERSION = 1;
 
 /** Upcoming panel looks this many days ahead (plus overdue items). */
 export const UPCOMING_WINDOW_DAYS = 14;
