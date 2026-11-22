@@ -293,6 +293,25 @@
       }
     }
 
+    /* Undo-delete toast: high-contrast so it stands out from normal toasts */
+    .toast-undo {
+      background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%);
+      border-color: #fdba74 !important;
+      color: #1c1917;
+      box-shadow: 0 10px 28px -6px rgba(234, 88, 12, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.12);
+    }
+
+    .toast-undo .toast-undo-btn {
+      background: #1c1917;
+      color: #fdba74;
+      border: 1px solid rgba(28, 25, 23, 0.35);
+    }
+
+    .toast-undo .toast-undo-btn:hover {
+      background: #292524;
+      color: #fde68a;
+    }
+
     /* Accessibility: reduced motion support */
     @media (prefers-reduced-motion: reduce) {
 
@@ -1296,14 +1315,24 @@
             <div>
               <h1 class="text-lg font-extrabold tracking-tight text-theme-primary font-mono">GradeCraft — Changelog</h1>
               <p class="text-xs text-theme-muted mt-1">Chronological record of releases and commits (<code
-                  class="font-mono">v1_1</code> &rarr; <code class="font-mono">v1_24</code>).</p>
+                  class="font-mono">v1_1</code> &rarr; <code class="font-mono">v1_25</code>).</p>
             </div>
             <span class="text-[11px] font-mono text-indigo-400 px-2.5 py-0.5 rounded-full accent-pill border">Latest:
-              v1_24</span>
+              v1_25</span>
           </div>
 
           <!-- Simple, clean text-based changelog list (Newest to Oldest & Plain-Text Block) -->
           <div class="space-y-4 font-mono text-xs leading-relaxed text-theme-secondary">
+            <div class="p-3.5 rounded-xl surface-alt border border-theme-subtle">
+              <div class="flex items-center justify-between gap-3">
+                <span class="font-bold text-indigo-400">v1_25</span>
+                <span class="text-[11px] font-mono text-theme-faint">11/22/2026</span>
+              </div>
+              <p class="mt-1 text-theme-primary font-sans text-xs leading-relaxed">
+                Added Undo for deleted classes: a full in-memory snapshot is kept until the next page navigation, with a high-contrast orange Undo toast so a mistaken delete can be reversed without a recycle bin.
+              </p>
+            </div>
+
             <div class="p-3.5 rounded-xl surface-alt border border-theme-subtle">
               <div class="flex items-center justify-between gap-3">
                 <span class="font-bold text-indigo-400">v1_24</span>
@@ -1625,7 +1654,7 @@
           <details id="rawChangelogDetails" class="pt-4 border-t border-theme">
             <summary class="raw-changelog-summary flex items-center justify-between gap-2 cursor-pointer select-none">
               <span class="text-[11px] font-bold uppercase tracking-wider text-theme-faint font-mono">Raw Plain-Text
-                Changelog (v1_1 &rarr; v1_24)</span>
+                Changelog (v1_1 &rarr; v1_25)</span>
               <i
                 class="fa-solid fa-chevron-down raw-changelog-chevron text-[11px] text-theme-faint transition-transform"></i>
             </summary>
@@ -1656,7 +1685,8 @@ v1_20 (11/22/2026) - Added assignment due dates, Upcoming panel (14-day + overdu
 v1_21 (11/22/2026) - Added Charts & Trends: group points breakdown, grade-over-time line, and Term GPA trend with text summaries and table fallbacks.
 v1_22 (11/22/2026) - Added Share & Export: print/PDF for planner and changelog, assignments CSV export, and read-only lz-string share links (file fallback; never writes localStorage).
 v1_23 (11/22/2026) - Added Import from Syllabus (rule-based, no LLM): paste or PDF (pdf.js on-device), parse name+percent pairs, review table with ~100% check, create groups only on confirm.
-v1_24 (11/22/2026) - Added optional Firebase cloud sync and accounts behind Sync (beta): email link + Google, batched push, realtime pull, first-sign-in merge choices, tombstones, privacy note, delete-my-data; local-only until Firebase config is set.</pre>
+v1_24 (11/22/2026) - Added optional Firebase cloud sync and accounts behind Sync (beta): email link + Google, batched push, realtime pull, first-sign-in merge choices, tombstones, privacy note, delete-my-data; local-only until Firebase config is set.
+v1_25 (11/22/2026) - Added Undo for deleted classes (full snapshot until next navigation) with a high-contrast orange Undo toast.</pre>
           </details>
         </section>
       </div>
@@ -3830,6 +3860,60 @@ v1_24 (11/22/2026) - Added optional Firebase cloud sync and accounts behind Sync
         return isLight ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-rose-500/15 text-rose-300 border border-rose-500/30';
       }
 
+      let pendingClassUndo = null;
+
+      function clearPendingClassUndo() {
+        if (pendingClassUndo?.toastEl) {
+          const el = pendingClassUndo.toastEl;
+          el.style.opacity = '0';
+          el.style.transform = 'translateY(6px)';
+          setTimeout(() => el.remove(), 220);
+        }
+        pendingClassUndo = null;
+      }
+
+      function undoDeleteClass() {
+        if (!pendingClassUndo || readOnlyMode) return;
+        const { snapshot, insertIndex, previousActiveTermFilter } = pendingClassUndo;
+        const restored = JSON.parse(JSON.stringify(snapshot));
+        restored.updatedAt = new Date().toISOString();
+
+        state.classTombstones = (state.classTombstones || []).filter(t => t.id !== restored.id);
+        if (!state.classes.some(c => c.id === restored.id)) {
+          const idx = Math.max(0, Math.min(insertIndex ?? state.classes.length, state.classes.length));
+          state.classes.splice(idx, 0, restored);
+        }
+        state.activeClassId = restored.id;
+        state.activeTermFilter = (previousActiveTermFilter === 'ALL' || previousActiveTermFilter)
+          ? previousActiveTermFilter
+          : normalizeTermName(restored.term);
+
+        clearPendingClassUndo();
+        saveState({ touchSettings: false, touchClass: false });
+        renderApp(false);
+        showToast(`Restored ${restored.code || 'class'}`, 'success');
+      }
+
+      function showUndoDeleteToast(classLabel) {
+        const container = document.getElementById('toastContainer');
+        if (!container || !pendingClassUndo) return;
+        if (pendingClassUndo.toastEl) pendingClassUndo.toastEl.remove();
+
+        const el = document.createElement('div');
+        el.className = 'toast-undo pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-xl border text-xs font-semibold transition-all duration-200';
+        el.setAttribute('role', 'status');
+        el.innerHTML = `
+          <i class="fa-solid fa-trash-can-arrow-up text-base" aria-hidden="true"></i>
+          <span class="flex-1 leading-snug">Deleted <strong>${escapeHtml(classLabel)}</strong>. Undo until you leave this page.</span>
+          <button type="button" data-action="undo-delete-class"
+            class="toast-undo-btn shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer transition">
+            Undo
+          </button>
+        `;
+        container.appendChild(el);
+        pendingClassUndo.toastEl = el;
+      }
+
       function showToast(message, type = 'info') {
         const container = document.getElementById('toastContainer');
         if (!container) return;
@@ -4626,6 +4710,7 @@ v1_24 (11/22/2026) - Added optional Firebase cloud sync and accounts behind Sync
       }
 
       function switchAppView(viewName, updateUrl = true) {
+        clearPendingClassUndo();
         const path = (window.location.pathname || '').toLowerCase();
         const isStandaloneSubpage = path.endsWith('/profile.html') || path.endsWith('/changelog.html');
 
@@ -6011,11 +6096,13 @@ v1_24 (11/22/2026) - Added optional Firebase cloud sync and accounts behind Sync
       function initEventListeners() {
         // Sync active subpage when browser Back / Forward buttons or hash changes occur
         window.addEventListener('popstate', () => {
+          clearPendingClassUndo();
           if (!readOnlyMode) tryEnterShareFromLocation();
           state.activeView = resolveViewFromLocation();
           renderApp(false);
         });
         window.addEventListener('hashchange', () => {
+          clearPendingClassUndo();
           if (!readOnlyMode) tryEnterShareFromLocation();
           state.activeView = resolveViewFromLocation();
           renderApp(false);
@@ -6061,6 +6148,7 @@ v1_24 (11/22/2026) - Added optional Firebase cloud sync and accounts behind Sync
           // Top-left Graduation Cap Brand Button -> Navigates directly to main landing page (...github.io/GradeCraft/)
           if (target.closest('#btnBrandReload')) {
             e.preventDefault();
+            clearPendingClassUndo();
             state.activeView = 'gradebook';
             saveState();
             const targetLandingUrl = getMainLandingPageUrl();
@@ -6322,6 +6410,11 @@ v1_24 (11/22/2026) - Added optional Firebase cloud sync and accounts behind Sync
             return;
           }
 
+          if (target.closest('[data-action="undo-delete-class"]')) {
+            undoDeleteClass();
+            return;
+          }
+
           if (target.closest('#btnDeleteClass')) {
             const cls = getActiveClass();
             if (!cls) return;
@@ -6331,9 +6424,23 @@ v1_24 (11/22/2026) - Added optional Firebase cloud sync and accounts behind Sync
             }
             openConfirmModal(
               `Delete "${cls.code}: ${cls.name}"?`,
-              `This will permanently remove this class and all ${cls.assignments.length} assignment entries.`,
+              `This removes the class and its ${cls.assignments.length} assignment entries. You can Undo until you navigate to another page.`,
               () => {
                 const deletedTerm = normalizeTermName(cls.term);
+                const insertIndex = state.classes.findIndex(c => c.id === cls.id);
+                const snapshot = JSON.parse(JSON.stringify(cls));
+                const previousActiveClassId = state.activeClassId;
+                const previousActiveTermFilter = state.activeTermFilter;
+
+                clearPendingClassUndo();
+                pendingClassUndo = {
+                  snapshot,
+                  insertIndex: insertIndex < 0 ? state.classes.length : insertIndex,
+                  previousActiveClassId,
+                  previousActiveTermFilter,
+                  toastEl: null
+                };
+
                 const tombstone = {
                   id: cls.id,
                   deleted: true,
@@ -6353,7 +6460,8 @@ v1_24 (11/22/2026) - Added optional Firebase cloud sync and accounts behind Sync
                 }
                 saveState({ touchSettings: false });
                 renderApp();
-                showToast('Deleted class gradebook', 'info');
+                const label = `${snapshot.code || 'Class'}${snapshot.name ? `: ${snapshot.name}` : ''}`;
+                showUndoDeleteToast(label);
               }
             );
             return;
