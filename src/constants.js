@@ -41,6 +41,24 @@ export const GPA_STORAGE_KEY = 'gradecraft_gpa_planner_v1';
 
 export const DEFAULT_CLASS_UNITS = 4;
 
+/** Default grading policies for an assignment group (all off). */
+export function createDefaultGroupPolicies() {
+  return {
+    dropLowest: 0,
+    bestOf: 0,
+    latePenalty: {
+      enabled: false,
+      percentPerDay: 10,
+      cap: 100
+    },
+    replacement: {
+      enabled: false,
+      sourceAssignmentId: '',
+      targetAssignmentId: ''
+    }
+  };
+}
+
 export const GROUP_DOT_COLORS = [
   'bg-indigo-500',
   'bg-emerald-500',

@@ -626,7 +626,7 @@
                   <th class="pb-2.5 text-right">Graded Pts</th>
                   <th class="pb-2.5 text-right">Actual %</th>
                   <th class="pb-2.5 text-right">Forecast %</th>
-                  <th class="pb-2.5 w-10 text-center"></th>
+                  <th class="pb-2.5 w-24 text-center">Policies</th>
                 </tr>
               </thead>
               <tbody id="tbodyAssignmentGroups" class="text-xs"></tbody>
@@ -1069,14 +1069,24 @@
             <div>
               <h1 class="text-lg font-extrabold tracking-tight text-theme-primary font-mono">GradeCraft — Changelog</h1>
               <p class="text-xs text-theme-muted mt-1">Chronological record of releases and commits (<code
-                  class="font-mono">v1_1</code> &rarr; <code class="font-mono">v1_17</code>).</p>
+                  class="font-mono">v1_1</code> &rarr; <code class="font-mono">v1_18</code>).</p>
             </div>
             <span class="text-[11px] font-mono text-indigo-400 px-2.5 py-0.5 rounded-full accent-pill border">Latest:
-              v1_17</span>
+              v1_18</span>
           </div>
 
           <!-- Simple, clean text-based changelog list (Newest to Oldest & Plain-Text Block) -->
           <div class="space-y-4 font-mono text-xs leading-relaxed text-theme-secondary">
+            <div class="p-3.5 rounded-xl surface-alt border border-theme-subtle">
+              <div class="flex items-center justify-between gap-3">
+                <span class="font-bold text-indigo-400">v1_18</span>
+                <span class="text-[11px] font-mono text-theme-faint">11/21/2026</span>
+              </div>
+              <p class="mt-1 text-theme-primary font-sans text-xs leading-relaxed">
+                Added grading policy rules per assignment group: drop lowest N, best N of M, late penalty (%/day with cap), score replacement, and extra credit. Group math now runs through <code class="font-mono">computeGroupResult</code> (late → replace → drop/best-of → extra credit), with a Policies menu, active-rule badges, assignment late/EC flags, and Target Forecaster notes when drop rules make the needed average approximate. Covered by new Vitest policy tests; legacy saves migrate empty policies on load.
+              </p>
+            </div>
+
             <div class="p-3.5 rounded-xl surface-alt border border-theme-subtle">
               <div class="flex items-center justify-between gap-3">
                 <span class="font-bold text-indigo-400">v1_17</span>
@@ -1328,7 +1338,7 @@
           <details id="rawChangelogDetails" class="pt-4 border-t border-theme">
             <summary class="raw-changelog-summary flex items-center justify-between gap-2 cursor-pointer select-none">
               <span class="text-[11px] font-bold uppercase tracking-wider text-theme-faint font-mono">Raw Plain-Text
-                Changelog (v1_1 &rarr; v1_17)</span>
+                Changelog (v1_1 &rarr; v1_18)</span>
               <i
                 class="fa-solid fa-chevron-down raw-changelog-chevron text-[11px] text-theme-faint transition-transform"></i>
             </summary>
@@ -1352,7 +1362,8 @@ v1_16_1 (11/17/2026) - Added a per-class P/NP checkbox next to Units that exclud
 v1_16_2 (11/18/2026) - Removed hardcoded values from the Profile & Settings inputs (Display Name, Academic Email, Institution, and Major / Program now show placeholders only, and legacy filler values saved by older versions are cleared on load), added a release date to every changelog entry and raw log line, fixed the raw log so every entry renders inside its block, and made the Raw Plain-Text Changelog a collapsible dropdown.
 v1_16_3 (11/18/2026) - Set the release date for v1_1 through v1_12 to 11/16/2026 and switched all changelog dates (cards and raw log) to the mm/dd/yyyy format.
 v1_16_4 (11/20/2026) - Fixed duplicate classes (such as CS 61A and DATA C8) appearing on open or after JSON import: saved data is now the only source once it exists, so older storage keys no longer re-add classes, and classes with the same ID or the same code, term and title are merged on load and import. Default examples are now CS 61A and DATA C8 only (MATH 54 removed), and the Restore Demo Courses message lists the examples it checks.
-v1_17 (11/21/2026) - Implemented Quality Foundation: extracted calculation and storage logic into standalone modules (src/calc.js, src/storage.js, src/constants.js), added 74 automated Vitest unit tests covering GPA math, unit weighting, and migration, added Playwright E2E and axe accessibility tests, configured GitHub Actions CI workflow, and added accessibility improvements (polite toast announcements, keyboard group reordering, and prefers-reduced-motion support).</pre>
+v1_17 (11/21/2026) - Implemented Quality Foundation: extracted calculation and storage logic into standalone modules (src/calc.js, src/storage.js, src/constants.js), added 74 automated Vitest unit tests covering GPA math, unit weighting, and migration, added Playwright E2E and axe accessibility tests, configured GitHub Actions CI workflow, and added accessibility improvements (polite toast announcements, keyboard group reordering, and prefers-reduced-motion support).
+v1_18 (11/21/2026) - Added grading policy rules per assignment group (drop lowest N, best N of M, late penalty, score replacement, extra credit) via computeGroupResult, Policies menu UI, active-rule badges, and Target Forecaster approximate notes; legacy saves migrate empty policies on load.</pre>
           </details>
         </section>
       </div>
@@ -1392,6 +1403,87 @@ v1_17 (11/21/2026) - Implemented Quality Foundation: extracted calculation and s
           class="px-4 py-2 rounded-xl text-xs font-semibold theme-btn-secondary cursor-pointer">Cancel</button>
         <button id="confirmModalAcceptBtn" type="button"
           class="px-4 py-2 rounded-xl text-xs font-semibold bg-rose-600 hover:bg-rose-500 text-white shadow-sm transition cursor-pointer">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- GROUP POLICIES MODAL -->
+  <div id="policiesModalBackdrop"
+    class="fixed inset-0 z-50 bg-black/75 backdrop-blur-xs hidden items-center justify-center p-4">
+    <div class="surface-card rounded-2xl border max-w-lg w-full p-6 space-y-4 max-h-[90vh] overflow-y-auto"
+      role="dialog" aria-modal="true" aria-labelledby="policiesModalTitle">
+      <div class="flex items-start justify-between gap-3">
+        <div>
+          <h3 id="policiesModalTitle" class="text-base font-bold text-theme-primary">Group Policies</h3>
+          <p class="text-xs text-theme-muted mt-1">Optional syllabus rules for this assignment group. Applied as: late
+            penalty → score replace → drop / best-of → extra credit.</p>
+        </div>
+        <button id="policiesModalCloseBtn" type="button"
+          class="text-theme-faint hover:text-theme-primary p-1.5 rounded-lg transition cursor-pointer"
+          aria-label="Close policies">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <input type="hidden" id="policiesModalGroupId" value="" />
+
+      <div class="space-y-3 text-xs">
+        <label class="flex flex-col gap-1.5">
+          <span class="font-semibold text-theme-secondary">Drop lowest N scores</span>
+          <input id="policyDropLowest" type="number" min="0" step="1" value="0"
+            class="w-full font-mono theme-input rounded-lg px-3 py-2" />
+        </label>
+
+        <label class="flex flex-col gap-1.5">
+          <span class="font-semibold text-theme-secondary">Count only best N scores <span
+              class="font-normal text-theme-faint">(0 = off; overrides drop lowest when set)</span></span>
+          <input id="policyBestOf" type="number" min="0" step="1" value="0"
+            class="w-full font-mono theme-input rounded-lg px-3 py-2" />
+        </label>
+
+        <div class="rounded-xl border border-theme-subtle surface-alt p-3 space-y-2.5">
+          <label class="inline-flex items-center gap-2 font-semibold text-theme-secondary cursor-pointer">
+            <input id="policyLateEnabled" type="checkbox" class="rounded border-theme" />
+            Late penalty
+          </label>
+          <div class="grid grid-cols-2 gap-2">
+            <label class="flex flex-col gap-1">
+              <span class="text-theme-muted">% per day late</span>
+              <input id="policyLatePerDay" type="number" min="0" step="any" value="10"
+                class="w-full font-mono theme-input rounded-lg px-3 py-2" />
+            </label>
+            <label class="flex flex-col gap-1">
+              <span class="text-theme-muted">Cap %</span>
+              <input id="policyLateCap" type="number" min="0" max="100" step="any" value="100"
+                class="w-full font-mono theme-input rounded-lg px-3 py-2" />
+            </label>
+          </div>
+          <p class="text-[11px] text-theme-faint">Mark days late on each assignment row. Extra credit is toggled per
+            assignment.</p>
+        </div>
+
+        <div class="rounded-xl border border-theme-subtle surface-alt p-3 space-y-2.5">
+          <label class="inline-flex items-center gap-2 font-semibold text-theme-secondary cursor-pointer">
+            <input id="policyReplaceEnabled" type="checkbox" class="rounded border-theme" />
+            Score replacement
+          </label>
+          <label class="flex flex-col gap-1">
+            <span class="text-theme-muted">Source (later / better score)</span>
+            <select id="policyReplaceSource" class="w-full theme-select rounded-lg px-3 py-2"></select>
+          </label>
+          <label class="flex flex-col gap-1">
+            <span class="text-theme-muted">Target (earlier score to raise)</span>
+            <select id="policyReplaceTarget" class="w-full theme-select rounded-lg px-3 py-2"></select>
+          </label>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-end gap-2 pt-1">
+        <button id="policiesModalClearBtn" type="button"
+          class="px-4 py-2 rounded-xl text-xs font-semibold theme-btn-secondary cursor-pointer">Clear rules</button>
+        <button id="policiesModalSaveBtn" type="button"
+          class="px-4 py-2 rounded-xl text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm transition cursor-pointer">Save
+          policies</button>
       </div>
     </div>
   </div>
@@ -1485,21 +1577,21 @@ v1_17 (11/21/2026) - Implemented Quality Foundation: extracted calculation and s
             units: 4,
             targetLetter: 'A',
             groups: [
-              { id: 'grp_61a_hw', name: 'Homework & Labs', weight: 15 },
-              { id: 'grp_61a_proj', name: 'Projects', weight: 30 },
-              { id: 'grp_61a_mt1', name: 'Midterm 1', weight: 15 },
-              { id: 'grp_61a_mt2', name: 'Midterm 2', weight: 15 },
-              { id: 'grp_61a_fin', name: 'Final Exam', weight: 25 }
+              { id: 'grp_61a_hw', name: 'Homework & Labs', weight: 15, policies: createDefaultGroupPolicies() },
+              { id: 'grp_61a_proj', name: 'Projects', weight: 30, policies: createDefaultGroupPolicies() },
+              { id: 'grp_61a_mt1', name: 'Midterm 1', weight: 15, policies: createDefaultGroupPolicies() },
+              { id: 'grp_61a_mt2', name: 'Midterm 2', weight: 15, policies: createDefaultGroupPolicies() },
+              { id: 'grp_61a_fin', name: 'Final Exam', weight: 25, policies: createDefaultGroupPolicies() }
             ],
             buckets: cloneGradeScale(scale),
             assignments: [
-              { id: 'asg_61a_1', name: 'Lab 01: Functions', groupId: 'grp_61a_hw', earned: 10, available: 10, whatIfEarned: null },
-              { id: 'asg_61a_2', name: 'HW 01: Control', groupId: 'grp_61a_hw', earned: 2, available: 2, whatIfEarned: null },
-              { id: 'asg_61a_3', name: 'Project 1: Hog', groupId: 'grp_61a_proj', earned: 25, available: 25, whatIfEarned: null },
-              { id: 'asg_61a_4', name: 'Project 2: Cats', groupId: 'grp_61a_proj', earned: 24, available: 25, whatIfEarned: null },
-              { id: 'asg_61a_5', name: 'Midterm 1', groupId: 'grp_61a_mt1', earned: 36, available: 40, whatIfEarned: null },
-              { id: 'asg_61a_6', name: 'Midterm 2', groupId: 'grp_61a_mt2', earned: 35, available: 40, whatIfEarned: null },
-              { id: 'asg_61a_7', name: 'Final Exam', groupId: 'grp_61a_fin', earned: null, available: 75, whatIfEarned: 68 }
+              { id: 'asg_61a_1', name: 'Lab 01: Functions', groupId: 'grp_61a_hw', earned: 10, available: 10, whatIfEarned: null, extraCredit: false, lateDays: 0 },
+              { id: 'asg_61a_2', name: 'HW 01: Control', groupId: 'grp_61a_hw', earned: 2, available: 2, whatIfEarned: null, extraCredit: false, lateDays: 0 },
+              { id: 'asg_61a_3', name: 'Project 1: Hog', groupId: 'grp_61a_proj', earned: 25, available: 25, whatIfEarned: null, extraCredit: false, lateDays: 0 },
+              { id: 'asg_61a_4', name: 'Project 2: Cats', groupId: 'grp_61a_proj', earned: 24, available: 25, whatIfEarned: null, extraCredit: false, lateDays: 0 },
+              { id: 'asg_61a_5', name: 'Midterm 1', groupId: 'grp_61a_mt1', earned: 36, available: 40, whatIfEarned: null, extraCredit: false, lateDays: 0 },
+              { id: 'asg_61a_6', name: 'Midterm 2', groupId: 'grp_61a_mt2', earned: 35, available: 40, whatIfEarned: null, extraCredit: false, lateDays: 0 },
+              { id: 'asg_61a_7', name: 'Final Exam', groupId: 'grp_61a_fin', earned: null, available: 75, whatIfEarned: 68, extraCredit: false, lateDays: 0 }
             ]
           },
           {
@@ -1510,19 +1602,19 @@ v1_17 (11/21/2026) - Implemented Quality Foundation: extracted calculation and s
             units: 4,
             targetLetter: 'A',
             groups: [
-              { id: 'grp_c8_lab', name: 'Labs', weight: 10 },
-              { id: 'grp_c8_hw', name: 'Homeworks', weight: 20 },
-              { id: 'grp_c8_proj', name: 'Projects', weight: 25 },
-              { id: 'grp_c8_mt', name: 'Midterm Exam', weight: 20 },
-              { id: 'grp_c8_fin', name: 'Final Exam', weight: 25 }
+              { id: 'grp_c8_lab', name: 'Labs', weight: 10, policies: createDefaultGroupPolicies() },
+              { id: 'grp_c8_hw', name: 'Homeworks', weight: 20, policies: createDefaultGroupPolicies() },
+              { id: 'grp_c8_proj', name: 'Projects', weight: 25, policies: createDefaultGroupPolicies() },
+              { id: 'grp_c8_mt', name: 'Midterm Exam', weight: 20, policies: createDefaultGroupPolicies() },
+              { id: 'grp_c8_fin', name: 'Final Exam', weight: 25, policies: createDefaultGroupPolicies() }
             ],
             buckets: cloneGradeScale(scale),
             assignments: [
-              { id: 'asg_c8_1', name: 'Lab 01: Expressions', groupId: 'grp_c8_lab', earned: 10, available: 10, whatIfEarned: null },
-              { id: 'asg_c8_2', name: 'HW 01: Causality', groupId: 'grp_c8_hw', earned: 18, available: 20, whatIfEarned: null },
-              { id: 'asg_c8_3', name: 'Project 1: World Progress', groupId: 'grp_c8_proj', earned: 29, available: 30, whatIfEarned: null },
-              { id: 'asg_c8_4', name: 'Midterm Exam', groupId: 'grp_c8_mt', earned: 44, available: 50, whatIfEarned: null },
-              { id: 'asg_c8_5', name: 'Final Exam', groupId: 'grp_c8_fin', earned: null, available: 100, whatIfEarned: 90 }
+              { id: 'asg_c8_1', name: 'Lab 01: Expressions', groupId: 'grp_c8_lab', earned: 10, available: 10, whatIfEarned: null, extraCredit: false, lateDays: 0 },
+              { id: 'asg_c8_2', name: 'HW 01: Causality', groupId: 'grp_c8_hw', earned: 18, available: 20, whatIfEarned: null, extraCredit: false, lateDays: 0 },
+              { id: 'asg_c8_3', name: 'Project 1: World Progress', groupId: 'grp_c8_proj', earned: 29, available: 30, whatIfEarned: null, extraCredit: false, lateDays: 0 },
+              { id: 'asg_c8_4', name: 'Midterm Exam', groupId: 'grp_c8_mt', earned: 44, available: 50, whatIfEarned: null, extraCredit: false, lateDays: 0 },
+              { id: 'asg_c8_5', name: 'Final Exam', groupId: 'grp_c8_fin', earned: null, available: 100, whatIfEarned: 90, extraCredit: false, lateDays: 0 }
             ]
           }
         ];
@@ -1548,6 +1640,24 @@ v1_17 (11/21/2026) - Implemented Quality Foundation: extracted calculation and s
         };
       }
 
+
+      function createDefaultGroupPolicies() {
+        return {
+          dropLowest: 0,
+          bestOf: 0,
+          latePenalty: {
+            enabled: false,
+            percentPerDay: 10,
+            cap: 100
+          },
+          replacement: {
+            enabled: false,
+            sourceAssignmentId: '',
+            targetAssignmentId: ''
+          }
+        };
+      }
+
       const DEFAULT_CLASS_UNITS = 4;
 
       function normalizeUnits(value, fallback = DEFAULT_CLASS_UNITS) {
@@ -1562,12 +1672,13 @@ v1_17 (11/21/2026) - Implemented Quality Foundation: extracted calculation and s
           ? c.groups.map((g, gIdx) => ({
             id: String(g?.id || uid(`grp_${gIdx}`)),
             name: String(g?.name ?? `Group ${gIdx + 1}`),
-            weight: Math.max(0, Number(g?.weight ?? 0) || 0)
+            weight: Math.max(0, Number(g?.weight ?? 0) || 0),
+            policies: normalizeGroupPolicies(g?.policies)
           }))
           : [
-            { id: uid('grp_1'), name: 'Assignments', weight: 30 },
-            { id: uid('grp_2'), name: 'Midterm Exam', weight: 30 },
-            { id: uid('grp_3'), name: 'Final Exam', weight: 40 }
+            { id: uid('grp_1'), name: 'Assignments', weight: 30, policies: createDefaultGroupPolicies() },
+            { id: uid('grp_2'), name: 'Midterm Exam', weight: 30, policies: createDefaultGroupPolicies() },
+            { id: uid('grp_3'), name: 'Final Exam', weight: 40, policies: createDefaultGroupPolicies() }
           ];
 
         const firstGroupId = safeGroups[0].id;
@@ -1584,7 +1695,9 @@ v1_17 (11/21/2026) - Implemented Quality Foundation: extracted calculation and s
               groupId: validGroupIds.has(a?.groupId) ? a.groupId : firstGroupId,
               earned: isGradedValue(a?.earned) ? Number(a.earned) : null,
               available: Math.max(0.01, Number(availVal ?? 100) || 100),
-              whatIfEarned: isGradedValue(whatIfVal) ? Number(whatIfVal) : null
+              whatIfEarned: isGradedValue(whatIfVal) ? Number(whatIfVal) : null,
+              extraCredit: a?.extraCredit === true,
+              lateDays: Math.max(0, Number(a?.lateDays) || 0)
             };
           })
           : [];
@@ -2027,6 +2140,93 @@ v1_17 (11/21/2026) - Implemented Quality Foundation: extracted calculation and s
         pendingModalConfirm = null;
       }
 
+      function openPoliciesModal(groupId) {
+        const cls = getActiveClass();
+        if (!cls) return;
+        const grp = cls.groups.find(g => g.id === groupId);
+        if (!grp) return;
+        grp.policies = normalizeGroupPolicies(grp.policies);
+        const p = grp.policies;
+
+        const backdrop = document.getElementById('policiesModalBackdrop');
+        const titleEl = document.getElementById('policiesModalTitle');
+        const gidEl = document.getElementById('policiesModalGroupId');
+        if (!backdrop || !gidEl) return;
+
+        if (titleEl) titleEl.textContent = `Policies — ${grp.name}`;
+        gidEl.value = groupId;
+        document.getElementById('policyDropLowest').value = String(p.dropLowest || 0);
+        document.getElementById('policyBestOf').value = String(p.bestOf || 0);
+        document.getElementById('policyLateEnabled').checked = !!p.latePenalty.enabled;
+        document.getElementById('policyLatePerDay').value = String(p.latePenalty.percentPerDay);
+        document.getElementById('policyLateCap').value = String(p.latePenalty.cap);
+        document.getElementById('policyReplaceEnabled').checked = !!p.replacement.enabled;
+
+        const opts = [`<option value="">— Select assignment —</option>`].concat(
+          cls.assignments.map(a => `<option value="${escapeHtml(a.id)}">${escapeHtml(a.name)}</option>`)
+        ).join('');
+        const srcSel = document.getElementById('policyReplaceSource');
+        const tgtSel = document.getElementById('policyReplaceTarget');
+        if (srcSel) {
+          srcSel.innerHTML = opts;
+          srcSel.value = p.replacement.sourceAssignmentId || '';
+        }
+        if (tgtSel) {
+          tgtSel.innerHTML = opts;
+          tgtSel.value = p.replacement.targetAssignmentId || '';
+        }
+
+        backdrop.classList.remove('hidden');
+        backdrop.classList.add('flex');
+      }
+
+      function closePoliciesModal() {
+        const backdrop = document.getElementById('policiesModalBackdrop');
+        if (!backdrop) return;
+        backdrop.classList.add('hidden');
+        backdrop.classList.remove('flex');
+      }
+
+      function savePoliciesModal() {
+        const cls = getActiveClass();
+        const gid = document.getElementById('policiesModalGroupId')?.value;
+        if (!cls || !gid) return;
+        const grp = cls.groups.find(g => g.id === gid);
+        if (!grp) return;
+
+        grp.policies = normalizeGroupPolicies({
+          dropLowest: document.getElementById('policyDropLowest').value,
+          bestOf: document.getElementById('policyBestOf').value,
+          latePenalty: {
+            enabled: document.getElementById('policyLateEnabled').checked,
+            percentPerDay: document.getElementById('policyLatePerDay').value,
+            cap: document.getElementById('policyLateCap').value
+          },
+          replacement: {
+            enabled: document.getElementById('policyReplaceEnabled').checked,
+            sourceAssignmentId: document.getElementById('policyReplaceSource').value,
+            targetAssignmentId: document.getElementById('policyReplaceTarget').value
+          }
+        });
+        saveState();
+        closePoliciesModal();
+        renderApp();
+        showToast(`Saved policies for ${grp.name}`, 'success');
+      }
+
+      function clearPoliciesModalFields() {
+        document.getElementById('policyDropLowest').value = '0';
+        document.getElementById('policyBestOf').value = '0';
+        document.getElementById('policyLateEnabled').checked = false;
+        document.getElementById('policyLatePerDay').value = '10';
+        document.getElementById('policyLateCap').value = '100';
+        document.getElementById('policyReplaceEnabled').checked = false;
+        const srcSel = document.getElementById('policyReplaceSource');
+        const tgtSel = document.getElementById('policyReplaceTarget');
+        if (srcSel) srcSel.value = '';
+        if (tgtSel) tgtSel.value = '';
+      }
+
       function getSortedBuckets(buckets) {
         return [...(buckets || [])].sort((a, b) => Number(b.min) - Number(a.min));
       }
@@ -2046,51 +2246,250 @@ v1_17 (11/21/2026) - Implemented Quality Foundation: extracted calculation and s
         };
       }
 
+      // ─── Group policies ──────────────────────────────────────────────────
+
+      function normalizeGroupPolicies(raw) {
+        const defaults = createDefaultGroupPolicies();
+        if (!raw || typeof raw !== 'object') return defaults;
+        const late = raw.latePenalty && typeof raw.latePenalty === 'object' ? raw.latePenalty : {};
+        const repl = raw.replacement && typeof raw.replacement === 'object' ? raw.replacement : {};
+        return {
+          dropLowest: Math.max(0, Math.floor(Number(raw.dropLowest) || 0)),
+          bestOf: Math.max(0, Math.floor(Number(raw.bestOf) || 0)),
+          latePenalty: {
+            enabled: late.enabled === true,
+            percentPerDay: Math.max(0, Number(late.percentPerDay ?? defaults.latePenalty.percentPerDay) || 0),
+            cap: Math.max(0, Math.min(100, Number(late.cap ?? defaults.latePenalty.cap) || 0))
+          },
+          replacement: {
+            enabled: repl.enabled === true,
+            sourceAssignmentId: String(repl.sourceAssignmentId || ''),
+            targetAssignmentId: String(repl.targetAssignmentId || '')
+          }
+        };
+      }
+
+      function groupPoliciesAreActive(policies, assignmentsInGroup = []) {
+        const p = normalizeGroupPolicies(policies);
+        if (p.dropLowest > 0) return true;
+        if (p.bestOf > 0) return true;
+        if (p.latePenalty.enabled) return true;
+        if (p.replacement.enabled && p.replacement.sourceAssignmentId && p.replacement.targetAssignmentId) return true;
+        if ((assignmentsInGroup || []).some(a => a.extraCredit === true)) return true;
+        return false;
+      }
+
+      function describeActiveGroupPolicies(policies, assignmentsInGroup = []) {
+        const p = normalizeGroupPolicies(policies);
+        const labels = [];
+        if (p.dropLowest > 0) labels.push(`Drop lowest ${p.dropLowest}`);
+        if (p.bestOf > 0) labels.push(`Best ${p.bestOf}`);
+        if (p.latePenalty.enabled) labels.push(`Late −${formatNumber(p.latePenalty.percentPerDay, 0, 1)}%/day`);
+        if (p.replacement.enabled && p.replacement.sourceAssignmentId && p.replacement.targetAssignmentId) {
+          labels.push('Score replace');
+        }
+        const ecCount = (assignmentsInGroup || []).filter(a => a.extraCredit === true).length;
+        if (ecCount > 0) labels.push(ecCount === 1 ? '1 extra credit' : `${ecCount} extra credit`);
+        return labels;
+      }
+
+      function getModeScore(assignment, mode) {
+        if (mode === 'forecast') {
+          if (isGradedValue(assignment.whatIfEarned)) return Number(assignment.whatIfEarned);
+          if (isGradedValue(assignment.earned)) return Number(assignment.earned);
+          return null;
+        }
+        return isGradedValue(assignment.earned) ? Number(assignment.earned) : null;
+      }
+
+      function applyLatePenaltyToScore(earned, lateDays, latePolicy) {
+        if (!latePolicy?.enabled) return earned;
+        const days = Math.max(0, Number(lateDays) || 0);
+        if (days <= 0) return earned;
+        const perDay = Math.max(0, Number(latePolicy.percentPerDay) || 0);
+        const cap = Math.max(0, Math.min(100, Number(latePolicy.cap) || 0));
+        const penaltyPct = Math.min(cap, days * perDay);
+        return Math.max(0, earned * (1 - penaltyPct / 100));
+      }
+
+      function resolveAssignmentLatePolicy(assignment, group, groupsById) {
+        const ownGroup = groupsById?.[assignment.groupId] || group;
+        return normalizeGroupPolicies(ownGroup?.policies).latePenalty;
+      }
+
+      /**
+       * Pure group scoring with policies applied in fixed order:
+       * late penalty → replacement → drop lowest OR best-of → extra credit.
+       *
+       * @param {object} group
+       * @param {Array} groupAssignments - assignments belonging to this group
+       * @param {object} [options]
+       * @param {'actual'|'forecast'} [options.mode]
+       * @param {Array} [options.allAssignments] - full class list (for cross-group replacement sources)
+       * @param {Object} [options.groupsById] - map of groupId → group (for source late penalties)
+       */
+      function computeGroupResult(group, groupAssignments, options = {}) {
+        const mode = options.mode === 'forecast' ? 'forecast' : 'actual';
+        const allAssignments = Array.isArray(options.allAssignments) ? options.allAssignments : groupAssignments;
+        const groupsById = options.groupsById || {};
+        const policies = normalizeGroupPolicies(group?.policies);
+
+        const items = [];
+        let totalAllAvailable = 0;
+        let gradedAvailableBeforeDrop = 0;
+
+        (groupAssignments || []).forEach(a => {
+          const available = Math.max(0, Number(a.available) || 0);
+          const isExtraCredit = a.extraCredit === true;
+          if (!isExtraCredit && available > 0) totalAllAvailable += available;
+
+          const rawScore = getModeScore(a, mode);
+          if (rawScore === null) {
+            items.push({
+              id: a.id,
+              available,
+              earned: null,
+              isExtraCredit,
+              scored: false,
+              dropped: false,
+              replaced: false
+            });
+            return;
+          }
+
+          const latePolicy = resolveAssignmentLatePolicy(a, group, groupsById);
+          const earnedAfterLate = applyLatePenaltyToScore(rawScore, a.lateDays, latePolicy);
+          if (!isExtraCredit && available > 0) gradedAvailableBeforeDrop += available;
+
+          items.push({
+            id: a.id,
+            available,
+            earned: earnedAfterLate,
+            isExtraCredit,
+            scored: true,
+            dropped: false,
+            replaced: false
+          });
+        });
+
+        // Replacement: source score % can raise the target's effective % (target keeps its available).
+        if (
+          policies.replacement.enabled &&
+          policies.replacement.sourceAssignmentId &&
+          policies.replacement.targetAssignmentId
+        ) {
+          const sourceAsg = allAssignments.find(a => a.id === policies.replacement.sourceAssignmentId);
+          const targetItem = items.find(i => i.id === policies.replacement.targetAssignmentId);
+          if (sourceAsg && targetItem && targetItem.scored && targetItem.available > 0 && !targetItem.isExtraCredit) {
+            const sourceRaw = getModeScore(sourceAsg, mode);
+            const sourceAvail = Math.max(0, Number(sourceAsg.available) || 0);
+            if (sourceRaw !== null && sourceAvail > 0) {
+              const sourceLate = resolveAssignmentLatePolicy(sourceAsg, group, groupsById);
+              const sourceEarned = applyLatePenaltyToScore(sourceRaw, sourceAsg.lateDays, sourceLate);
+              const sourcePct = (sourceEarned / sourceAvail) * 100;
+              const targetPct = (targetItem.earned / targetItem.available) * 100;
+              if (sourcePct > targetPct + 1e-12) {
+                targetItem.earned = (sourcePct / 100) * targetItem.available;
+                targetItem.replaced = true;
+              }
+            }
+          }
+        }
+
+        // Drop lowest OR best-of (bestOf wins when both are set).
+        const regularScored = items.filter(i => i.scored && !i.isExtraCredit && i.available > 0);
+        const dropCount = policies.bestOf > 0
+          ? Math.max(0, regularScored.length - policies.bestOf)
+          : Math.min(policies.dropLowest, regularScored.length);
+
+        if (dropCount > 0) {
+          const ranked = [...regularScored].sort((a, b) => {
+            const pa = a.earned / a.available;
+            const pb = b.earned / b.available;
+            if (pa !== pb) return pa - pb;
+            return String(a.id).localeCompare(String(b.id));
+          });
+          ranked.slice(0, dropCount).forEach(item => {
+            item.dropped = true;
+          });
+        }
+
+        let earned = 0;
+        let available = 0;
+        const droppedIds = [];
+        const replacedIds = [];
+
+        items.forEach(item => {
+          if (item.replaced) replacedIds.push(item.id);
+          if (item.dropped) {
+            droppedIds.push(item.id);
+            return;
+          }
+          if (!item.scored) return;
+          if (item.isExtraCredit) {
+            earned += item.earned;
+            return;
+          }
+          if (item.available <= 0) return;
+          earned += item.earned;
+          available += item.available;
+        });
+
+        const pct = available > 0 ? (earned / available) * 100 : null;
+        const hasDropOrBestOf = policies.dropLowest > 0 || policies.bestOf > 0;
+        const hasUngradedRegular = items.some(i => !i.scored && !i.isExtraCredit && i.available > 0);
+
+        return {
+          earned,
+          available,
+          pct,
+          totalAllAvailable,
+          gradedAvailableBeforeDrop,
+          droppedIds,
+          replacedIds,
+          hasActivePolicies: groupPoliciesAreActive(policies, groupAssignments),
+          forecastIsApproximate: hasDropOrBestOf && hasUngradedRegular
+        };
+      }
+
+      // ─── Class grade computation ─────────────────────────────────────────
+
       function computeClassMetrics(cls) {
         const groupMap = {};
         let totalConfiguredWeight = 0;
+        const groupsById = {};
 
         cls.groups.forEach(g => {
           const w = Math.max(0, Number(g.weight) || 0);
           totalConfiguredWeight += w;
+          const normalized = {
+            ...g,
+            policies: normalizeGroupPolicies(g.policies)
+          };
+          groupsById[g.id] = normalized;
           groupMap[g.id] = {
             id: g.id,
             name: g.name,
             weight: w,
+            policies: normalized.policies,
             actualEarned: 0,
             actualAvailable: 0,
             actualPct: null,
             forecastEarned: 0,
             forecastAvailable: 0,
             forecastPct: null,
-            totalAllAvailable: 0
+            totalAllAvailable: 0,
+            gradedAvailableBeforeDrop: 0,
+            droppedIds: [],
+            replacedIds: [],
+            hasActivePolicies: false,
+            forecastIsApproximate: false
           };
         });
 
         let activeWhatIfCount = 0;
-
         cls.assignments.forEach(a => {
-          const g = groupMap[a.groupId];
-          if (!g) return;
-          const avail = Math.max(0, Number(a.available) || 0);
-          if (avail <= 0) return;
-          g.totalAllAvailable += avail;
-
-          const hasActual = isGradedValue(a.earned);
-          const hasWhatIf = isGradedValue(a.whatIfEarned);
-          if (hasWhatIf) activeWhatIfCount++;
-
-          if (hasActual) {
-            g.actualEarned += Number(a.earned);
-            g.actualAvailable += avail;
-          }
-          if (hasWhatIf) {
-            g.forecastEarned += Number(a.whatIfEarned);
-            g.forecastAvailable += avail;
-          } else if (hasActual) {
-            g.forecastEarned += Number(a.earned);
-            g.forecastAvailable += avail;
-          }
+          if (isGradedValue(a.whatIfEarned)) activeWhatIfCount++;
         });
 
         let actualWeightedNumerator = 0;
@@ -2101,28 +2500,63 @@ v1_17 (11/21/2026) - Implemented Quality Foundation: extracted calculation and s
         let forecastActiveWeight = 0;
         let lockedWeightedContribution = 0;
         let remainingUngradedWeight = 0;
+        let forecastIsApproximate = false;
+        const allDroppedIds = new Set();
+        const allReplacedIds = new Set();
 
         cls.groups.forEach(grp => {
           const st = groupMap[grp.id];
+          const groupAssignments = cls.assignments.filter(a => a.groupId === grp.id);
+          const actual = computeGroupResult(groupsById[grp.id], groupAssignments, {
+            mode: 'actual',
+            allAssignments: cls.assignments,
+            groupsById
+          });
+          const forecast = computeGroupResult(groupsById[grp.id], groupAssignments, {
+            mode: 'forecast',
+            allAssignments: cls.assignments,
+            groupsById
+          });
+
+          st.actualEarned = actual.earned;
+          st.actualAvailable = actual.available;
+          st.actualPct = actual.pct;
+          st.forecastEarned = forecast.earned;
+          st.forecastAvailable = forecast.available;
+          st.forecastPct = forecast.pct;
+          st.totalAllAvailable = actual.totalAllAvailable;
+          st.gradedAvailableBeforeDrop = actual.gradedAvailableBeforeDrop;
+          st.droppedIds = actual.droppedIds;
+          st.replacedIds = actual.replacedIds;
+          st.hasActivePolicies = actual.hasActivePolicies;
+          st.forecastIsApproximate = actual.forecastIsApproximate || forecast.forecastIsApproximate;
+
+          actual.droppedIds.forEach(id => allDroppedIds.add(id));
+          actual.replacedIds.forEach(id => allReplacedIds.add(id));
+          if (st.forecastIsApproximate) forecastIsApproximate = true;
+
           totalActualEarnedPts += st.actualEarned;
           totalActualAvailPts += st.actualAvailable;
 
-          if (st.actualAvailable > 0) {
-            st.actualPct = (st.actualEarned / st.actualAvailable) * 100;
+          if (st.actualAvailable > 0 && st.actualPct !== null) {
             actualWeightedNumerator += st.actualPct * st.weight;
             actualActiveWeight += st.weight;
           }
-          if (st.forecastAvailable > 0) {
-            st.forecastPct = (st.forecastEarned / st.forecastAvailable) * 100;
+          if (st.forecastAvailable > 0 && st.forecastPct !== null) {
             forecastWeightedNumerator += st.forecastPct * st.weight;
             forecastActiveWeight += st.weight;
           }
+
           if (st.totalAllAvailable > 0) {
-            const gradedFraction = st.actualAvailable / st.totalAllAvailable;
+            const gradedFraction = st.gradedAvailableBeforeDrop / st.totalAllAvailable;
             const ungradedFraction = Math.max(0, 1 - gradedFraction);
             const currentGroupPct = st.actualPct !== null ? st.actualPct : 0;
             lockedWeightedContribution += (currentGroupPct / 100) * (st.weight * gradedFraction);
             remainingUngradedWeight += st.weight * ungradedFraction;
+          } else if (groupAssignments.some(a => a.extraCredit === true)) {
+            // Extra-credit-only group still contributes its weight as remaining until scored.
+            if (st.actualPct === null) remainingUngradedWeight += st.weight;
+            else lockedWeightedContribution += (st.actualPct / 100) * st.weight;
           } else {
             remainingUngradedWeight += st.weight;
           }
@@ -2146,9 +2580,13 @@ v1_17 (11/21/2026) - Implemented Quality Foundation: extracted calculation and s
           forecastBucket,
           activeWhatIfCount,
           lockedWeightedContribution,
-          remainingUngradedWeight
+          remainingUngradedWeight,
+          forecastIsApproximate,
+          droppedAssignmentIds: [...allDroppedIds],
+          replacedAssignmentIds: [...allReplacedIds]
         };
       }
+
 
       // UC Berkeley GPA: total grade points (course grade points x units) / total graded units.
       // Classes without a grade yet, P/NP classes, or classes with 0 units don't count toward the GPA.
@@ -2539,6 +2977,9 @@ v1_17 (11/21/2026) - Implemented Quality Foundation: extracted calculation and s
                   </div>`;
               }
             }
+            if (metrics.forecastIsApproximate) {
+              boxTargetForecastResult.innerHTML += `<div class="mt-2 text-[11px] text-amber-400/90"><i class="fa-solid fa-circle-info mr-1"></i>Approximate: a drop / best-of rule is active while some work is still ungraded, so the needed average assumes remaining scores count equally.</div>`;
+            }
           }
         }
 
@@ -2654,7 +3095,7 @@ v1_17 (11/21/2026) - Implemented Quality Foundation: extracted calculation and s
         });
       }
 
-      function renderAssignmentRowHtml(cls, a) {
+      function renderAssignmentRowHtml(cls, a, metrics = null) {
         const avail = Math.max(0, Number(a.available) || 0);
         const hasActual = isGradedValue(a.earned);
         const hasWhatIf = isGradedValue(a.whatIfEarned);
@@ -2662,18 +3103,41 @@ v1_17 (11/21/2026) - Implemented Quality Foundation: extracted calculation and s
         const effectiveScore = hasWhatIf ? Number(a.whatIfEarned) : (hasActual ? Number(a.earned) : null);
         const effectivePct = effectiveScore !== null && avail > 0 ? (effectiveScore / avail) * 100 : null;
         const isHighlighted = a.id === highlightedAssignmentId;
+        const isDropped = metrics?.droppedAssignmentIds?.includes(a.id);
+        const isReplaced = metrics?.replacedAssignmentIds?.includes(a.id);
+        const grp = cls.groups.find(g => g.id === a.groupId);
+        const lateEnabled = normalizeGroupPolicies(grp?.policies).latePenalty.enabled;
+        const statusBits = [
+          a.extraCredit ? '<span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30">EC</span>' : '',
+          isDropped ? '<span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-zinc-500/20 text-theme-muted border border-theme-subtle">Dropped</span>' : '',
+          isReplaced ? '<span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-sky-500/15 text-sky-400 border border-sky-500/30">Replaced</span>' : ''
+        ].filter(Boolean).join(' ');
 
         return `
-          <tr class="theme-row-hover transition border-b border-theme-subtle ${isHighlighted ? 'row-highlight-anim' : ''}" data-assign-id="${escapeHtml(a.id)}">
+          <tr class="theme-row-hover transition border-b border-theme-subtle ${isHighlighted ? 'row-highlight-anim' : ''} ${isDropped ? 'opacity-60' : ''}" data-assign-id="${escapeHtml(a.id)}">
             <td class="py-2.5 pl-3 pr-2">
-              <input
-                type="text"
-                value="${escapeHtml(a.name)}"
-                data-assign-id="${escapeHtml(a.id)}"
-                data-assign-field="name"
-                aria-label="Assignment Name"
-                class="w-full min-w-[170px] text-xs font-semibold theme-inline-input rounded-lg px-2 py-1"
-              />
+              <div class="flex flex-col gap-1">
+                <input
+                  type="text"
+                  value="${escapeHtml(a.name)}"
+                  data-assign-id="${escapeHtml(a.id)}"
+                  data-assign-field="name"
+                  aria-label="Assignment Name"
+                  class="w-full min-w-[170px] text-xs font-semibold theme-inline-input rounded-lg px-2 py-1 ${isDropped ? 'line-through' : ''}"
+                />
+                <div class="flex flex-wrap items-center gap-2 pl-0.5">
+                  <label class="inline-flex items-center gap-1 text-[10px] text-theme-muted cursor-pointer" title="Extra credit adds earned points without adding to available">
+                    <input type="checkbox" data-assign-id="${escapeHtml(a.id)}" data-assign-field="extraCredit" ${a.extraCredit ? 'checked' : ''} class="rounded border-theme" />
+                    Extra credit
+                  </label>
+                  <label class="inline-flex items-center gap-1 text-[10px] text-theme-muted ${lateEnabled ? '' : 'opacity-40'}" title="Days late (uses group late-penalty policy)">
+                    Late
+                    <input type="number" min="0" step="1" value="${Number(a.lateDays) || 0}" data-assign-id="${escapeHtml(a.id)}" data-assign-field="lateDays" aria-label="Days late" class="w-12 font-mono theme-input rounded px-1 py-0.5 text-[10px]" ${lateEnabled ? '' : 'disabled'} />
+                    d
+                  </label>
+                  ${statusBits}
+                </div>
+              </div>
             </td>
             <td class="py-2.5 px-2">
               <select
@@ -2894,6 +3358,10 @@ v1_17 (11/21/2026) - Implemented Quality Foundation: extracted calculation and s
           tbodyGroups.innerHTML = cls.groups.map((g, idx) => {
             const st = metrics.groupMap[g.id];
             const dotColor = GROUP_DOT_COLORS[idx % GROUP_DOT_COLORS.length];
+            const groupAsgs = cls.assignments.filter(a => a.groupId === g.id);
+            const policyLabels = describeActiveGroupPolicies(g.policies, groupAsgs);
+            const hasRules = policyLabels.length > 0;
+            const policyTitle = hasRules ? policyLabels.join(' · ') : 'No active rules';
             return `
               <tr
                 class="theme-row-hover transition border-b border-theme-subtle"
@@ -2921,14 +3389,17 @@ v1_17 (11/21/2026) - Implemented Quality Foundation: extracted calculation and s
                       </svg>
                     </div>
                     <span class="w-2.5 h-2.5 rounded-full shrink-0 ${dotColor}"></span>
-                    <input
-                      type="text"
-                      value="${escapeHtml(g.name)}"
-                      data-group-id="${escapeHtml(g.id)}"
-                      data-group-field="name"
-                      aria-label="Assignment Group Name"
-                      class="w-full min-w-[130px] text-xs font-semibold theme-inline-input rounded-lg px-2 py-1"
-                    />
+                    <div class="flex flex-col gap-1 min-w-0 flex-1">
+                      <input
+                        type="text"
+                        value="${escapeHtml(g.name)}"
+                        data-group-id="${escapeHtml(g.id)}"
+                        data-group-field="name"
+                        aria-label="Assignment Group Name"
+                        class="w-full min-w-[130px] text-xs font-semibold theme-inline-input rounded-lg px-2 py-1"
+                      />
+                      ${hasRules ? `<span class="text-[10px] text-amber-400/90 truncate" title="${escapeHtml(policyTitle)}">${escapeHtml(policyTitle)}</span>` : ''}
+                    </div>
                   </div>
                 </td>
                 <td class="py-2.5 text-right">
@@ -2957,15 +3428,27 @@ v1_17 (11/21/2026) - Implemented Quality Foundation: extracted calculation and s
                   ${st && st.forecastPct !== null ? formatPercent(st.forecastPct, 1) : '--%'}
                 </td>
                 <td class="py-2.5 text-center">
-                  <button
-                    type="button"
-                    data-action="delete-group"
-                    data-group-id="${escapeHtml(g.id)}"
-                    title="Delete Assignment Group"
-                    class="text-theme-faint hover:text-rose-400 p-1.5 rounded-lg transition cursor-pointer"
-                  >
-                    <i class="fa-regular fa-trash-can text-xs"></i>
-                  </button>
+                  <div class="inline-flex items-center justify-center gap-0.5">
+                    <button
+                      type="button"
+                      data-action="edit-group-policies"
+                      data-group-id="${escapeHtml(g.id)}"
+                      title="${escapeHtml(policyTitle)}"
+                      class="relative text-theme-faint hover:text-indigo-400 p-1.5 rounded-lg transition cursor-pointer ${hasRules ? 'text-amber-400' : ''}"
+                    >
+                      <i class="fa-solid fa-sliders text-xs"></i>
+                      ${hasRules ? '<span class="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-amber-400"></span>' : ''}
+                    </button>
+                    <button
+                      type="button"
+                      data-action="delete-group"
+                      data-group-id="${escapeHtml(g.id)}"
+                      title="Delete Assignment Group"
+                      class="text-theme-faint hover:text-rose-400 p-1.5 rounded-lg transition cursor-pointer"
+                    >
+                      <i class="fa-regular fa-trash-can text-xs"></i>
+                    </button>
+                  </div>
                 </td>
               </tr>
             `;
@@ -3082,7 +3565,7 @@ v1_17 (11/21/2026) - Implemented Quality Foundation: extracted calculation and s
                       </tr>
                     </thead>
                     <tbody class="text-xs">
-                      ${sortedAssignments.map(a => renderAssignmentRowHtml(cls, a)).join('')}
+                      ${sortedAssignments.map(a => renderAssignmentRowHtml(cls, a, metrics)).join('')}
                     </tbody>
                   </table>
                 </div>
@@ -3093,6 +3576,10 @@ v1_17 (11/21/2026) - Implemented Quality Foundation: extracted calculation and s
               const groupAssignments = cls.assignments.filter(a => a.groupId === grp.id);
               const st = metrics.groupMap[grp.id];
               const dotColor = GROUP_DOT_COLORS[idx % GROUP_DOT_COLORS.length];
+              const policyLabels = describeActiveGroupPolicies(grp.policies, groupAssignments);
+              const policyBadge = policyLabels.length
+                ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-500/15 text-amber-400 border border-amber-500/30" title="${escapeHtml(policyLabels.join(' · '))}">Rules on</span>`
+                : '';
 
               return `
                 <div class="rounded-2xl border border-theme overflow-hidden">
@@ -3103,6 +3590,7 @@ v1_17 (11/21/2026) - Implemented Quality Foundation: extracted calculation and s
                       <span data-section-group-weight="${escapeHtml(grp.id)}" class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold accent-pill border">
                         Weight: ${formatPercent(grp.weight, 1)}
                       </span>
+                      ${policyBadge}
                       <span data-section-subtotal="${escapeHtml(grp.id)}" class="text-xs font-mono text-theme-muted">
                         ${st ? `${formatNumber(st.actualEarned)} / ${formatNumber(st.actualAvailable)} pts` : '0 / 0 pts'}
                       </span>
@@ -3112,6 +3600,16 @@ v1_17 (11/21/2026) - Implemented Quality Foundation: extracted calculation and s
                       <span data-section-pct="${escapeHtml(grp.id)}" class="px-2.5 py-0.5 rounded-lg font-mono text-xs font-bold ${getScorePillClasses(st ? st.actualPct : null)}">
                         ${st && st.actualPct !== null ? formatPercent(st.actualPct, 1) : 'Ungraded'}
                       </span>
+                      <button
+                        type="button"
+                        data-action="edit-group-policies"
+                        data-group-id="${escapeHtml(grp.id)}"
+                        title="Edit group policies"
+                        class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-semibold theme-btn-secondary cursor-pointer"
+                      >
+                        <i class="fa-solid fa-sliders text-[10px]"></i>
+                        <span>Policies</span>
+                      </button>
                       <button
                         type="button"
                         data-action="add-to-group"
@@ -3144,7 +3642,7 @@ v1_17 (11/21/2026) - Implemented Quality Foundation: extracted calculation and s
                           </tr>
                         </thead>
                         <tbody class="text-xs">
-                          ${groupAssignments.map(a => renderAssignmentRowHtml(cls, a)).join('')}
+                          ${groupAssignments.map(a => renderAssignmentRowHtml(cls, a, metrics)).join('')}
                         </tbody>
                       </table>
                     </div>
@@ -3493,15 +3991,15 @@ v1_17 (11/21/2026) - Implemented Quality Foundation: extracted calculation and s
               units: DEFAULT_CLASS_UNITS,
               targetLetter: 'A',
               groups: [
-                { id: g1, name: 'Assignments', weight: 30 },
-                { id: g2, name: 'Midterm Exam', weight: 30 },
-                { id: g3, name: 'Final Exam', weight: 40 }
+                { id: g1, name: 'Assignments', weight: 30, policies: createDefaultGroupPolicies() },
+                { id: g2, name: 'Midterm Exam', weight: 30, policies: createDefaultGroupPolicies() },
+                { id: g3, name: 'Final Exam', weight: 40, policies: createDefaultGroupPolicies() }
               ],
               buckets: cloneGradeScale(state.defaultGradeDefinitions),
               assignments: [
-                { id: uid('asg'), name: 'Homework 1', groupId: g1, earned: 45, available: 50, whatIfEarned: null },
-                { id: uid('asg'), name: 'Midterm Exam', groupId: g2, earned: null, available: 100, whatIfEarned: null },
-                { id: uid('asg'), name: 'Final Exam', groupId: g3, earned: null, available: 150, whatIfEarned: null }
+                { id: uid('asg'), name: 'Homework 1', groupId: g1, earned: 45, available: 50, whatIfEarned: null, extraCredit: false, lateDays: 0 },
+                { id: uid('asg'), name: 'Midterm Exam', groupId: g2, earned: null, available: 100, whatIfEarned: null, extraCredit: false, lateDays: 0 },
+                { id: uid('asg'), name: 'Final Exam', groupId: g3, earned: null, available: 150, whatIfEarned: null, extraCredit: false, lateDays: 0 }
               ]
             });
 
@@ -3602,11 +4100,31 @@ v1_17 (11/21/2026) - Implemented Quality Foundation: extracted calculation and s
             cls.groups.push({
               id: uid('grp'),
               name: `Group ${cls.groups.length + 1}`,
-              weight: suggested
+              weight: suggested,
+              policies: createDefaultGroupPolicies()
             });
             saveState();
             renderApp();
             showToast('Added new assignment group', 'success');
+            return;
+          }
+
+          const editPoliciesBtn = target.closest('[data-action="edit-group-policies"]');
+          if (editPoliciesBtn) {
+            openPoliciesModal(editPoliciesBtn.getAttribute('data-group-id'));
+            return;
+          }
+
+          if (target.closest('#policiesModalCloseBtn') || (target.id === 'policiesModalBackdrop')) {
+            closePoliciesModal();
+            return;
+          }
+          if (target.closest('#policiesModalClearBtn')) {
+            clearPoliciesModalFields();
+            return;
+          }
+          if (target.closest('#policiesModalSaveBtn')) {
+            savePoliciesModal();
             return;
           }
 
@@ -3703,7 +4221,9 @@ v1_17 (11/21/2026) - Implemented Quality Foundation: extracted calculation and s
               groupId: firstGroup.id,
               earned: null,
               available: 100,
-              whatIfEarned: null
+              whatIfEarned: null,
+              extraCredit: false,
+              lateDays: 0
             });
             highlightedAssignmentId = newId;
             saveState();
@@ -3728,7 +4248,9 @@ v1_17 (11/21/2026) - Implemented Quality Foundation: extracted calculation and s
               groupId: gid,
               earned: null,
               available: 100,
-              whatIfEarned: null
+              whatIfEarned: null,
+              extraCredit: false,
+              lateDays: 0
             });
             highlightedAssignmentId = newId;
             saveState();
@@ -3936,6 +4458,16 @@ v1_17 (11/21/2026) - Implemented Quality Foundation: extracted calculation and s
             } else if (aField === 'whatIfEarned') {
               const raw = target.value.trim();
               assign.whatIfEarned = raw === '' ? null : parseFloat(raw);
+            } else if (aField === 'extraCredit') {
+              assign.extraCredit = !!target.checked;
+              saveState();
+              renderApp();
+              return;
+            } else if (aField === 'lateDays') {
+              assign.lateDays = Math.max(0, Number(target.value) || 0);
+              saveState();
+              updateCalculatedMetricsInDOM();
+              return;
             }
 
             const avail = Math.max(0, Number(assign.available) || 0);
@@ -4060,6 +4592,18 @@ v1_17 (11/21/2026) - Implemented Quality Foundation: extracted calculation and s
             cls.targetLetter = target.value;
             saveState();
             updateCalculatedMetricsInDOM();
+            return;
+          }
+
+          if (target.getAttribute('data-assign-field') === 'extraCredit') {
+            const cls = getActiveClass();
+            if (!cls) return;
+            const aid = target.getAttribute('data-assign-id');
+            const assign = cls.assignments.find(a => a.id === aid);
+            if (!assign) return;
+            assign.extraCredit = !!target.checked;
+            saveState();
+            renderApp();
             return;
           }
 

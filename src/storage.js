@@ -9,14 +9,16 @@ import {
   STORAGE_KEY,
   ALL_STORAGE_KEYS,
   GPA_STORAGE_KEY,
-  DEFAULT_CLASS_UNITS
+  DEFAULT_CLASS_UNITS,
+  createDefaultGroupPolicies
 } from './constants.js';
 
 import {
   isGradedValue,
   normalizeTermName,
   normalizeUnits,
-  cloneGradeScale
+  cloneGradeScale,
+  normalizeGroupPolicies
 } from './calc.js';
 
 // ─── Helpers ─────────────────────────────────────────────────────────
@@ -72,21 +74,21 @@ export function createExampleCourses(defaultScale) {
       units: 4,
       targetLetter: 'A',
       groups: [
-        { id: 'grp_61a_hw',   name: 'Homework & Labs', weight: 15 },
-        { id: 'grp_61a_proj', name: 'Projects', weight: 30 },
-        { id: 'grp_61a_mt1',  name: 'Midterm 1', weight: 15 },
-        { id: 'grp_61a_mt2',  name: 'Midterm 2', weight: 15 },
-        { id: 'grp_61a_fin',  name: 'Final Exam', weight: 25 }
+        { id: 'grp_61a_hw',   name: 'Homework & Labs', weight: 15, policies: createDefaultGroupPolicies() },
+        { id: 'grp_61a_proj', name: 'Projects', weight: 30, policies: createDefaultGroupPolicies() },
+        { id: 'grp_61a_mt1',  name: 'Midterm 1', weight: 15, policies: createDefaultGroupPolicies() },
+        { id: 'grp_61a_mt2',  name: 'Midterm 2', weight: 15, policies: createDefaultGroupPolicies() },
+        { id: 'grp_61a_fin',  name: 'Final Exam', weight: 25, policies: createDefaultGroupPolicies() }
       ],
       buckets: cloneGradeScale(scale),
       assignments: [
-        { id: 'asg_61a_1', name: 'Lab 01: Functions', groupId: 'grp_61a_hw', earned: 10, available: 10, whatIfEarned: null },
-        { id: 'asg_61a_2', name: 'HW 01: Control', groupId: 'grp_61a_hw', earned: 2, available: 2, whatIfEarned: null },
-        { id: 'asg_61a_3', name: 'Project 1: Hog', groupId: 'grp_61a_proj', earned: 25, available: 25, whatIfEarned: null },
-        { id: 'asg_61a_4', name: 'Project 2: Cats', groupId: 'grp_61a_proj', earned: 24, available: 25, whatIfEarned: null },
-        { id: 'asg_61a_5', name: 'Midterm 1', groupId: 'grp_61a_mt1', earned: 36, available: 40, whatIfEarned: null },
-        { id: 'asg_61a_6', name: 'Midterm 2', groupId: 'grp_61a_mt2', earned: 35, available: 40, whatIfEarned: null },
-        { id: 'asg_61a_7', name: 'Final Exam', groupId: 'grp_61a_fin', earned: null, available: 75, whatIfEarned: 68 }
+        { id: 'asg_61a_1', name: 'Lab 01: Functions', groupId: 'grp_61a_hw', earned: 10, available: 10, whatIfEarned: null, extraCredit: false, lateDays: 0 },
+        { id: 'asg_61a_2', name: 'HW 01: Control', groupId: 'grp_61a_hw', earned: 2, available: 2, whatIfEarned: null, extraCredit: false, lateDays: 0 },
+        { id: 'asg_61a_3', name: 'Project 1: Hog', groupId: 'grp_61a_proj', earned: 25, available: 25, whatIfEarned: null, extraCredit: false, lateDays: 0 },
+        { id: 'asg_61a_4', name: 'Project 2: Cats', groupId: 'grp_61a_proj', earned: 24, available: 25, whatIfEarned: null, extraCredit: false, lateDays: 0 },
+        { id: 'asg_61a_5', name: 'Midterm 1', groupId: 'grp_61a_mt1', earned: 36, available: 40, whatIfEarned: null, extraCredit: false, lateDays: 0 },
+        { id: 'asg_61a_6', name: 'Midterm 2', groupId: 'grp_61a_mt2', earned: 35, available: 40, whatIfEarned: null, extraCredit: false, lateDays: 0 },
+        { id: 'asg_61a_7', name: 'Final Exam', groupId: 'grp_61a_fin', earned: null, available: 75, whatIfEarned: 68, extraCredit: false, lateDays: 0 }
       ]
     },
     {
@@ -97,19 +99,19 @@ export function createExampleCourses(defaultScale) {
       units: 4,
       targetLetter: 'A',
       groups: [
-        { id: 'grp_c8_lab',  name: 'Labs', weight: 10 },
-        { id: 'grp_c8_hw',   name: 'Homeworks', weight: 20 },
-        { id: 'grp_c8_proj', name: 'Projects', weight: 25 },
-        { id: 'grp_c8_mt',   name: 'Midterm Exam', weight: 20 },
-        { id: 'grp_c8_fin',  name: 'Final Exam', weight: 25 }
+        { id: 'grp_c8_lab',  name: 'Labs', weight: 10, policies: createDefaultGroupPolicies() },
+        { id: 'grp_c8_hw',   name: 'Homeworks', weight: 20, policies: createDefaultGroupPolicies() },
+        { id: 'grp_c8_proj', name: 'Projects', weight: 25, policies: createDefaultGroupPolicies() },
+        { id: 'grp_c8_mt',   name: 'Midterm Exam', weight: 20, policies: createDefaultGroupPolicies() },
+        { id: 'grp_c8_fin',  name: 'Final Exam', weight: 25, policies: createDefaultGroupPolicies() }
       ],
       buckets: cloneGradeScale(scale),
       assignments: [
-        { id: 'asg_c8_1', name: 'Lab 01: Expressions', groupId: 'grp_c8_lab', earned: 10, available: 10, whatIfEarned: null },
-        { id: 'asg_c8_2', name: 'HW 01: Causality', groupId: 'grp_c8_hw', earned: 18, available: 20, whatIfEarned: null },
-        { id: 'asg_c8_3', name: 'Project 1: World Progress', groupId: 'grp_c8_proj', earned: 29, available: 30, whatIfEarned: null },
-        { id: 'asg_c8_4', name: 'Midterm Exam', groupId: 'grp_c8_mt', earned: 44, available: 50, whatIfEarned: null },
-        { id: 'asg_c8_5', name: 'Final Exam', groupId: 'grp_c8_fin', earned: null, available: 100, whatIfEarned: 90 }
+        { id: 'asg_c8_1', name: 'Lab 01: Expressions', groupId: 'grp_c8_lab', earned: 10, available: 10, whatIfEarned: null, extraCredit: false, lateDays: 0 },
+        { id: 'asg_c8_2', name: 'HW 01: Causality', groupId: 'grp_c8_hw', earned: 18, available: 20, whatIfEarned: null, extraCredit: false, lateDays: 0 },
+        { id: 'asg_c8_3', name: 'Project 1: World Progress', groupId: 'grp_c8_proj', earned: 29, available: 30, whatIfEarned: null, extraCredit: false, lateDays: 0 },
+        { id: 'asg_c8_4', name: 'Midterm Exam', groupId: 'grp_c8_mt', earned: 44, available: 50, whatIfEarned: null, extraCredit: false, lateDays: 0 },
+        { id: 'asg_c8_5', name: 'Final Exam', groupId: 'grp_c8_fin', earned: null, available: 100, whatIfEarned: 90, extraCredit: false, lateDays: 0 }
       ]
     }
   ];
@@ -142,12 +144,13 @@ export function sanitizeClassObject(c, idx, defaultDefs) {
     ? c.groups.map((g, gIdx) => ({
         id: String(g?.id || uid(`grp_${gIdx}`)),
         name: String(g?.name ?? `Group ${gIdx + 1}`),
-        weight: Math.max(0, Number(g?.weight ?? 0) || 0)
+        weight: Math.max(0, Number(g?.weight ?? 0) || 0),
+        policies: normalizeGroupPolicies(g?.policies)
       }))
     : [
-        { id: uid('grp_1'), name: 'Assignments', weight: 30 },
-        { id: uid('grp_2'), name: 'Midterm Exam', weight: 30 },
-        { id: uid('grp_3'), name: 'Final Exam', weight: 40 }
+        { id: uid('grp_1'), name: 'Assignments', weight: 30, policies: createDefaultGroupPolicies() },
+        { id: uid('grp_2'), name: 'Midterm Exam', weight: 30, policies: createDefaultGroupPolicies() },
+        { id: uid('grp_3'), name: 'Final Exam', weight: 40, policies: createDefaultGroupPolicies() }
       ];
 
   const firstGroupId = safeGroups[0].id;
@@ -164,7 +167,9 @@ export function sanitizeClassObject(c, idx, defaultDefs) {
           groupId: validGroupIds.has(a?.groupId) ? a.groupId : firstGroupId,
           earned: isGradedValue(a?.earned) ? Number(a.earned) : null,
           available: Math.max(0.01, Number(availVal ?? 100) || 100),
-          whatIfEarned: isGradedValue(whatIfVal) ? Number(whatIfVal) : null
+          whatIfEarned: isGradedValue(whatIfVal) ? Number(whatIfVal) : null,
+          extraCredit: a?.extraCredit === true,
+          lateDays: Math.max(0, Number(a?.lateDays) || 0)
         };
       })
     : [];
