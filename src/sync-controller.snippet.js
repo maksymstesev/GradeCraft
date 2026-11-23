@@ -252,10 +252,14 @@
           const provider = providerName === 'v3' || providerName === 'recaptcha-v3'
             ? new appCheckMod.ReCaptchaV3Provider(siteKey)
             : new appCheckMod.ReCaptchaEnterpriseProvider(siteKey);
-          return appCheckMod.initializeAppCheck(app, {
+          const appCheck = appCheckMod.initializeAppCheck(app, {
             provider,
             isTokenAutoRefreshEnabled: true
           });
+          const { token } = await appCheckMod.getToken(appCheck, false);
+          if (!token) console.warn('Firebase App Check: initialize succeeded but no token yet.');
+          else console.info('Firebase App Check: token ready.');
+          return appCheck;
         } catch (err) {
           console.warn('Firebase App Check unavailable:', err);
           return null;
