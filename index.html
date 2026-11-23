@@ -368,7 +368,9 @@
       #shareModalBackdrop,
       #syllabusModalBackdrop,
       #syncConflictModalBackdrop,
-      #shareReadonlyBanner {
+      #shareReadonlyBanner,
+      #feedbackModalBackdrop,
+      #feedbackPickBanner {
         display: none !important;
       }
 
@@ -397,6 +399,17 @@
         content: none !important;
       }
     }
+
+    body.feedback-pick-mode,
+    body.feedback-pick-mode * {
+      cursor: crosshair !important;
+    }
+
+    .feedback-pick-highlight {
+      outline: 2px solid #6366f1 !important;
+      outline-offset: 2px !important;
+      box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.25) !important;
+    }
   </style>
 
   <!-- lz-string URI codec for share-link payloads (same algorithm as src/lzstring.js) -->
@@ -405,6 +418,8 @@
   <script src="./src/firebase-config.browser.js"></script>
   <!-- Institution presets (UC undergraduate campuses) -->
   <script src="./src/presets-browser.js"></script>
+  <!-- Element-targeted feedback helpers -->
+  <script src="./src/feedback-browser.js"></script>
 </head>
 
 <body class="min-h-screen flex flex-col selection:bg-indigo-500/30 selection:text-indigo-200">
@@ -1740,13 +1755,99 @@ v1_26 (11/22/2026) - Added institution presets for all UC undergraduate campuses
     class="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 text-center text-xs text-theme-faint border-t border-theme mt-10 space-y-1.5">
     <p>GradeCraft — Class Grade Calculator &amp; Forecaster. All course configurations, grade definitions, and
       assignment forecasts are saved locally in your browser.</p>
-    <div>
+    <div class="flex flex-wrap items-center justify-center gap-3">
       <a id="btnFooterChangelog" href="#/changelog"
         class="share-readonly-allow text-[11px] font-medium text-theme-muted hover:text-indigo-400 underline underline-offset-4 transition cursor-pointer">
         Changelog
       </a>
+      <button id="btnFooterFeedback" type="button"
+        class="share-readonly-allow text-[11px] font-medium text-theme-muted hover:text-indigo-400 underline underline-offset-4 transition cursor-pointer">
+        Send feedback
+      </button>
     </div>
   </footer>
+
+  <!-- Element pick banner -->
+  <div id="feedbackPickBanner" data-feedback-ignore="true"
+    class="no-print hidden fixed top-3 left-1/2 -translate-x-1/2 z-[60] max-w-lg w-[calc(100%-1.5rem)] px-4 py-2.5 rounded-xl surface-card border border-indigo-500/40 text-xs text-theme-primary shadow-xl flex items-center justify-between gap-3">
+    <span class="leading-relaxed">
+      <i class="fa-solid fa-crosshairs text-indigo-400 mr-1.5"></i>
+      Click the element that looks wrong. <span class="text-theme-muted">Esc cancels.</span>
+    </span>
+    <button id="btnCancelFeedbackPick" type="button"
+      class="shrink-0 px-2.5 py-1 rounded-lg text-[11px] font-semibold theme-btn-secondary cursor-pointer">Cancel</button>
+  </div>
+
+  <!-- Feedback modal -->
+  <div id="feedbackModalBackdrop" data-feedback-ignore="true"
+    class="fixed inset-0 z-50 bg-black/75 backdrop-blur-xs hidden items-center justify-center p-4">
+    <div class="surface-card rounded-2xl border max-w-md w-full p-6 space-y-4" role="dialog" aria-modal="true"
+      aria-labelledby="feedbackModalTitle">
+      <div class="flex items-start justify-between gap-3">
+        <div>
+          <h3 id="feedbackModalTitle" class="text-base font-bold text-theme-primary">Send feedback</h3>
+          <p class="text-xs text-theme-muted mt-1 leading-relaxed">
+            Optionally pick a page element, add a short note, then submit. Reports are saved to a separate
+            <code class="font-mono">feedback</code> collection in Firestore (not mixed with your synced classes).
+            Sign in under Profile → Account &amp; Cloud Sync first.
+          </p>
+        </div>
+        <button id="btnFeedbackModalClose" type="button"
+          class="share-readonly-allow text-theme-faint hover:text-theme-primary p-1.5 rounded-lg transition cursor-pointer"
+          aria-label="Close feedback dialog">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="space-y-2">
+        <div class="flex items-center justify-between gap-2">
+          <span class="text-[11px] font-bold uppercase tracking-wider text-theme-faint">Selected element</span>
+          <button id="btnFeedbackPickElement" type="button"
+            class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-semibold theme-btn-secondary cursor-pointer">
+            <i class="fa-solid fa-crosshairs text-indigo-400"></i>
+            <span>Select on page</span>
+          </button>
+        </div>
+        <div id="feedbackSelectedSummary"
+          class="rounded-xl surface-alt border border-theme-subtle px-3 py-2.5 text-xs text-theme-muted leading-relaxed">
+          Nothing selected yet — optional, but helpful for layout bugs.
+        </div>
+        <button id="btnFeedbackClearElement" type="button"
+          class="hidden text-[11px] font-medium text-theme-faint hover:text-indigo-400 underline underline-offset-2 cursor-pointer">
+          Clear selection
+        </button>
+      </div>
+
+      <label class="flex flex-col gap-1.5 text-xs">
+        <span class="font-semibold text-theme-secondary">What's wrong? <span class="text-theme-faint font-normal">(max 500 chars)</span></span>
+        <textarea id="feedbackMessageInput" rows="4" maxlength="500"
+          placeholder="e.g. This button overlaps the units field on mobile."
+          class="share-readonly-allow w-full text-xs theme-input rounded-xl px-3 py-2.5 resize-y"></textarea>
+      </label>
+
+      <p id="feedbackSubmitHint" class="text-[11px] text-theme-faint leading-relaxed"></p>
+
+      <div class="flex flex-wrap items-center justify-end gap-2 pt-1">
+        <button id="btnFeedbackDownload" type="button"
+          class="share-readonly-allow inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold theme-btn-secondary cursor-pointer"
+          title="Offline fallback">
+          <i class="fa-solid fa-download text-indigo-400"></i>
+          <span>Download JSON</span>
+        </button>
+        <button id="btnFeedbackCopy" type="button"
+          class="share-readonly-allow inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold theme-btn-secondary cursor-pointer"
+          title="Offline fallback">
+          <i class="fa-regular fa-copy"></i>
+          <span>Copy</span>
+        </button>
+        <button id="btnFeedbackSubmit" type="button"
+          class="share-readonly-allow inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm transition cursor-pointer">
+          <i class="fa-solid fa-cloud-arrow-up"></i>
+          <span>Submit report</span>
+        </button>
+      </div>
+    </div>
+  </div>
 
   <!-- CUSTOM CONFIRMATION MODAL -->
   <div id="confirmModalBackdrop"
@@ -4088,6 +4189,266 @@ v1_26 (11/22/2026) - Added institution presets for all UC undergraduate campuses
         pendingModalConfirm = null;
       }
 
+      let feedbackSelected = null;
+      let feedbackPickActive = false;
+      let feedbackHighlightEl = null;
+
+      function feedbackApi() {
+        return window.GRADECRAFT_FEEDBACK || null;
+      }
+
+      function updateFeedbackSelectedSummary() {
+        const summary = document.getElementById('feedbackSelectedSummary');
+        const clearBtn = document.getElementById('btnFeedbackClearElement');
+        if (!summary) return;
+        if (!feedbackSelected) {
+          summary.textContent = 'Nothing selected yet — optional, but helpful for layout bugs.';
+          summary.classList.add('text-theme-muted');
+          if (clearBtn) clearBtn.classList.add('hidden');
+          return;
+        }
+        summary.innerHTML = `
+          <div class="text-theme-primary font-medium">${escapeHtml(feedbackSelected.label)}</div>
+          <div class="font-mono text-[11px] text-theme-faint mt-1 break-all">${escapeHtml(feedbackSelected.path || '—')}</div>
+        `;
+        summary.classList.remove('text-theme-muted');
+        if (clearBtn) clearBtn.classList.remove('hidden');
+      }
+
+      function clearFeedbackHighlight() {
+        if (feedbackHighlightEl) {
+          feedbackHighlightEl.classList.remove('feedback-pick-highlight');
+          feedbackHighlightEl = null;
+        }
+      }
+
+      function updateFeedbackSubmitHint() {
+        const hint = document.getElementById('feedbackSubmitHint');
+        if (!hint) return;
+        if (!isFirebaseConfigured()) {
+          hint.textContent = 'Firebase is not configured, so Submit is unavailable. Use Copy or Download JSON instead.';
+          return;
+        }
+        if (syncUser?.uid || (syncFirebase?.auth?.currentUser)) {
+          hint.textContent = 'Submit saves this report under Firestore → feedback (separate from your synced gradebook).';
+          return;
+        }
+        hint.textContent = 'Sign in under Profile → Account & Cloud Sync to submit. Copy / Download still work offline.';
+      }
+
+      function openFeedbackModal() {
+        const backdrop = document.getElementById('feedbackModalBackdrop');
+        if (!backdrop) return;
+        updateFeedbackSelectedSummary();
+        updateFeedbackSubmitHint();
+        backdrop.classList.remove('hidden');
+        backdrop.classList.add('flex');
+        const input = document.getElementById('feedbackMessageInput');
+        if (input) setTimeout(() => input.focus(), 30);
+      }
+
+      function closeFeedbackModal() {
+        const backdrop = document.getElementById('feedbackModalBackdrop');
+        if (!backdrop) return;
+        backdrop.classList.add('hidden');
+        backdrop.classList.remove('flex');
+      }
+
+      function stopFeedbackPickMode() {
+        feedbackPickActive = false;
+        document.body.classList.remove('feedback-pick-mode');
+        clearFeedbackHighlight();
+        const banner = document.getElementById('feedbackPickBanner');
+        if (banner) banner.classList.add('hidden');
+        document.removeEventListener('mousemove', onFeedbackPickMove, true);
+        document.removeEventListener('click', onFeedbackPickClick, true);
+        document.removeEventListener('keydown', onFeedbackPickKeydown, true);
+      }
+
+      function startFeedbackPickMode() {
+        const api = feedbackApi();
+        if (!api) {
+          showToast('Feedback helpers failed to load.', 'warning');
+          return;
+        }
+        closeFeedbackModal();
+        feedbackPickActive = true;
+        document.body.classList.add('feedback-pick-mode');
+        const banner = document.getElementById('feedbackPickBanner');
+        if (banner) banner.classList.remove('hidden');
+        document.addEventListener('mousemove', onFeedbackPickMove, true);
+        document.addEventListener('click', onFeedbackPickClick, true);
+        document.addEventListener('keydown', onFeedbackPickKeydown, true);
+      }
+
+      function onFeedbackPickMove(e) {
+        if (!feedbackPickActive) return;
+        const api = feedbackApi();
+        const el = document.elementFromPoint(e.clientX, e.clientY);
+        if (!el || !api || api.isFeedbackUiElement(el)) {
+          clearFeedbackHighlight();
+          return;
+        }
+        if (feedbackHighlightEl === el) return;
+        clearFeedbackHighlight();
+        el.classList.add('feedback-pick-highlight');
+        feedbackHighlightEl = el;
+      }
+
+      function onFeedbackPickClick(e) {
+        if (!feedbackPickActive) return;
+        e.preventDefault();
+        e.stopPropagation();
+        const api = feedbackApi();
+        const el = document.elementFromPoint(e.clientX, e.clientY);
+        if (!el || !api || api.isFeedbackUiElement(el)) return;
+        feedbackSelected = api.describeElement(el);
+        stopFeedbackPickMode();
+        openFeedbackModal();
+        showToast('Element selected', 'success');
+      }
+
+      function onFeedbackPickKeydown(e) {
+        if (!feedbackPickActive) return;
+        if (e.key === 'Escape') {
+          e.preventDefault();
+          stopFeedbackPickMode();
+          openFeedbackModal();
+          showToast('Element pick cancelled', 'info');
+        }
+      }
+
+      function buildCurrentFeedbackPayload() {
+        const api = feedbackApi();
+        if (!api) return null;
+        const message = document.getElementById('feedbackMessageInput')?.value || '';
+        return api.buildFeedbackPayload({
+          message,
+          element: feedbackSelected,
+          pageUrl: window.location.href,
+          view: state.activeView || '',
+          theme: state.theme || '',
+          userAgent: navigator.userAgent || ''
+        });
+      }
+
+      function copyFeedbackReport() {
+        const api = feedbackApi();
+        const payload = buildCurrentFeedbackPayload();
+        if (!api || !payload) {
+          showToast('Feedback helpers failed to load.', 'warning');
+          return;
+        }
+        if (!payload.message && !payload.element) {
+          showToast('Add a short message or select an element first.', 'warning');
+          return;
+        }
+        const text = api.formatFeedbackText(payload);
+        const done = () => {
+          closeFeedbackModal();
+          showToast('Feedback report copied', 'success');
+        };
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(done).catch(() => {
+            showToast('Could not copy — try Download JSON.', 'warning');
+          });
+        } else {
+          showToast('Clipboard unavailable — use Download JSON.', 'warning');
+        }
+      }
+
+      function downloadFeedbackReport() {
+        const payload = buildCurrentFeedbackPayload();
+        if (!payload) {
+          showToast('Feedback helpers failed to load.', 'warning');
+          return;
+        }
+        if (!payload.message && !payload.element) {
+          showToast('Add a short message or select an element first.', 'warning');
+          return;
+        }
+        const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `gradecraft-feedback-${Date.now()}.json`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+        closeFeedbackModal();
+        showToast('Downloaded feedback JSON', 'success');
+      }
+
+      async function resolveFeedbackAuthUser() {
+        if (syncUser?.uid) return syncUser;
+        if (!isFirebaseConfigured()) return null;
+        const fb = await loadFirebaseSdk();
+        if (fb.auth.currentUser) return fb.auth.currentUser;
+        return new Promise((resolve) => {
+          let settled = false;
+          const finish = (user) => {
+            if (settled) return;
+            settled = true;
+            try { unsub(); } catch { /* ignore */ }
+            resolve(user || null);
+          };
+          const unsub = fb.authMod.onAuthStateChanged(fb.auth, finish);
+          setTimeout(() => finish(fb.auth.currentUser), 1500);
+        });
+      }
+
+      async function submitFeedbackToCloud() {
+        const api = feedbackApi();
+        const payload = buildCurrentFeedbackPayload();
+        if (!api || !payload) {
+          showToast('Feedback helpers failed to load.', 'warning');
+          return;
+        }
+        if (!payload.message && !payload.element) {
+          showToast('Add a short message or select an element first.', 'warning');
+          return;
+        }
+        if (!isFirebaseConfigured()) {
+          showToast('Firebase is not configured. Use Copy or Download instead.', 'warning');
+          return;
+        }
+        const submitBtn = document.getElementById('btnFeedbackSubmit');
+        if (submitBtn) {
+          submitBtn.disabled = true;
+          submitBtn.classList.add('opacity-60', 'pointer-events-none');
+        }
+        try {
+          const user = await resolveFeedbackAuthUser();
+          if (!user?.uid) {
+            showToast('Sign in under Profile → Account & Cloud Sync to submit.', 'warning');
+            updateFeedbackSubmitHint();
+            return;
+          }
+          const fb = await loadFirebaseSdk();
+          const docData = api.toFeedbackCloudDoc(payload, {
+            uid: user.uid,
+            email: user.email || ''
+          });
+          const col = fb.fsMod.collection(fb.db, 'feedback');
+          const ref = fb.fsMod.doc(col);
+          await fb.fsMod.setDoc(ref, docData);
+          const input = document.getElementById('feedbackMessageInput');
+          if (input) input.value = '';
+          feedbackSelected = null;
+          closeFeedbackModal();
+          showToast('Feedback submitted', 'success');
+        } catch (err) {
+          console.error('Feedback submit failed:', err);
+          showToast(err?.message ? `Submit failed: ${err.message}` : 'Could not submit feedback.', 'warning');
+        } finally {
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.classList.remove('opacity-60', 'pointer-events-none');
+          }
+        }
+      }
+
       function openPoliciesModal(groupId) {
         const cls = getActiveClass();
         if (!cls) return;
@@ -6358,6 +6719,48 @@ v1_26 (11/22/2026) - Added institution presets for all UC undergraduate campuses
               return;
             }
             openShareModal();
+            return;
+          }
+
+          if (target.closest('#btnFooterFeedback')) {
+            openFeedbackModal();
+            return;
+          }
+
+          if (target.closest('#btnFeedbackModalClose') || target.id === 'feedbackModalBackdrop') {
+            closeFeedbackModal();
+            return;
+          }
+
+          if (target.closest('#btnFeedbackPickElement')) {
+            startFeedbackPickMode();
+            return;
+          }
+
+          if (target.closest('#btnCancelFeedbackPick')) {
+            stopFeedbackPickMode();
+            openFeedbackModal();
+            return;
+          }
+
+          if (target.closest('#btnFeedbackClearElement')) {
+            feedbackSelected = null;
+            updateFeedbackSelectedSummary();
+            return;
+          }
+
+          if (target.closest('#btnFeedbackSubmit')) {
+            submitFeedbackToCloud();
+            return;
+          }
+
+          if (target.closest('#btnFeedbackCopy')) {
+            copyFeedbackReport();
+            return;
+          }
+
+          if (target.closest('#btnFeedbackDownload')) {
+            downloadFeedbackReport();
             return;
           }
 

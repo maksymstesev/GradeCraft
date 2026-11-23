@@ -1,8 +1,23 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    // Per-user GradeCraft sync data (classes, planner, settings).
     match /users/{uid}/{document=**} {
       allow read, write: if request.auth != null && request.auth.uid == uid;
+    }
+
+    // Separate feedback / bug reports (not mixed with sync docs).
+    // Authenticated users may create their own reports and read only those they filed.
+    // Updates/deletes are blocked; review in Firebase console (admin bypasses rules).
+    match /feedback/{reportId} {
+      allow create: if request.auth != null
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.type == 'gradecraft-feedback'
+        && request.resource.data.message is string
+        && request.resource.data.message.size() <= 500
+        && request.resource.data.keys().hasAll(['type', 'version', 'at', 'createdAt', 'uid', 'message']);
+      allow read: if request.auth != null && resource.data.uid == request.auth.uid;
+      allow update, delete: if false;
     }
   }
 }

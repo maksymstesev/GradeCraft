@@ -16,6 +16,12 @@ describe('firestore.rules', () => {
     expect(rules).toMatch(/allow read, write:/);
   });
 
+  it('keeps feedback in a separate collection with create-only auth rules', () => {
+    expect(rules).toMatch(/match \/feedback\/\{reportId\}/);
+    expect(rules).toMatch(/request\.resource\.data\.uid == request\.auth\.uid/);
+    expect(rules).toMatch(/allow update, delete: if false/);
+  });
+
   it('does not allow open world access', () => {
     expect(rules).not.toMatch(/allow read, write:\s*if true/);
   });
