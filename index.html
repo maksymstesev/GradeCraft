@@ -1053,33 +1053,33 @@
         <section class="surface-card rounded-2xl border overflow-hidden">
           <div class="px-6 py-4 border-b border-theme surface-alt space-y-4">
             <div class="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
-              <div>
-                <h3 class="text-base font-bold text-theme-primary flex items-center gap-2">
-                  <i class="fa-solid fa-award text-indigo-400"></i>
+            <div>
+              <h3 class="text-base font-bold text-theme-primary flex items-center gap-2">
+                <i class="fa-solid fa-award text-indigo-400"></i>
                   <span>Institution Preset &amp; Grade Definitions</span>
-                </h3>
-                <p class="text-xs text-theme-muted mt-0.5">
+              </h3>
+              <p class="text-xs text-theme-muted mt-0.5">
                   Pick a UC campus preset for grade points, P/NP notes, and semester vs quarter units. Edit cutoffs below
                   for anything the preset does not cover. UC Berkeley stays the GradeCraft default.
-                </p>
-              </div>
-              <div class="flex flex-wrap items-center gap-2 shrink-0">
-                <button id="btnSaveDefaultDefinitions" type="button"
-                  class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white shadow-xs transition cursor-pointer">
-                  <i class="fa-solid fa-floppy-disk"></i>
-                  <span>Save Default Definitions</span>
-                </button>
-                <button id="btnApplyDefaultsToAllClasses" type="button"
-                  class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white shadow-xs transition cursor-pointer">
-                  <i class="fa-solid fa-arrows-rotate"></i>
-                  <span>Apply to All Classes</span>
-                </button>
-                <button id="btnResetUcbDefaults" type="button"
-                  class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold theme-btn-secondary cursor-pointer">
-                  <i class="fa-solid fa-rotate-left text-indigo-400"></i>
+              </p>
+            </div>
+            <div class="flex flex-wrap items-center gap-2 shrink-0">
+              <button id="btnSaveDefaultDefinitions" type="button"
+                class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white shadow-xs transition cursor-pointer">
+                <i class="fa-solid fa-floppy-disk"></i>
+                <span>Save Default Definitions</span>
+              </button>
+              <button id="btnApplyDefaultsToAllClasses" type="button"
+                class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white shadow-xs transition cursor-pointer">
+                <i class="fa-solid fa-arrows-rotate"></i>
+                <span>Apply to All Classes</span>
+              </button>
+              <button id="btnResetUcbDefaults" type="button"
+                class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold theme-btn-secondary cursor-pointer">
+                <i class="fa-solid fa-rotate-left text-indigo-400"></i>
                   <span>Reset to UC Berkeley</span>
-                </button>
-              </div>
+              </button>
+            </div>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_auto] gap-3 items-end">
@@ -1160,7 +1160,7 @@
             Sync is off by default. Turn it on only after you add a Firebase web config
             (<code class="font-mono">src/firebase-config.js</code> or <code class="font-mono">window.GRADECRAFT_FIREBASE</code>).
             Until then GradeCraft stays fully local.
-          </div>
+            </div>
 
           <div id="syncActivePanel" class="hidden space-y-4">
             <div id="syncSignedOutPanel" class="space-y-3">
@@ -1175,7 +1175,7 @@
                   <i class="fa-solid fa-envelope"></i>
                   <span>Email me a link</span>
                 </button>
-              </div>
+            </div>
               <button id="btnSyncGoogle" type="button"
                 class="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-semibold theme-btn-secondary cursor-pointer">
                 <i class="fa-brands fa-google text-indigo-400"></i>
@@ -1206,8 +1206,8 @@
                   class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 transition cursor-pointer">
                   <i class="fa-solid fa-user-slash"></i>
                   <span>Delete my data</span>
-                </button>
-              </div>
+              </button>
+            </div>
             </div>
 
             <details class="rounded-xl border border-theme-subtle surface-alt p-3">
@@ -1311,11 +1311,11 @@
                 <i class="fa-solid fa-share-nodes text-indigo-400"></i>
                 <span>Share Link</span>
               </button>
-              <button id="btnClearGpaGrades" type="button"
+            <button id="btnClearGpaGrades" type="button"
                 class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold theme-btn-secondary cursor-pointer">
-                <i class="fa-solid fa-rotate-left text-indigo-400"></i>
-                <span>Clear All Grades</span>
-              </button>
+              <i class="fa-solid fa-rotate-left text-indigo-400"></i>
+              <span>Clear All Grades</span>
+            </button>
             </div>
           </div>
         </section>
@@ -1361,14 +1361,26 @@
             <div>
               <h1 class="text-lg font-extrabold tracking-tight text-theme-primary font-mono">GradeCraft — Changelog</h1>
               <p class="text-xs text-theme-muted mt-1">Chronological record of releases and commits (<code
-                  class="font-mono">v1_1</code> &rarr; <code class="font-mono">v1_26</code>).</p>
+                  class="font-mono">v1_1</code> &rarr; <code class="font-mono">v1_26_1</code>).</p>
             </div>
             <span class="text-[11px] font-mono text-indigo-400 px-2.5 py-0.5 rounded-full accent-pill border">Latest:
-              v1_26</span>
+              v1_26_1</span>
           </div>
 
           <!-- Simple, clean text-based changelog list (Newest to Oldest & Plain-Text Block) -->
           <div class="space-y-4 font-mono text-xs leading-relaxed text-theme-secondary">
+            <div class="p-3.5 rounded-xl surface-alt border border-theme-subtle">
+              <div class="flex items-center justify-between gap-3">
+                <span class="font-bold text-indigo-400">v1_26_1</span>
+                <span class="text-[11px] font-mono text-theme-faint">11/22/2026</span>
+              </div>
+              <p class="mt-1 text-theme-primary font-sans text-xs leading-relaxed">
+                Locked down Firebase with App Check (reCAPTCHA Enterprise): client initializes
+                <code class="font-mono">ReCaptchaEnterpriseProvider</code> from config, with optional localhost debug tokens.
+                Documented HTTP-referrer API key restrictions for the GitHub Pages and local hosts.
+              </p>
+            </div>
+
             <div class="p-3.5 rounded-xl surface-alt border border-theme-subtle">
               <div class="flex items-center justify-between gap-3">
                 <span class="font-bold text-indigo-400">v1_26</span>
@@ -1710,7 +1722,7 @@
           <details id="rawChangelogDetails" class="pt-4 border-t border-theme">
             <summary class="raw-changelog-summary flex items-center justify-between gap-2 cursor-pointer select-none">
               <span class="text-[11px] font-bold uppercase tracking-wider text-theme-faint font-mono">Raw Plain-Text
-                Changelog (v1_1 &rarr; v1_26)</span>
+                Changelog (v1_1 &rarr; v1_26_1)</span>
               <i
                 class="fa-solid fa-chevron-down raw-changelog-chevron text-[11px] text-theme-faint transition-transform"></i>
             </summary>
@@ -1743,7 +1755,8 @@ v1_22 (11/22/2026) - Added Share & Export: print/PDF for planner and changelog, 
 v1_23 (11/22/2026) - Added Import from Syllabus (rule-based, no LLM): paste or PDF (pdf.js on-device), parse name+percent pairs, review table with ~100% check, create groups only on confirm.
 v1_24 (11/22/2026) - Added optional Firebase cloud sync and accounts behind Sync (beta): email link + Google, batched push, realtime pull, first-sign-in merge choices, tombstones, privacy note, delete-my-data; local-only until Firebase config is set.
 v1_25 (11/22/2026) - Added Undo for deleted classes (full snapshot until next navigation) with a high-contrast orange Undo toast.
-v1_26 (11/22/2026) - Added institution presets for all UC undergraduate campuses (Berkeley + Davis, UCLA, San Diego, Santa Barbara, Irvine, Santa Cruz, Riverside, Merced): grade scales, semester/quarter notes, Apply/Export/Import, UCSD without D+/D−, GPA decimals from active preset.</pre>
+v1_26 (11/22/2026) - Added institution presets for all UC undergraduate campuses (Berkeley + Davis, UCLA, San Diego, Santa Barbara, Irvine, Santa Cruz, Riverside, Merced): grade scales, semester/quarter notes, Apply/Export/Import, UCSD without D+/D−, GPA decimals from active preset.
+v1_26_1 (11/22/2026) - Firebase App Check with reCAPTCHA Enterprise (client provider + config), optional localhost debug tokens, and API key HTTP-referrer lockdown notes.</pre>
           </details>
         </section>
       </div>
@@ -5154,20 +5167,20 @@ v1_26 (11/22/2026) - Added institution presets for all UC undergraduate campuses
         overallEl.innerHTML = `
           <div class="bg-gradient-to-br from-[#0c0d18] via-[#11152c] to-[#1b173b] text-white rounded-2xl border border-indigo-500/35 p-5 shadow-lg space-y-4">
             <div class="flex flex-wrap items-center justify-between gap-4">
-              <div>
-                <div class="text-xs font-bold uppercase tracking-wider text-indigo-300 flex items-center gap-1.5">
-                  <i class="fa-solid fa-chart-line text-amber-400"></i>
-                  Overall Summary
-                </div>
-                <div class="text-xs text-indigo-200/80 mt-1">
-                  Across all terms &bull; ${overall.graded} of ${overall.total} ${overall.total === 1 ? 'class' : 'classes'} graded &bull; ${formatNumber(overall.gradedUnits, 0, 1)} of ${formatNumber(overall.gpaUnits, 0, 1)} units${overall.pnpCount ? ` &bull; ${overall.pnpCount} P/NP excluded` : ""}
-                </div>
+            <div>
+              <div class="text-xs font-bold uppercase tracking-wider text-indigo-300 flex items-center gap-1.5">
+                <i class="fa-solid fa-chart-line text-amber-400"></i>
+                Overall Summary
               </div>
-              <div class="text-right">
-                <div class="text-4xl sm:text-5xl font-extrabold tracking-tight font-mono text-white">${fmtGpa(overall.avg)}</div>
-                <div class="text-[11px] text-indigo-300 mt-1">Planner Overall GPA</div>
+              <div class="text-xs text-indigo-200/80 mt-1">
+                Across all terms &bull; ${overall.graded} of ${overall.total} ${overall.total === 1 ? 'class' : 'classes'} graded &bull; ${formatNumber(overall.gradedUnits, 0, 1)} of ${formatNumber(overall.gpaUnits, 0, 1)} units${overall.pnpCount ? ` &bull; ${overall.pnpCount} P/NP excluded` : ""}
               </div>
             </div>
+            <div class="text-right">
+              <div class="text-4xl sm:text-5xl font-extrabold tracking-tight font-mono text-white">${fmtGpa(overall.avg)}</div>
+                <div class="text-[11px] text-indigo-300 mt-1">Planner Overall GPA</div>
+            </div>
+          </div>
             <div class="pt-3 border-t border-white/10 flex flex-wrap items-end justify-between gap-3">
               <div class="text-xs text-indigo-200/85">
                 Cumulative estimate
@@ -5883,12 +5896,12 @@ v1_26 (11/22/2026) - Added institution presets for all UC undergraduate campuses
           <tr class="theme-row-hover transition border-b border-theme-subtle ${isHighlighted ? 'row-highlight-anim' : ''} ${isDropped ? 'opacity-60' : ''}" data-assign-id="${escapeHtml(a.id)}">
             <td class="py-2.5 pl-3 pr-2">
               <div class="flex flex-col gap-1">
-                <input
-                  type="text"
-                  value="${escapeHtml(a.name)}"
-                  data-assign-id="${escapeHtml(a.id)}"
-                  data-assign-field="name"
-                  aria-label="Assignment Name"
+              <input
+                type="text"
+                value="${escapeHtml(a.name)}"
+                data-assign-id="${escapeHtml(a.id)}"
+                data-assign-field="name"
+                aria-label="Assignment Name"
                   class="w-full min-w-[170px] text-xs font-semibold theme-inline-input rounded-lg px-2 py-1 ${isDropped ? 'line-through' : ''}"
                 />
                 <div class="flex flex-wrap items-center gap-2 pl-0.5">
@@ -6166,14 +6179,14 @@ v1_26 (11/22/2026) - Added institution presets for all UC undergraduate campuses
                     </div>
                     <span class="w-2.5 h-2.5 rounded-full shrink-0 ${dotColor}"></span>
                     <div class="flex flex-col gap-1 min-w-0 flex-1">
-                      <input
-                        type="text"
-                        value="${escapeHtml(g.name)}"
-                        data-group-id="${escapeHtml(g.id)}"
-                        data-group-field="name"
-                        aria-label="Assignment Group Name"
-                        class="w-full min-w-[130px] text-xs font-semibold theme-inline-input rounded-lg px-2 py-1"
-                      />
+                    <input
+                      type="text"
+                      value="${escapeHtml(g.name)}"
+                      data-group-id="${escapeHtml(g.id)}"
+                      data-group-field="name"
+                      aria-label="Assignment Group Name"
+                      class="w-full min-w-[130px] text-xs font-semibold theme-inline-input rounded-lg px-2 py-1"
+                    />
                       ${hasRules ? `<span class="text-[10px] text-amber-400/90 truncate" title="${escapeHtml(policyTitle)}">${escapeHtml(policyTitle)}</span>` : ''}
                     </div>
                   </div>
@@ -6215,15 +6228,15 @@ v1_26 (11/22/2026) - Added institution presets for all UC undergraduate campuses
                       <i class="fa-solid fa-sliders text-xs"></i>
                       ${hasRules ? '<span class="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-amber-400"></span>' : ''}
                     </button>
-                    <button
-                      type="button"
-                      data-action="delete-group"
-                      data-group-id="${escapeHtml(g.id)}"
-                      title="Delete Assignment Group"
-                      class="text-theme-faint hover:text-rose-400 p-1.5 rounded-lg transition cursor-pointer"
-                    >
-                      <i class="fa-regular fa-trash-can text-xs"></i>
-                    </button>
+                  <button
+                    type="button"
+                    data-action="delete-group"
+                    data-group-id="${escapeHtml(g.id)}"
+                    title="Delete Assignment Group"
+                    class="text-theme-faint hover:text-rose-400 p-1.5 rounded-lg transition cursor-pointer"
+                  >
+                    <i class="fa-regular fa-trash-can text-xs"></i>
+                  </button>
                   </div>
                 </td>
               </tr>
@@ -8171,7 +8184,7 @@ v1_26 (11/22/2026) - Added institution presets for all UC undergraduate campuses
           if (!doc?.id) return;
           if (doc.deleted === true) {
             upsert({ id: String(doc.id), deleted: true, updatedAt: syncNormalizeUpdatedAt(doc.updatedAt, syncNowIso()) });
-          } else {
+      } else {
             const cleaned = sanitizeClassObject(doc, 0, state.defaultGradeDefinitions);
             cleaned.updatedAt = syncNormalizeUpdatedAt(doc.updatedAt, syncNowIso());
             upsert({ ...cleaned, deleted: false });
@@ -8274,6 +8287,36 @@ v1_26 (11/22/2026) - Added institution presets for all UC undergraduate campuses
         if (authMsg && syncErrorMessage) authMsg.textContent = syncErrorMessage;
       }
 
+      async function initFirebaseAppCheck(app) {
+        const cfg = window.GRADECRAFT_FIREBASE || {};
+        const siteKey = String(cfg.appCheckRecaptchaSiteKey || '').trim();
+        if (!siteKey) {
+          console.info('Firebase App Check: no appCheckRecaptchaSiteKey yet — skipping (register in console, then paste site key).');
+          return null;
+        }
+        const host = (window.location.hostname || '').toLowerCase();
+        const isLocal = host === 'localhost' || host === '127.0.0.1';
+        if (cfg.appCheckDebug && isLocal) {
+          // Must be set before initializeAppCheck. Register the token under App Check → Manage debug tokens.
+          self.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
+        }
+        try {
+          const appCheckMod = await import('https://www.gstatic.com/firebasejs/11.0.2/firebase-app-check.js');
+          // Console shows "reCAPTCHA Enterprise" / Fraud Defense — must match provider type.
+          const providerName = String(cfg.appCheckProvider || 'enterprise').toLowerCase();
+          const provider = providerName === 'v3' || providerName === 'recaptcha-v3'
+            ? new appCheckMod.ReCaptchaV3Provider(siteKey)
+            : new appCheckMod.ReCaptchaEnterpriseProvider(siteKey);
+          return appCheckMod.initializeAppCheck(app, {
+            provider,
+            isTokenAutoRefreshEnabled: true
+          });
+        } catch (err) {
+          console.warn('Firebase App Check unavailable:', err);
+          return null;
+        }
+      }
+
       async function loadFirebaseSdk() {
         if (syncFirebase) return syncFirebase;
         if (!isFirebaseConfigured()) throw new Error('Firebase is not configured');
@@ -8284,6 +8327,8 @@ v1_26 (11/22/2026) - Added institution presets for all UC undergraduate campuses
         ]);
         const existing = getApps();
         const app = existing.length ? existing[0] : initializeApp(window.GRADECRAFT_FIREBASE);
+        // App Check before Auth/Firestore use so tokens attach to backend calls once enforced.
+        const appCheck = await initFirebaseAppCheck(app);
         const auth = authMod.getAuth(app);
         let db;
         try {
@@ -8305,7 +8350,7 @@ v1_26 (11/22/2026) - Added institution presets for all UC undergraduate campuses
             console.warn('Firebase Analytics unavailable:', err);
           }
         }
-        syncFirebase = { app, auth, db, analytics, authMod, fsMod };
+        syncFirebase = { app, auth, db, analytics, appCheck, authMod, fsMod };
         return syncFirebase;
       }
 
@@ -8753,7 +8798,7 @@ v1_26 (11/22/2026) - Added institution presets for all UC undergraduate campuses
       function bootApp() {
         const openedShare = tryEnterShareFromLocation();
         if (!openedShare) {
-          state.activeView = resolveViewFromLocation();
+        state.activeView = resolveViewFromLocation();
         }
         initEventListeners();
         initSyncUi();

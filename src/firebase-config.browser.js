@@ -7,6 +7,11 @@
     storageBucket: 'gradecraft-317bb.firebasestorage.app',
     messagingSenderId: '303187680260',
     appId: '1:303187680260:web:d1b8a59f061a8df63d2951',
-    measurementId: 'G-F34CHQW963'
+    measurementId: 'G-F34CHQW963',
+    /* Enterprise site key from Google Cloud → Security → reCAPTCHA Enterprise (NOT classic admin) */
+    appCheckRecaptchaSiteKey: '6Ldczi0uAAAAALAlAxN7DlxiABirTEGc6lBunU0I',
+    appCheckProvider: 'enterprise',
+    /* true on localhost only while registering an App Check debug token */
+    appCheckDebug: false
   };
 })(typeof window !== 'undefined' ? window : globalThis);

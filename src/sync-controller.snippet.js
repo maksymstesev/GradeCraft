@@ -234,6 +234,34 @@
         if (authMsg && syncErrorMessage) authMsg.textContent = syncErrorMessage;
       }
 
+      async function initFirebaseAppCheck(app) {
+        const cfg = window.GRADECRAFT_FIREBASE || {};
+        const siteKey = String(cfg.appCheckRecaptchaSiteKey || '').trim();
+        if (!siteKey) {
+          console.info('Firebase App Check: no appCheckRecaptchaSiteKey yet — skipping.');
+          return null;
+        }
+        const host = (window.location.hostname || '').toLowerCase();
+        const isLocal = host === 'localhost' || host === '127.0.0.1';
+        if (cfg.appCheckDebug && isLocal) {
+          self.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
+        }
+        try {
+          const appCheckMod = await import('https://www.gstatic.com/firebasejs/11.0.2/firebase-app-check.js');
+          const providerName = String(cfg.appCheckProvider || 'enterprise').toLowerCase();
+          const provider = providerName === 'v3' || providerName === 'recaptcha-v3'
+            ? new appCheckMod.ReCaptchaV3Provider(siteKey)
+            : new appCheckMod.ReCaptchaEnterpriseProvider(siteKey);
+          return appCheckMod.initializeAppCheck(app, {
+            provider,
+            isTokenAutoRefreshEnabled: true
+          });
+        } catch (err) {
+          console.warn('Firebase App Check unavailable:', err);
+          return null;
+        }
+      }
+
       async function loadFirebaseSdk() {
         if (syncFirebase) return syncFirebase;
         if (!isFirebaseConfigured()) throw new Error('Firebase is not configured');
@@ -244,6 +272,7 @@
         ]);
         const existing = getApps();
         const app = existing.length ? existing[0] : initializeApp(window.GRADECRAFT_FIREBASE);
+        const appCheck = await initFirebaseAppCheck(app);
         const auth = authMod.getAuth(app);
         let db;
         try {
@@ -265,7 +294,7 @@
             console.warn('Firebase Analytics unavailable:', err);
           }
         }
-        syncFirebase = { app, auth, db, analytics, authMod, fsMod };
+        syncFirebase = { app, auth, db, analytics, appCheck, authMod, fsMod };
         return syncFirebase;
       }
 
