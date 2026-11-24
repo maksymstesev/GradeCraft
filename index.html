@@ -2578,6 +2578,19 @@ v1_26_1 (11/22/2026) - Firebase App Check with reCAPTCHA Enterprise (client prov
         return str.trim() === legacyFiller ? '' : str;
       }
 
+      // Must be declared before loadState()/sanitizeState() — a later const would TDZ-throw when
+      // a saved avatar is present, and loadState's catch would wipe the whole session to defaults.
+      const AVATAR_DATA_URL_MAX_CHARS = 120000;
+
+      /** Compact local-only avatar data URLs (JPEG/PNG/WebP/GIF). Not synced to Firestore. */
+      function sanitizeAvatarDataUrl(value) {
+        const raw = String(value || '');
+        if (!raw) return '';
+        if (raw.length > AVATAR_DATA_URL_MAX_CHARS) return '';
+        if (!/^data:image\/(jpeg|jpg|png|webp|gif);base64,/i.test(raw)) return '';
+        return raw;
+      }
+
       // Two classes are duplicates when they share an ID, or the same code, term and title
       // (case and extra spaces ignored). Keeps the first occurrence.
       function classDedupeKeys(c) {
@@ -4236,18 +4249,9 @@ v1_26_1 (11/22/2026) - Firebase App Check with reCAPTCHA Enterprise (client prov
       }
 
       /** Keep only compact data-URL avatars (JPEG/PNG/WebP/GIF) suitable for 20–56px circles. */
-      const AVATAR_DATA_URL_MAX_CHARS = 120000;
       const AVATAR_COMPRESS_MAX_PX = 112;
       const AVATAR_COMPRESS_QUALITY = 0.82;
       const AVATAR_SOURCE_MAX_BYTES = 8 * 1024 * 1024;
-
-      function sanitizeAvatarDataUrl(value) {
-        const raw = String(value || '');
-        if (!raw) return '';
-        if (raw.length > AVATAR_DATA_URL_MAX_CHARS) return '';
-        if (!/^data:image\/(jpeg|jpg|png|webp|gif);base64,/i.test(raw)) return '';
-        return raw;
-      }
 
       function paintAvatarElement(el, dataUrl, initials) {
         if (!el) return;

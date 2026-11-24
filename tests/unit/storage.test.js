@@ -355,6 +355,35 @@ describe('loadState', () => {
     const state = loadState(storage);
     expect(state.classes.length).toBeGreaterThanOrEqual(2);
   });
+
+  it('preserves a saved profile avatar across loadState (regression: TDZ wipe)', () => {
+    const avatar = 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD';
+    const saved = {
+      theme: 'midnight',
+      profile: {
+        displayName: 'Maksym',
+        email: '',
+        institution: '',
+        major: '',
+        avatarDataUrl: avatar,
+      },
+      classes: [
+        {
+          id: 'c1', code: 'CS 61A', name: 'Structure',
+          term: 'Fall 2026',
+          groups: [{ id: 'g1', name: 'HW', weight: 100 }],
+          assignments: [],
+        },
+      ],
+    };
+    const storage = createMockStorage({
+      [STORAGE_KEY]: JSON.stringify(saved),
+    });
+    const state = loadState(storage);
+    expect(state.profile.avatarDataUrl).toBe(avatar);
+    expect(state.profile.displayName).toBe('Maksym');
+    expect(state.classes[0].code).toBe('CS 61A');
+  });
 });
 
 describe('saveState', () => {
