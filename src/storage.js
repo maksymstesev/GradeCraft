@@ -34,6 +34,17 @@ export function cleanLegacyProfileValue(value, legacyFiller) {
   return str.trim() === legacyFiller ? '' : str;
 }
 
+/** Compact local-only avatar data URLs (JPEG/PNG/WebP/GIF). Not synced to Firestore. */
+export const AVATAR_DATA_URL_MAX_CHARS = 120000;
+
+export function sanitizeAvatarDataUrl(value) {
+  const raw = String(value || '');
+  if (!raw) return '';
+  if (raw.length > AVATAR_DATA_URL_MAX_CHARS) return '';
+  if (!/^data:image\/(jpeg|jpg|png|webp|gif);base64,/i.test(raw)) return '';
+  return raw;
+}
+
 // ─── Deduplication ───────────────────────────────────────────────────
 
 /**
@@ -136,7 +147,8 @@ export function createDefaultState() {
       displayName: '',
       email: '',
       institution: '',
-      major: ''
+      major: '',
+      avatarDataUrl: ''
     },
     defaultGradeDefinitions: cloneGradeScale(defaultScale),
     activePresetId: 'uc_berkeley',
@@ -246,7 +258,8 @@ export function sanitizeState(rawState) {
       displayName: cleanLegacyProfileValue(rawState.profile?.displayName, 'Student Name'),
       email: cleanLegacyProfileValue(rawState.profile?.email, 'student@university.edu'),
       institution: cleanLegacyProfileValue(rawState.profile?.institution, 'University Campus'),
-      major: String(rawState.profile?.major || '')
+      major: String(rawState.profile?.major || ''),
+      avatarDataUrl: sanitizeAvatarDataUrl(rawState.profile?.avatarDataUrl)
     },
     defaultGradeDefinitions: defaultDefs,
     activePresetId: typeof rawState.activePresetId === 'string' && rawState.activePresetId

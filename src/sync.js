@@ -115,11 +115,14 @@ export function applyCloudSettings(state, settingsDoc) {
   if (!settingsDoc || typeof settingsDoc !== 'object') return state;
   const next = { ...state };
   if (settingsDoc.profile && typeof settingsDoc.profile === 'object') {
+    // Preserve local-only avatarDataUrl — photos are not synced to Firestore yet.
+    const localAvatar = String(state?.profile?.avatarDataUrl || '');
     next.profile = {
       displayName: String(settingsDoc.profile.displayName || ''),
       email: String(settingsDoc.profile.email || ''),
       institution: String(settingsDoc.profile.institution || ''),
-      major: String(settingsDoc.profile.major || '')
+      major: String(settingsDoc.profile.major || ''),
+      avatarDataUrl: localAvatar
     };
   }
   if (['black', 'midnight', 'light'].includes(settingsDoc.theme)) {

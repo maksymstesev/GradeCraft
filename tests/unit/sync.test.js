@@ -198,6 +198,20 @@ describe('settings + prefs', () => {
     expect(state.profile.displayName).toBe('Ada');
   });
 
+  it('preserves local avatar when applying cloud settings', () => {
+    const localAvatar = 'data:image/jpeg;base64,/9j/local';
+    const state = applyCloudSettings(
+      {
+        theme: 'black',
+        locale: 'en-US',
+        profile: { displayName: 'Local', email: '', institution: '', major: '', avatarDataUrl: localAvatar }
+      },
+      { theme: 'light', profile: { displayName: 'Cloud', email: '', institution: '', major: '' }, updatedAt: newer }
+    );
+    expect(state.profile.displayName).toBe('Cloud');
+    expect(state.profile.avatarDataUrl).toBe(localAvatar);
+  });
+
   it('sanitizes sync prefs with enabled default false', () => {
     expect(sanitizeSyncPrefs(null).enabled).toBe(false);
     expect(sanitizeSyncPrefs({ enabled: true, lastSyncedAt: newer }).enabled).toBe(true);

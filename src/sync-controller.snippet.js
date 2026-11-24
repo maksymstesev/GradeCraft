@@ -96,10 +96,16 @@
       }
 
       function settingsToCloudDoc() {
+        // Avatar stays local-only until Firebase Storage sync is explicitly enabled.
         return {
           schemaVersion: SYNC_SCHEMA_VERSION,
           updatedAt: syncNormalizeUpdatedAt(state.settingsUpdatedAt, syncNowIso()),
-          profile: { ...(state.profile || {}) },
+          profile: {
+            displayName: state.profile?.displayName || '',
+            email: state.profile?.email || '',
+            institution: state.profile?.institution || '',
+            major: state.profile?.major || ''
+          },
           theme: state.theme,
           locale: state.locale,
           defaultGradeDefinitions: cloneGradeScale(state.defaultGradeDefinitions)
@@ -419,7 +425,10 @@
           });
           if (snap.remotePlanner) gpaPlan = sanitizeGpaPlan(snap.remotePlanner);
           if (snap.remoteSettings) {
-            if (snap.remoteSettings.profile) state.profile = { ...state.profile, ...snap.remoteSettings.profile };
+            if (snap.remoteSettings.profile) {
+              const localAvatar = String(state.profile?.avatarDataUrl || '');
+              state.profile = { ...state.profile, ...snap.remoteSettings.profile, avatarDataUrl: localAvatar };
+            }
             if (['black', 'midnight', 'light'].includes(snap.remoteSettings.theme)) state.theme = snap.remoteSettings.theme;
             if (snap.remoteSettings.locale) state.locale = snap.remoteSettings.locale;
             if (Array.isArray(snap.remoteSettings.defaultGradeDefinitions)) {
@@ -439,7 +448,10 @@
             gpaPlan = sanitizeGpaPlan(snap.remotePlanner);
           }
           if (snap.remoteSettings && syncIsNewer(snap.remoteSettings.updatedAt, state.settingsUpdatedAt)) {
-            if (snap.remoteSettings.profile) state.profile = { ...state.profile, ...snap.remoteSettings.profile };
+            if (snap.remoteSettings.profile) {
+              const localAvatar = String(state.profile?.avatarDataUrl || '');
+              state.profile = { ...state.profile, ...snap.remoteSettings.profile, avatarDataUrl: localAvatar };
+            }
             if (['black', 'midnight', 'light'].includes(snap.remoteSettings.theme)) state.theme = snap.remoteSettings.theme;
             if (snap.remoteSettings.locale) state.locale = snap.remoteSettings.locale;
             if (Array.isArray(snap.remoteSettings.defaultGradeDefinitions)) {
@@ -542,7 +554,10 @@
               return;
             }
             if (!syncIsNewer(data.updatedAt, state.settingsUpdatedAt)) return;
-            if (data.profile) state.profile = { ...state.profile, ...data.profile };
+            if (data.profile) {
+              const localAvatar = String(state.profile?.avatarDataUrl || '');
+              state.profile = { ...state.profile, ...data.profile, avatarDataUrl: localAvatar };
+            }
             if (['black', 'midnight', 'light'].includes(data.theme)) state.theme = data.theme;
             if (data.locale) state.locale = data.locale;
             if (Array.isArray(data.defaultGradeDefinitions)) {

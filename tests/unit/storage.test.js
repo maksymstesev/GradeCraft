@@ -9,6 +9,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import {
   uid,
   cleanLegacyProfileValue,
+  sanitizeAvatarDataUrl,
   classDedupeKeys,
   dedupeClasses,
   createExampleCourses,
@@ -272,6 +273,18 @@ describe('sanitizeState', () => {
     expect(state.profile.displayName).toBe('');
     expect(state.profile.email).toBe('');
     expect(state.profile.institution).toBe('');
+  });
+
+  it('keeps compact avatar data URLs and drops invalid ones', () => {
+    const ok = 'data:image/jpeg;base64,/9j/4AAQ';
+    expect(sanitizeAvatarDataUrl(ok)).toBe(ok);
+    expect(sanitizeAvatarDataUrl('https://evil.example/x.png')).toBe('');
+    expect(sanitizeAvatarDataUrl('data:text/plain;base64,aaa')).toBe('');
+    const kept = sanitizeState({
+      profile: { avatarDataUrl: ok },
+      classes: [{ id: 'c1', groups: [{ id: 'g1', name: 'HW', weight: 100 }] }],
+    });
+    expect(kept.profile.avatarDataUrl).toBe(ok);
   });
 
   it('reads legacy keys: viewMode, language, defaultBuckets, customDefaultScale', () => {
