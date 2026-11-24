@@ -5071,11 +5071,33 @@ v1_26_1 (11/22/2026) - Firebase App Check with reCAPTCHA Enterprise (client prov
         if (gpaBtn) gpaBtn.className = state.activeView === 'gpa' ? activeCls : idleCls;
       }
 
+      function normalizeDecimalInputText(raw) {
+        return String(raw ?? '').trim().replace(/,/g, '.');
+      }
+
+      /** True while the user is mid-keystroke on a decimal (e.g. "3." or "."). */
+      function isPartialNumberInput(raw) {
+        const text = normalizeDecimalInputText(raw);
+        return text === '.' || text === '-' || text === '-.' || /^-?\d+\.$/.test(text);
+      }
+
       function parseOptionalNumberInput(raw) {
-        const text = String(raw ?? '').trim();
-        if (text === '') return null;
+        const text = normalizeDecimalInputText(raw);
+        if (text === '' || isPartialNumberInput(text)) return null;
         const n = Number(text);
         return Number.isFinite(n) ? n : null;
+      }
+
+      function commitDecimalNumberField(el) {
+        if (!el) return;
+        const text = normalizeDecimalInputText(el.value);
+        if (text === '' || text === '.' || text === '-' || text === '-.') {
+          el.value = '';
+          return;
+        }
+        const cleaned = text.endsWith('.') ? text.slice(0, -1) : text;
+        const n = Number(cleaned);
+        el.value = Number.isFinite(n) ? String(n) : '';
       }
 
       function refreshGpaDerivedDisplays() {
@@ -5186,7 +5208,8 @@ v1_26_1 (11/22/2026) - Firebase App Check with reCAPTCHA Enterprise (client prov
                 </label>
                 <label class="flex flex-col gap-1.5 text-xs">
                   <span class="font-semibold text-theme-secondary">Prior GPA</span>
-                  <input id="gpaPriorGpa" type="number" min="0" max="4" step="0.01" value="${prior.gpa === null ? '' : prior.gpa}" placeholder="e.g. 3.50"
+                  <input id="gpaPriorGpa" type="text" inputmode="decimal" autocomplete="off"
+                    value="${prior.gpa === null ? '' : prior.gpa}" placeholder="e.g. 3.50"
                     class="w-full font-mono theme-input rounded-lg px-3 py-2" aria-label="Prior GPA" />
                 </label>
                 <div class="flex flex-col gap-1.5 text-xs">
@@ -5325,7 +5348,7 @@ v1_26_1 (11/22/2026) - Firebase App Check with reCAPTCHA Enterprise (client prov
             <div class="p-5 grid grid-cols-1 sm:grid-cols-2 gap-4">
               <label class="flex flex-col gap-1.5 text-xs">
                 <span class="font-semibold text-theme-secondary">Target cumulative GPA</span>
-                <input id="gpaGoalTarget" type="number" min="0" max="4" step="0.01"
+                <input id="gpaGoalTarget" type="text" inputmode="decimal" autocomplete="off"
                   value="${gpaPlan.goal.targetGpa === null || gpaPlan.goal.targetGpa === undefined ? '' : gpaPlan.goal.targetGpa}"
                   placeholder="e.g. 3.70" class="w-full font-mono theme-input rounded-lg px-3 py-2" aria-label="Target cumulative GPA" />
               </label>
@@ -7647,6 +7670,15 @@ v1_26_1 (11/22/2026) - Firebase App Check with reCAPTCHA Enterprise (client prov
           }
         });
 
+        // Normalize decimal GPA fields on blur so trailing "." commits (e.g. "3." → 3)
+        document.addEventListener('focusout', (e) => {
+          const target = e.target;
+          if (!target || readOnlyMode) return;
+          if (target.id !== 'gpaPriorGpa' && target.id !== 'gpaGoalTarget') return;
+          commitDecimalNumberField(target);
+          target.dispatchEvent(new Event('input', { bubbles: true }));
+        });
+
         // B. IN-PLACE INPUT DELEGATION (ZERO CARET/SCROLL LOSS)
         document.addEventListener('input', (e) => {
           const target = e.target;
@@ -7683,6 +7715,7 @@ v1_26_1 (11/22/2026) - Firebase App Check with reCAPTCHA Enterprise (client prov
           }
 
           if (target.id === 'gpaPriorUnits') {
+            if (isPartialNumberInput(target.value)) return;
             const n = parseOptionalNumberInput(target.value);
             gpaPlan.prior = gpaPlan.prior || { units: 0, gpa: null };
             gpaPlan.prior.units = n === null ? 0 : Math.max(0, n);
@@ -7691,6 +7724,8 @@ v1_26_1 (11/22/2026) - Firebase App Check with reCAPTCHA Enterprise (client prov
             return;
           }
           if (target.id === 'gpaPriorGpa') {
+            // Keep mid-decimal keystrokes (e.g. "3.") — type=number used to swallow "."
+            if (isPartialNumberInput(target.value)) return;
             const n = parseOptionalNumberInput(target.value);
             gpaPlan.prior = gpaPlan.prior || { units: 0, gpa: null };
             gpaPlan.prior.gpa = n === null ? null : Math.max(0, n);
@@ -7699,6 +7734,7 @@ v1_26_1 (11/22/2026) - Firebase App Check with reCAPTCHA Enterprise (client prov
             return;
           }
           if (target.id === 'gpaGoalTarget') {
+            if (isPartialNumberInput(target.value)) return;
             const n = parseOptionalNumberInput(target.value);
             gpaPlan.goal = gpaPlan.goal || { targetGpa: null, futureUnits: null };
             gpaPlan.goal.targetGpa = n === null ? null : Math.max(0, n);
@@ -7707,6 +7743,7 @@ v1_26_1 (11/22/2026) - Firebase App Check with reCAPTCHA Enterprise (client prov
             return;
           }
           if (target.id === 'gpaGoalFutureUnits') {
+            if (isPartialNumberInput(target.value)) return;
             const n = parseOptionalNumberInput(target.value);
             gpaPlan.goal = gpaPlan.goal || { targetGpa: null, futureUnits: null };
             gpaPlan.goal.futureUnits = n === null ? null : Math.max(0, n);
