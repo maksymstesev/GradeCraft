@@ -366,6 +366,7 @@
       #confirmModalBackdrop,
       #policiesModalBackdrop,
       #shareModalBackdrop,
+      #shareAppPromoBackdrop,
       #syllabusModalBackdrop,
       #syncConflictModalBackdrop,
       #shareReadonlyBanner,
@@ -1937,6 +1938,55 @@ v1_26_1 (11/22/2026) - Firebase App Check with reCAPTCHA Enterprise (client prov
     </div>
   </div>
 
+  <!-- SHARE APP WITH FRIENDS PROMO -->
+  <div id="shareAppPromoBackdrop" data-feedback-ignore="true"
+    class="fixed inset-0 z-50 bg-black/75 backdrop-blur-xs hidden items-center justify-center p-4">
+    <div class="surface-card rounded-2xl border max-w-md w-full p-6 space-y-4" role="dialog" aria-modal="true"
+      aria-labelledby="shareAppPromoTitle">
+      <div class="flex items-start justify-between gap-3">
+        <div class="flex items-start gap-3">
+          <div
+            class="w-10 h-10 rounded-xl bg-indigo-500/15 text-indigo-400 border border-indigo-500/30 flex items-center justify-center shrink-0">
+            <i class="fa-solid fa-heart text-lg"></i>
+          </div>
+          <div>
+            <h3 id="shareAppPromoTitle" class="text-base font-bold text-theme-primary">Got a classmate who needs this?</h3>
+            <p class="text-xs text-theme-muted mt-1.5 leading-relaxed">
+              If GradeCraft has made tracking grades a little less stressful, share it with a friend or classmate.
+              One quick link can spare someone a late-night “what’s my average?” spiral — and they might thank you later.
+            </p>
+          </div>
+        </div>
+        <button id="btnShareAppPromoClose" type="button"
+          class="share-readonly-allow text-theme-faint hover:text-theme-primary p-1.5 rounded-lg transition cursor-pointer shrink-0"
+          aria-label="Close share invite dialog">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <label for="shareAppPromoDontShow"
+        class="share-readonly-allow flex items-start gap-2.5 rounded-xl surface-alt border border-theme-subtle px-3 py-2.5 cursor-pointer">
+        <input id="shareAppPromoDontShow" type="checkbox"
+          class="share-readonly-allow mt-0.5 h-3.5 w-3.5 rounded border-theme-input accent-indigo-500 cursor-pointer" />
+        <span class="text-xs text-theme-secondary leading-relaxed">
+          Don’t show this message again
+        </span>
+      </label>
+
+      <div class="flex flex-wrap items-center justify-end gap-2 pt-1">
+        <button id="btnShareAppPromoDismiss" type="button"
+          class="share-readonly-allow px-4 py-2 rounded-xl text-xs font-semibold theme-btn-secondary cursor-pointer">
+          Maybe later
+        </button>
+        <button id="btnShareAppPromoCopy" type="button"
+          class="share-readonly-allow inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm transition cursor-pointer">
+          <i class="fa-regular fa-copy"></i>
+          <span>Copy app link</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- GROUP POLICIES MODAL -->
   <div id="policiesModalBackdrop"
     class="fixed inset-0 z-50 bg-black/75 backdrop-blur-xs hidden items-center justify-center p-4">
@@ -2146,6 +2196,12 @@ v1_26_1 (11/22/2026) - Firebase App Check with reCAPTCHA Enterprise (client prov
       'use strict';
 
       const STORAGE_KEY = 'gradecraft_state_v4';
+
+      // Manual kill-switch: set to false to disable the “share GradeCraft with friends” popup entirely.
+      const SHARE_APP_PROMO_ENABLED = true;
+      const SHARE_APP_PROMO_STORAGE_KEY = 'gradecraft_share_app_promo_dismissed_v1';
+      const SHARE_APP_PROMO_DELAY_MS = 1800;
+
       const ALL_STORAGE_KEYS = [
         'gradecraft_state_v4',
         'gradecraft_state_v3',
@@ -3549,6 +3605,67 @@ v1_26_1 (11/22/2026) - Firebase App Check with reCAPTCHA Enterprise (client prov
         if (!backdrop) return;
         backdrop.classList.add('hidden');
         backdrop.classList.remove('flex');
+      }
+
+      function isShareAppPromoOptedOut() {
+        try {
+          return localStorage.getItem(SHARE_APP_PROMO_STORAGE_KEY) === '1';
+        } catch {
+          return false;
+        }
+      }
+
+      function persistShareAppPromoOptOut() {
+        try {
+          localStorage.setItem(SHARE_APP_PROMO_STORAGE_KEY, '1');
+        } catch { /* ignore quota / private mode */ }
+      }
+
+      function shouldPersistShareAppPromoOptOut() {
+        const checkbox = document.getElementById('shareAppPromoDontShow');
+        return !!(checkbox && checkbox.checked);
+      }
+
+      function openShareAppPromo() {
+        const backdrop = document.getElementById('shareAppPromoBackdrop');
+        if (!backdrop) return;
+        const checkbox = document.getElementById('shareAppPromoDontShow');
+        if (checkbox) checkbox.checked = false;
+        backdrop.classList.remove('hidden');
+        backdrop.classList.add('flex');
+      }
+
+      function closeShareAppPromo(options = {}) {
+        const persist = options.persistOptOut === true || shouldPersistShareAppPromoOptOut();
+        if (persist) persistShareAppPromoOptOut();
+        const backdrop = document.getElementById('shareAppPromoBackdrop');
+        if (!backdrop) return;
+        backdrop.classList.add('hidden');
+        backdrop.classList.remove('flex');
+      }
+
+      function maybeShowShareAppPromo() {
+        // Flip SHARE_APP_PROMO_ENABLED to false above to turn this off for everyone.
+        if (!SHARE_APP_PROMO_ENABLED) return;
+        if (readOnlyMode) return;
+        if (isShareAppPromoOptedOut()) return;
+        if (!document.getElementById('shareAppPromoBackdrop')) return;
+        window.setTimeout(() => {
+          if (!SHARE_APP_PROMO_ENABLED || readOnlyMode || isShareAppPromoOptedOut()) return;
+          openShareAppPromo();
+        }, SHARE_APP_PROMO_DELAY_MS);
+      }
+
+      async function copyShareAppLink() {
+        const url = getMainLandingPageUrl();
+        try {
+          await navigator.clipboard.writeText(url);
+          showToast('App link copied — share it with a friend!', 'success');
+          closeShareAppPromo();
+        } catch {
+          showToast('Could not copy automatically — link: ' + url, 'info');
+          closeShareAppPromo();
+        }
       }
 
       function downloadShareFile() {
@@ -6782,6 +6899,20 @@ v1_26_1 (11/22/2026) - Firebase App Check with reCAPTCHA Enterprise (client prov
             return;
           }
 
+          if (
+            target.closest('#btnShareAppPromoClose')
+            || target.closest('#btnShareAppPromoDismiss')
+            || target.id === 'shareAppPromoBackdrop'
+          ) {
+            closeShareAppPromo();
+            return;
+          }
+
+          if (target.closest('#btnShareAppPromoCopy')) {
+            copyShareAppLink();
+            return;
+          }
+
           if (target.closest('#btnCopyShareUrl')) {
             copyShareUrl();
             return;
@@ -8813,6 +8944,8 @@ v1_26_1 (11/22/2026) - Firebase App Check with reCAPTCHA Enterprise (client prov
         renderApp(false);
         if (openedShare) {
           showToast('Opened a read-only shared GPA Planner. Local data was not modified.', 'info');
+        } else {
+          maybeShowShareAppPromo();
         }
       }
 
