@@ -7,10 +7,10 @@
 | | |
 |---|---|
 | **Live app** | [maksymstesev.github.io/GradeCraft](https://maksymstesev.github.io/GradeCraft/) |
-| **Version** | `1.26.1` (`v1_26_1`) |
+| **Version** | `1.26.1` (`package.json`) · product log through `v1_26_2` + later fixes |
 | **License** | [MIT](./LICENSE) |
 | **Stack** | Vanilla HTML/CSS/JS · Tailwind CDN · optional Firebase Auth + Firestore |
-| **Tests** | 187 Vitest unit tests · Playwright E2E + axe-core accessibility |
+| **Tests** | 190 Vitest unit tests · Playwright E2E + axe-core accessibility |
 
 GradeCraft is a **single-page app** (`index.html`) that runs entirely in the browser. Grades, What-If scores, GPA plans, and settings persist in `localStorage` by default. Optional **Sync (beta)** backs them up to Firebase when you sign in. Opening a compressed share link never writes to local storage.
 
@@ -75,7 +75,7 @@ Or open `index.html` directly in a browser. CDN assets (Tailwind, fonts, Font Aw
 
 ```bash
 npm ci
-npm run test:unit          # Vitest (187 tests)
+npm run test:unit          # Vitest (190 tests)
 npm run test:e2e:install   # Chromium for Playwright (once)
 npm run test:e2e           # serves the app + smoke/a11y tests
 npm run test:all           # unit + e2e
@@ -103,6 +103,7 @@ Node **20+** is recommended (matches CI).
 ### Profile & Settings
 
 - Profile fields (display name, email, institution, major)
+- **Profile photo** — click the header or Profile avatar to upload/remove; image is compressed in-browser (JPEG ≤ ~112px) and stored as `profile.avatarDataUrl` in local state only (not sent to Firestore yet)
 - Theme: True Black (default), Midnight, Light
 - Locale for number/date formatting
 - Default grade definitions + **institution presets** (Apply / Export / Import JSON)
@@ -110,7 +111,7 @@ Node **20+** is recommended (matches CI).
 
 ### GPA Planner
 
-Separate from the gradebook: assign planned letter grades per class, see term and overall unit-weighted GPA, prior credit, cumulative GPA, and a goal calculator. Planner data lives in its own `localStorage` key and does not rewrite gradebook scores.
+Separate from the gradebook: assign planned letter grades per class, see term and overall unit-weighted GPA, prior credit, cumulative GPA, and a goal calculator. Planner data lives in its own `localStorage` key and does not rewrite gradebook scores. **Prior GPA** and **Target cumulative GPA** accept decimal values (text + `inputmode="decimal"`); prior graded units and future units remain `type="number"` with `step="0.5"`.
 
 ---
 
@@ -192,7 +193,7 @@ Storage key: `gradecraft_gpa_planner_v1`.
 ```
 
 - Planned letters map through the active default grade definitions (preset-aware display decimals).
-- **Prior credit:** graded units + GPA (or legacy grade-points ÷ units).
+- **Prior credit:** graded units (`step` 0.5) + GPA (or legacy grade-points ÷ units). Mid-keystroke decimals like `3.` are kept until blur on Prior GPA / target GPA fields (avoids `type="number"` swallowing `.`).
 - **Cumulative GPA:** planner grade points + prior, over planner graded units + prior units (prior only counts when GPA is set and units &gt; 0).
 - **Goal calculator:**  
   \(G_{\text{needed}} = \frac{G_{\text{target}}(U_{\text{current}} + U_{\text{future}}) - GP_{\text{current}}}{U_{\text{future}}}\)  
@@ -270,6 +271,10 @@ Helpers in [`src/share.js`](./src/share.js); compression via [`src/lzstring.js`]
 
 Share payloads include class metadata, planner grades/prior/goal, and default grade definitions — not full assignment scorebooks. Opening a share URL is read-only and non-persistent.
 
+### Share-the-app promo (`v1_26_2`)
+
+A dismissable “share with a classmate” dialog can appear after a short delay (`SHARE_APP_PROMO_DELAY_MS`, ~1.8s). It offers **Copy app link** / **Maybe later**, and a **Don’t show this message again** checkbox. Opt-out is stored in `localStorage` under `gradecraft_share_app_promo_dismissed_v1`. Flip `SHARE_APP_PROMO_ENABLED` in `index.html` to disable it for everyone.
+
 ---
 
 ## Cloud sync (beta)
@@ -291,6 +296,7 @@ Optional. Without Firebase config, the app stays fully local.
 - Soft-delete **tombstones** so deletions sync across devices.
 - First sign-in with both local and cloud data: **Use cloud** / **Use device** / **Merge** (with local backup).
 - **Sign out** and **Delete my data** (cloud wipe for that uid).
+- **Profile photos stay local.** Cloud settings docs sync name/email/institution/major only; `avatarDataUrl` is stripped on upload and preserved on pull/merge so Sync cannot wipe a local photo.
 
 ### Firestore shape
 
@@ -298,7 +304,8 @@ Optional. Without Firebase config, the app stays fully local.
 users/{uid}/
   classes/{classId}     # class doc or { deleted: true, updatedAt }
   planner               # GPA plan document
-  settings              # profile, theme, locale, grade defs, preset id, schemaVersion
+  settings              # profile text fields, theme, locale, grade defs, preset id, schemaVersion
+                        # (no avatar binary / data URL)
 feedback/{reportId}     # separate feedback collection (not under users)
 ```
 
@@ -347,6 +354,7 @@ Payload helpers: [`src/feedback.js`](./src/feedback.js). Rules allow create + ow
 | `gradecraft_state_v4` | Current app state (classes, UI, profile, defaults) |
 | `gradecraft_gpa_planner_v1` | GPA Planner only |
 | `gradecraft_sync_prefs_v1` | Sync enabled, last push stamps, first-sync flag |
+| `gradecraft_share_app_promo_dismissed_v1` | Share-the-app promo permanently dismissed (`'1'`) |
 | Legacy keys in `ALL_STORAGE_KEYS` | Migrated/merged on load, then written to v4 |
 
 ### App state (simplified)
@@ -356,13 +364,19 @@ Payload helpers: [`src/feedback.js`](./src/feedback.js). Rules allow create + ow
   activeView, activeTermFilter, activeClassId,
   gradebookViewMode,   // 'grouped' | 'unified'
   gradebookSortMode,   // 'group' | 'due'
-  theme, locale, profile,
+  theme, locale,
+  profile: {
+    displayName, email, institution, major,
+    avatarDataUrl      // optional data:image/…;base64,… (local-only; sanitized)
+  },
   defaultGradeDefinitions, activePresetId,
   classes: [ /* Class */ ],
   classTombstones: [ { id, deleted: true, updatedAt } ],
   settingsUpdatedAt
 }
 ```
+
+`sanitizeAvatarDataUrl` accepts only compact `data:image/(jpeg|jpg|png|webp|gif);base64,…` strings (max ~120k chars). Invalid or oversize values are dropped on load.
 
 ### Class
 
@@ -401,22 +415,22 @@ Demo courses are created when there is no saved data; **Restore Demo Courses** r
 ├── src/
 │   ├── constants.js           # grade scale, storage keys, policy defaults
 │   ├── calc.js                # grades, GPA, due dates, ICS, charts
-│   ├── storage.js             # sanitize/load/save, demos, GPA plan
+│   ├── storage.js             # sanitize/load/save, demos, GPA plan, avatar sanitize
 │   ├── share.js               # CSV + lz-string share URLs
 │   ├── syllabus.js            # syllabus weight parser
 │   ├── presets.js             # UC institution presets
-│   ├── sync.js                # merge / tombstones / sync payloads
+│   ├── sync.js                # merge / tombstones / sync payloads (preserves local avatar)
 │   ├── feedback.js            # element pick + feedback docs
 │   ├── firebase-config.js     # ESM Firebase + App Check config
 │   ├── lzstring.js            # share compression (ESM)
 │   ├── *-browser.js           # IIFE/globals for script tags in index.html
 │   └── sync-controller.snippet.js  # reference sync controller excerpt
 └── tests/
-    ├── unit/*.test.js         # 12 files, 187 tests
+    ├── unit/*.test.js         # 12 files, 190 tests
     └── e2e/app.spec.js        # smoke + axe
 ```
 
-Ignored: `node_modules/`, `archive/`, Playwright/Vitest artifacts (see [`.gitignore`](./.gitignore)).
+Ignored: `node_modules/`, `archive/`, `docs/private/`, Playwright/Vitest artifacts (see [`.gitignore`](./.gitignore)).
 
 ---
 
@@ -427,6 +441,7 @@ Ignored: `node_modules/`, `archive/`, Playwright/Vitest artifacts (see [`.gitign
 3. **Injectable storage.** `loadState(storage)` / `saveState(state, storage)` accept a storage object so unit tests mock `localStorage`.
 4. **Firebase is optional.** Missing config → local-only UX; Sync panel still explains setup.
 5. **Share uses the URL hash** so payloads are not sent to a server as query parameters.
+6. **Avatars are local-first.** Compression and sanitize live next to profile rendering in `index.html` / `storage.js`; sync controllers must keep `avatarDataUrl` off the wire until Storage sync is intentional.
 
 When changing grade math, policies, sync merge, or sanitize rules, update **both** the module under `src/` and the matching inline section in `index.html`, then run `npm run test:unit`.
 
@@ -463,13 +478,13 @@ There is no build step: edit `index.html` / `src/` and refresh.
 | `calc.test.js` | Graded values, buckets, class metrics, term/planner GPA |
 | `policies.test.js` | Drop / best-of / late / replace / EC / forecast |
 | `cumulative.test.js` | Prior credit, cumulative GPA, goal statuses |
-| `storage.test.js` | Sanitize, dedupe, load/save migration |
+| `storage.test.js` | Sanitize, dedupe, load/save migration, avatar data URLs |
 | `due_dates.test.js` | Dates, Upcoming, ICS |
 | `charts.test.js` | Chart data builders |
 | `share.test.js` | CSV, lz-string, share URL helpers |
 | `syllabus.test.js` | Parser & weight totals |
 | `presets.test.js` | UC presets validate/import/export |
-| `sync.test.js` | Merge, first sign-in, outgoing payload |
+| `sync.test.js` | Merge, first sign-in, outgoing payload, local avatar preserved |
 | `feedback.test.js` | Paths, payloads, ignore chrome |
 | `firestore_rules.test.js` | Rules file structure expectations |
 
@@ -502,19 +517,22 @@ firebase deploy --only firestore:rules
 ## Security & privacy
 
 - **Local-first:** grade data stays in the browser unless Sync is enabled and you sign in.
+- **Profile photos** are compressed and saved only in `localStorage` (data URLs); they are not uploaded to Firestore/Storage in the current sync design.
 - **Firestore rules:** each user may only read/write `users/{theirUid}/**`. Feedback docs are create-once, own-read, no client update/delete.
 - **Client Firebase keys** are public by design; protect the project with Auth, rules, App Check, and API key referrer restrictions (documented in `firebase-config.js`).
 - **Share links** embed planner data in the URL — treat them like secrets if they contain private grades.
-- **Do not commit** private service-account keys. The web config in-repo is the public client config only.
+- **Do not commit** private service-account keys or notes under `docs/private/`. The web config in-repo is the public client config only.
 
 ---
 
 ## Changelog
 
-The in-app **Changelog** view (`#/changelog`) is the canonical release log (`v1_1` → `v1_26_1`), including print/PDF and plain-text copy. Highlights:
+The in-app **Changelog** view (`#/changelog`) is the canonical release log (`v1_1` → latest tagged entry), including print/PDF and plain-text copy. Highlights:
 
 | Version | Highlights |
 |---------|------------|
+| **Post–v1_26_2** | Local-only profile photo upload/compress/remove; Prior GPA / goal decimal typing fix; avatar preserved across Sync merges |
+| **v1_26_2** | Dismissable share-with-friends promo popup (`gradecraft_share_app_promo_dismissed_v1`) |
 | **v1_26_1** | Firebase App Check (reCAPTCHA Enterprise) + API key lockdown docs |
 | **v1_26** | UC undergraduate institution presets |
 | **v1_25** | Undo for deleted classes |
@@ -528,6 +546,8 @@ The in-app **Changelog** view (`#/changelog`) is the canonical release log (`v1_
 | **v1_17** | Extracted modules, Vitest, Playwright, CI, a11y |
 | **v1_16+** | Units, P/NP, GPA Planner page |
 | **v1_1** | Initial gradebook + What-If + target forecaster + localStorage |
+
+Note: the in-app changelog cards may lag `package.json` / git commit titles until those UI entries are refreshed; this README covers shipped behavior through the commits after the previous README rewrite.
 
 ---
 
